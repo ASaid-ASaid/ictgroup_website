@@ -1,0 +1,44 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Validation Télétravail{% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Validation des demandes de télétravail</h2>
+    {% if telework_requests %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+                <thead class="bg-blue-100 text-blue-800">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Employé</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Début</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Fin</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Motif</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Soumise le</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for request in telework_requests %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.user.username }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.start_date|date:"d/m/Y" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.end_date|date:"d/m/Y" }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-800">{{ request.reason|default:"N/A" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.submitted_at|date:"d/m/Y H:i" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm">
+                            <form method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="request_id" value="{{ request.id }}">
+                                <button name="action" value="approve" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md shadow btn mr-2">Valider</button>
+                                <button name="action" value="reject" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn">Rejeter</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 text-lg mt-8">Aucune demande de télétravail à valider.</p>
+    {% endif %}
+</div>
+{% endblock %}

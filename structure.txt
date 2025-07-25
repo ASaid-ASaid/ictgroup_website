@@ -1,0 +1,50 @@
+ictgroup_website/
+├── .env.example
+├── .dockerignore
+├── docker-compose.yml  # À adapter selon vos besoins (commandes, services, variables d'env)
+├── Dockerfile  # À personnaliser pour la prod (clé secrète, collectstatic, etc.)
+├── requirements.txt  # Ajouter/mettre à jour les dépendances Python nécessaires
+├── README.md  # À compléter avec les instructions spécifiques à votre projet
+└── app/
+    ├── manage.py
+    ├── ictgroup/
+    │   ├── __init__.py
+    │   ├── asgi.py
+    │   ├── settings.py  # À adapter pour la prod (DEBUG, ALLOWED_HOSTS, etc.)
+    │   ├── urls.py  # Ajouter les routes nécessaires
+    │   └── wsgi.py
+    ├── vitrine/
+    │   ├── __init__.py
+    │   ├── admin.py
+    │   ├── apps.py
+    │   ├── migrations/
+    │   ├── models.py  # À compléter si besoin de modèles pour la vitrine
+    │   ├── tests.py  # Ajouter des tests unitaires
+    │   ├── views.py  # Ajouter/modifier les vues de la vitrine
+    │   ├── urls.py  # À compléter avec les routes de la vitrine
+    │   ├── static/
+    │   │   ├── img/
+    │   │   │   └── logo_ictgroup.png (à placer)
+    │   │   └── css/
+    │   │       └── main.css  # Personnaliser le style si besoin
+    │   └── templates/vitrine/
+    │       └── index.html  # Modifier le contenu selon vos besoins
+    └── extranet/
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── migrations/
+        ├── models.py  # Ajouter/modifier les modèles pour l'extranet
+        ├── tests.py  # Ajouter des tests unitaires
+        ├── views.py  # Ajouter/modifier les vues de l'extranet
+        ├── urls.py  # À compléter avec les routes de l'extranet
+        ├── static/
+        │   ├── img/
+        │   │   └── logo_ictgroup.png (à placer)
+        │   └── css/
+        │       └── main.css  # Personnaliser le style si besoin
+        └── templates/extranet/
+            ├── base.html  # Personnaliser le template de base
+            ├── login.html  # Adapter le formulaire de connexion
+            ├── leave_request.html  # Adapter le formulaire de demande de congé
+            └── leave_list.html  # Adapter la liste des demandes

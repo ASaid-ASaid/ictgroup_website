@@ -1,0 +1,19 @@
+# Liste des dépendances Python pour le projet Django
+
+# Framework web Django
+Django>=4.0
+
+# Adaptateur PostgreSQL pour Django (version binaire pour une installation plus facile)
+psycopg2-binary
+
+# Serveur WSGI pour la production (utilisé par exemple sur Fly.io)
+gunicorn
+
+# Bibliothèque pour charger les variables d'environnement depuis un fichier .env
+python-dotenv
+
+# Gestion de l'URL de la base de données
+dj-database-url
+
+# Bibliothèque pour les calendriers et les jours fériés
+workalendar

@@ -1,0 +1,54 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Mon compte{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-10 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Mon compte</h2>
+    <div class="mb-8">
+        <p class="text-lg"><span class="font-semibold">Nom d'utilisateur :</span> {{ user.username }}</p>
+        <p class="text-lg"><span class="font-semibold">Email :</span> {{ user.email }}</p>
+        <p class="text-lg"><span class="font-semibold">Rôle :</span> {{ user.profile.role|title }}</p>
+    </div>
+    <div class="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-5">
+        <h3 class="text-xl font-bold text-blue-700 mb-2">Solde de congés</h3>
+        <ul class="text-base text-blue-900 space-y-1">
+            <li><span class="font-semibold">Jours acquis cette année :</span> {{ leave_balance.acquired }} j</li>
+            <li><span class="font-semibold">Jours pris cette année :</span> {{ leave_balance.taken }} j</li>
+            <li><span class="font-semibold">Report de l'an dernier :</span> {{ leave_balance.report }} j</li>
+            <li><span class="font-semibold">Solde restant :</span> <span class="text-green-700 font-bold">{{ leave_balance.balance }} j</span></li>
+            {% if leave_balance.must_take_before_april > 0 %}
+            <li class="text-orange-700 font-semibold">Jours à prendre avant le 30 avril : {{ leave_balance.must_take_before_april }} j</li>
+            {% endif %}
+        </ul>
+    </div>
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+        <div>
+            <label for="email" class="block text-base font-semibold text-gray-700 mb-1">Nouvel email</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}" class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 p-3 text-lg transition" placeholder="Votre nouvel email">
+        </div>
+        <div>
+            <label for="site" class="block text-base font-semibold text-gray-700 mb-1">Site</label>
+            <select name="site" id="site" class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 p-3 text-lg transition">
+                <option value="Tunisie" {% if user.profile.site == 'Tunisie' %}selected{% endif %}>Tunisie</option>
+                <option value="France" {% if user.profile.site == 'France' %}selected{% endif %}>France</option>
+            </select>
+        </div>
+        <div>
+            <label for="password" class="block text-base font-semibold text-gray-700 mb-1">Nouveau mot de passe</label>
+            <input type="password" name="password" id="password" class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 p-3 text-lg transition" placeholder="••••••••">
+        </div>
+        <div>
+            <label for="password2" class="block text-base font-semibold text-gray-700 mb-1">Confirmer le mot de passe</label>
+            <input type="password" name="password2" id="password2" class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 p-3 text-lg transition" placeholder="••••••••">
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-green-400 hover:from-blue-700 hover:to-green-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out shadow-lg text-lg btn">Mettre à jour</button>
+    </form>
+    {% if messages %}
+        <div class="mt-6">
+            {% for message in messages %}
+                <div class="p-3 rounded-md bg-blue-100 text-blue-800 mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

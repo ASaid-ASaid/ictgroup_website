@@ -1,0 +1,147 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Gestion des utilisateurs{% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight flex items-center justify-center gap-2">
+        <span>Gestion des utilisateurs</span>
+        <span class="inline-flex items-center bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full animate-pulse">{{ users|length }} utilisateurs</span>
+    </h2>
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <form method="post" class="flex flex-wrap gap-2 items-end bg-blue-50 p-4 rounded-lg shadow mb-2 w-full md:w-auto">
+            {% csrf_token %}
+            <input type="hidden" name="add_user" value="1">
+            <input type="text" name="username" placeholder="Login" required class="rounded border-gray-300 p-1" style="min-width:120px">
+            <input type="text" name="last_name" placeholder="Nom" required class="rounded border-gray-300 p-1" style="min-width:120px">
+            <input type="text" name="first_name" placeholder="Prénom" required class="rounded border-gray-300 p-1" style="min-width:120px">
+            <input type="email" name="email" placeholder="Email" required class="rounded border-gray-300 p-1" style="min-width:180px">
+            <input type="password" name="password" placeholder="Mot de passe" required class="rounded border-gray-300 p-1" style="min-width:120px">
+            <select name="role" class="rounded border-gray-300">
+                <option value="user">Utilisateur</option>
+                <option value="manager">Manager</option>
+                <option value="rh">RH</option>
+                <option value="admin">Admin</option>
+            </select>
+            <select name="site" class="rounded border-gray-300">
+                <option value="Tunisie">Tunisie</option>
+                <option value="France">France</option>
+            </select>
+            <select name="manager" class="rounded border-gray-300">
+                <option value="">Manager</option>
+                {% for m in users %}
+                    <option value="{{ m.id }}">{{ m.get_full_name|default:m.username }}</option>
+                {% endfor %}
+            </select>
+            <select name="rh" class="rounded border-gray-300">
+                <option value="">RH</option>
+                {% for r in users %}
+                    <option value="{{ r.id }}">{{ r.get_full_name|default:r.username }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md shadow btn">Ajouter</button>
+        </form>
+        <div class="flex-1 flex justify-end">
+            <input id="user-search" type="text" placeholder="🔍 Rechercher (login, nom, email...)" class="rounded border-gray-300 p-2 w-full md:w-72 shadow focus:ring-2 focus:ring-blue-400" />
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-xl shadow-md">
+            <thead class="bg-blue-100 text-blue-800">
+                <tr>
+                    <th class="py-3 px-4">Login</th>
+                    <th class="py-3 px-4">Nom</th>
+                    <th class="py-3 px-4">Prénom</th>
+                    <th class="py-3 px-4">Email</th>
+                    <th class="py-3 px-4">Rôle</th>
+                    <th class="py-3 px-4">Site</th>
+                    <th class="py-3 px-4">Manager</th>
+                    <th class="py-3 px-4">RH</th>
+                    <th class="py-3 px-4">Acquis</th>
+                    <th class="py-3 px-4">Pris</th>
+                    <th class="py-3 px-4">Solde</th>
+                    <th class="py-3 px-4">Report</th>
+                    <th class="py-3 px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" data-user-list>
+                {% for user in users %}
+                <tr class="hover:bg-blue-50 transition group">
+                    <form method="post" class="contents">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <td class="py-2 px-4 font-mono text-blue-900 bg-blue-50 rounded-l-lg group-hover:bg-blue-100 transition">{{ user.username }}</td>
+                        <td class="py-2 px-4"><input type="text" name="last_name" value="{{ user.last_name }}" class="w-full rounded border-gray-300 p-1 focus:ring-2 focus:ring-blue-400"></td>
+                        <td class="py-2 px-4"><input type="text" name="first_name" value="{{ user.first_name }}" class="w-full rounded border-gray-300 p-1 focus:ring-2 focus:ring-blue-400"></td>
+                        <td class="py-2 px-4"><input type="email" name="email" value="{{ user.email }}" class="w-full rounded border-gray-300 p-1 focus:ring-2 focus:ring-blue-400"></td>
+                        <td class="py-2 px-4">
+                            <select name="role" class="rounded border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                <option value="user" {% if user.profile.role == 'user' %}selected{% endif %}>Utilisateur</option>
+                                <option value="manager" {% if user.profile.role == 'manager' %}selected{% endif %}>Manager</option>
+                                <option value="rh" {% if user.profile.role == 'rh' %}selected{% endif %}>RH</option>
+                                <option value="admin" {% if user.profile.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                        </td>
+                        <td class="py-2 px-4">
+                            <select name="site" class="rounded border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                <option value="Tunisie" {% if user.profile.site == 'tunisie' %}selected{% endif %}>Tunisie</option>
+                                <option value="France" {% if user.profile.site == 'france' %}selected{% endif %}>France</option>
+                            </select>
+                        </td>
+                        <td class="py-2 px-4">
+                            <select name="manager" class="rounded border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                <option value="">Aucun</option>
+                                {% for m in users %}
+                                    <option value="{{ m.id }}" {% if user.profile.manager and user.profile.manager.id == m.id %}selected{% endif %}>{{ m.get_full_name|default:m.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="py-2 px-4">
+                            <select name="rh" class="rounded border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                <option value="">Aucun</option>
+                                {% for r in users %}
+                                    <option value="{{ r.id }}" {% if user.profile.rh and user.profile.rh.id == r.id %}selected{% endif %}>{{ r.get_full_name|default:r.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="py-2 px-4 text-blue-900">{{ user_balances.user.id.acquired }}</td>
+                        <td class="py-2 px-4 text-blue-900">{{ user_balances.user.id.taken }}</td>
+                        <td class="py-2 px-4 text-green-700 font-bold">{{ user_balances.user.id.balance }}</td>
+                        <td class="py-2 px-4 text-orange-700">{{ user_balances.user.id.report }}</td>
+                        <td class="py-2 px-4 flex flex-col gap-2 rounded-r-lg">
+                            <input type="password" name="password" placeholder="Nouveau mot de passe" class="w-full rounded border-gray-300 p-1 mb-1 focus:ring-2 focus:ring-blue-400">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn mb-1 transition">Enregistrer</button>
+                        </td>
+                    </form>
+                    <form method="post" onsubmit="return confirm('Supprimer cet utilisateur ?');" class="contents">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_user" value="1">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <td colspan="12" class="py-1 px-4 text-right">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Supprimer</button>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="flex justify-end mt-2">
+            <button onclick="window.location.href='?export=csv'" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded-md shadow btn transition text-sm">Exporter CSV</button>
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div id="toast-message" class="fixed bottom-6 right-6 z-50 p-4 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-700 bg-opacity-90
+                {% if 'success' in message.tags %} bg-green-500
+                {% elif 'error' in message.tags %} bg-red-500
+                {% elif 'info' in message.tags %} bg-sky-500
+                {% else %} bg-blue-600
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+{% load static %}
+{% block extra_js %}
+<script src="{% static 'js/user_admin.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Entrée - Sortie{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Entrée - Sortie</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="stock_item">Article :</label>
+    <select id="stock_item" name="stock_item" class="block w-full mb-4">
+        {% for item in stock_items %}
+        <option value="{{ item.id }}">{{ item.designation }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="movement_type">Type de mouvement :</label>
+    <select id="movement_type" name="movement_type" class="block w-full mb-4">
+        <option value="entry">Entrée</option>
+        <option value="exit">Sortie</option>
+    </select>
+
+    <label for="quantity">Quantité :</label>
+    <input type="number" id="quantity" name="quantity" class="block w-full mb-4" required>
+
+    <label for="remarks">Remarques :</label>
+    <textarea id="remarks" name="remarks" class="block w-full mb-4"></textarea>
+
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Enregistrer</button>
+</form>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Validation des demandes{% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-2xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Validation des demandes</h2>
+    <div class="mb-8">
+        <ul class="flex flex-wrap gap-4 justify-center">
+            <li><a href="?type=leave" class="px-4 py-2 rounded-md shadow bg-blue-100 text-blue-800 font-semibold {% if type == 'leave' %}ring-2 ring-blue-400{% endif %}">Congés</a></li>
+            <li><a href="?type=telework" class="px-4 py-2 rounded-md shadow bg-blue-100 text-blue-800 font-semibold {% if type == 'telework' %}ring-2 ring-blue-400{% endif %}">Télétravail</a></li>
+        </ul>
+    </div>
+    {% if type == 'leave' %}
+        <h3 class="text-xl font-bold mb-4">Demandes de congés à valider</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+                <thead class="bg-blue-100 text-blue-800">
+                    <tr>
+                        <th class="py-3 px-4">Utilisateur</th>
+                        <th class="py-3 px-4">Période</th>
+                        <th class="py-3 px-4">Statut</th>
+                        <th class="py-3 px-4">Manager</th>
+                        <th class="py-3 px-4">RH</th>
+                        <th class="py-3 px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in leaves %}
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="py-2 px-4">{{ leave.user.get_full_name|default:leave.user.username }}</td>
+                        <td class="py-2 px-4">{{ leave.start_date }} au {{ leave.end_date }}</td>
+                        <td class="py-2 px-4">
+                            <span class="px-2 py-1 rounded text-xs font-bold {% if leave.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif leave.status == 'approved' %}bg-green-100 text-green-800{% elif leave.status == 'rejected' %}bg-red-100 text-red-800{% endif %}">{{ leave.get_status_display }}</span>
+                        </td>
+                        <td class="py-2 px-4">{% if leave.manager_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
+                        <td class="py-2 px-4">{% if leave.rh_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
+                        <td class="py-2 px-4">
+                            <form method="post" class="flex gap-2 items-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                                {% if not leave.manager_validated and user.profile.role in 'manager admin' %}
+                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (Manager)</button>
+                                {% endif %}
+                                {% if leave.manager_validated and not leave.rh_validated and user.profile.role in 'rh admin' %}
+                                    <button name="action" value="rh_approve" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (RH)</button>
+                                {% endif %}
+                                {% if not leave.manager_validated and leave.manager_validated == False and user.profile.role == 'manager' and user.profile.role == 'rh' %}
+                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (Manager)</button>
+                                    <button name="action" value="rh_approve" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (RH)</button>
+                                {% endif %}
+                                {% if leave.status == 'pending' %}
+                                    <button name="action" value="reject" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Rejeter</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4 text-gray-500">Aucune demande à valider.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif type == 'telework' %}
+        <h3 class="text-xl font-bold mb-4">Demandes de télétravail à valider</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+                <thead class="bg-blue-100 text-blue-800">
+                    <tr>
+                        <th class="py-3 px-4">Utilisateur</th>
+                        <th class="py-3 px-4">Période</th>
+                        <th class="py-3 px-4">Statut</th>
+                        <th class="py-3 px-4">Manager</th>
+                        <th class="py-3 px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tw in teleworks %}
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="py-2 px-4">{{ tw.user.get_full_name|default:tw.user.username }}</td>
+                        <td class="py-2 px-4">{{ tw.start_date }} au {{ tw.end_date }}</td>
+                        <td class="py-2 px-4">
+                            <span class="px-2 py-1 rounded text-xs font-bold {% if tw.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif tw.status == 'approved' %}bg-green-100 text-green-800{% elif tw.status == 'rejected' %}bg-red-100 text-red-800{% endif %}">{{ tw.get_status_display }}</span>
+                        </td>
+                        <td class="py-2 px-4">{% if tw.manager_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
+                        <td class="py-2 px-4">
+                            <form method="post" class="flex gap-2 items-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="tw_id" value="{{ tw.id }}">
+                                {% if not tw.manager_validated and user.profile.role == 'manager' %}
+                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider</button>
+                                {% endif %}
+                                {% if tw.status == 'pending' %}
+                                    <button name="action" value="reject" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Rejeter</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center py-4 text-gray-500">Aucune demande à valider.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

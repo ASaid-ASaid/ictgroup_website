@@ -1,0 +1,61 @@
+{% extends 'extranet/base.html' %}
+
+{% block title %}Mes Demandes de Télétravail{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">
+        {% if user.is_superuser %}
+            Toutes les Demandes de Télétravail
+        {% else %}
+            Mes Demandes de Télétravail
+        {% endif %}
+    </h2>
+    {% if telework_requests %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+                <thead class="bg-blue-100 text-blue-800">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider rounded-tl-lg">ID</th>
+                        {% if user.is_superuser %}
+                            <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Employé</th>
+                        {% endif %}
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Début</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Fin</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Motif</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider">Soumise le</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold uppercase tracking-wider rounded-tr-lg">Statut</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for request in telework_requests %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.id }}</td>
+                        {% if user.is_superuser %}
+                            <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.user.username }}</td>
+                        {% endif %}
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.start_date|date:"d/m/Y" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.end_date|date:"d/m/Y" }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-800">{{ request.reason|default:"N/A" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-800">{{ request.submitted_at|date:"d/m/Y H:i" }}</td>
+                        <td class="py-3 px-4 whitespace-nowrap text-sm font-semibold">
+                            {% if request.status == 'pending' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full status-pending">En attente</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full status-approved">Approuvée</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full status-rejected">Rejetée</span>
+                            {% elif request.status == 'cancelled' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full status-cancelled">Annulée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 text-lg mt-8">Aucune demande de télétravail trouvée.</p>
+    {% endif %}
+</div>
+{% endblock %}

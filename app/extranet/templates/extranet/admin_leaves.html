@@ -1,0 +1,85 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Gestion des congés (admin){% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Gestion des congés</h2>
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <form method="get" class="flex flex-wrap gap-2 items-end bg-blue-50 p-4 rounded-lg shadow mb-2 w-full md:w-auto">
+            <button type="submit" name="export" value="csv" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded-md shadow btn">Exporter CSV</button>
+        </form>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-xl shadow-md">
+            <thead class="bg-blue-100 text-blue-800">
+                <tr>
+                    <th class="py-3 px-4">Utilisateur</th>
+                    <th class="py-3 px-4">Début</th>
+                    <th class="py-3 px-4">Fin</th>
+                    <th class="py-3 px-4">Demi-journée</th>
+                    <th class="py-3 px-4">Statut</th>
+                    <th class="py-3 px-4">Manager</th>
+                    <th class="py-3 px-4">RH</th>
+                    <th class="py-3 px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for leave in leaves %}
+                <tr class="hover:bg-blue-50 transition group">
+                    {% if leave.id|stringformat:'s' == request.GET.edit|default:'' %}
+                    <form method="post" class="contents">
+                        {% csrf_token %}
+                        <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                        <td class="py-2 px-4">{{ leave.user.get_full_name|default:leave.user.username }}</td>
+                        <td class="py-2 px-4"><input type="date" name="start_date" value="{{ leave.start_date }}" class="rounded border-gray-300 p-1"></td>
+                        <td class="py-2 px-4"><input type="date" name="end_date" value="{{ leave.end_date }}" class="rounded border-gray-300 p-1"></td>
+                        <td class="py-2 px-4">{% if leave.demi_jour != 'full' and leave.start_date == leave.end_date %}0.5{% else %}{{ leave|get_nb_days }}{% endif %}</td>
+                        <td class="py-2 px-4">
+                            <select name="status" class="rounded border-gray-300">
+                                {% for key, val in leave.STATUS_CHOICES %}
+                                    <option value="{{ key }}" {% if leave.status == key %}selected{% endif %}>{{ val }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="py-2 px-4">{{ leave.user.profile.manager.get_full_name|default_if_none:"" }}</td>
+                        <td class="py-2 px-4">{{ leave.user.profile.rh.get_full_name|default_if_none:"" }}</td>
+                        <td class="py-2 px-4 flex flex-col gap-2">
+                            <button type="submit" name="edit_leave" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn mb-1 transition">Enregistrer</button>
+                        </td>
+                    </form>
+                    {% else %}
+                    <td class="py-2 px-4">{{ leave.user.get_full_name|default:leave.user.username }}</td>
+                    <td class="py-2 px-4">{{ leave.start_date }}</td>
+                    <td class="py-2 px-4">{{ leave.end_date }}</td>
+                    <td class="py-2 px-4">{{ leave.get_nb_days }}</td>
+                    <td class="py-2 px-4">{{ leave.get_status_display }}</td>
+                    <td class="py-2 px-4">{{ leave.user.profile.manager.get_full_name|default_if_none:"" }}</td>
+                    <td class="py-2 px-4">{{ leave.user.profile.rh.get_full_name|default_if_none:"" }}</td>
+                    <td class="py-2 px-4 flex flex-col gap-2">
+                        <a href="?edit={{ leave.id }}" class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md shadow btn mb-1 transition text-center">Modifier</a>
+                        <form method="post" onsubmit="return confirm('Supprimer ce congé ?');" class="contents">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_leave" value="1">
+                            <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Supprimer</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div id="toast-message" class="fixed bottom-6 right-6 z-50 p-4 rounded-lg shadow-lg text-white font-semibold transition-opacity duration-700 bg-opacity-90
+                {% if 'success' in message.tags %} bg-green-500
+                {% elif 'error' in message.tags %} bg-red-500
+                {% elif 'info' in message.tags %} bg-sky-500
+                {% else %} bg-blue-600
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

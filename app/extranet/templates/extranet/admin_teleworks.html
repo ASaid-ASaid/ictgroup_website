@@ -1,0 +1,46 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Gestion des télétravails (admin){% endblock %}
+{% block content %}
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Gestion des télétravails</h2>
+    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <a href="?export=csv" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md shadow btn">Export CSV</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-xl shadow-md text-center">
+            <thead class="bg-blue-100 text-blue-800">
+                <tr>
+                    <th class="py-3 px-4">Utilisateur</th>
+                    <th class="py-3 px-4">Début</th>
+                    <th class="py-3 px-4">Fin</th>
+                    <th class="py-3 px-4">Statut</th>
+                    <th class="py-3 px-4">Manager</th>
+                    <th class="py-3 px-4">RH</th>
+                    <th class="py-3 px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for tw in teleworks %}
+                <tr>
+                    <td class="py-2 px-2">{{ tw.user.username }}</td>
+                    <td class="py-2 px-2">{{ tw.start_date }}</td>
+                    <td class="py-2 px-2">{{ tw.end_date }}</td>
+                    <td class="py-2 px-2">{{ tw.get_status_display|default:tw.status }}</td>
+                    <td class="py-2 px-2">{{ tw.user.profile.manager.get_full_name|default_if_none:'' }}</td>
+                    <td class="py-2 px-2">{{ tw.user.profile.rh.get_full_name|default_if_none:'' }}</td>
+                    <td class="py-2 px-2">
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="telework_id" value="{{ tw.id }}">
+                            <button type="submit" name="delete_telework" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded shadow">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="py-4 text-gray-500">Aucune demande de télétravail</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

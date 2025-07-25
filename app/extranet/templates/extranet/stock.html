@@ -1,0 +1,68 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Stock{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Stock</h1>
+<table class="min-w-full bg-white rounded-lg shadow-md">
+    <thead class="bg-blue-100">
+        <tr>
+            <th class="py-2 px-4">Code</th>
+            <th class="py-2 px-4">Désignation</th>
+            <th class="py-2 px-4">Fournisseur</th>
+            <th class="py-2 px-4">Type</th>
+            <th class="py-2 px-4">Quantité</th>
+            <th class="py-2 px-4">Remarques</th>
+            {% if user.is_superuser or user.profile.role == 'manager' %}
+            <th class="py-2 px-4">Actions</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in stock_items %}
+        <tr>
+            <td class="py-2 px-4">{{ item.code }}</td>
+            <td class="py-2 px-4">{{ item.designation }}</td>
+            <td class="py-2 px-4">{{ item.fournisseur }}</td>
+            <td class="py-2 px-4">{{ item.type }}</td>
+            <td class="py-2 px-4">{{ item.quantity }}</td>
+            <td class="py-2 px-4">{{ item.remarks }}</td>
+            {% if user.is_superuser or user.profile.role == 'manager' %}
+            <td class="py-2 px-4">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="stock_item_id" value="{{ item.id }}">
+                    <input type="text" name="designation" value="{{ item.designation }}" placeholder="Désignation">
+                    <input type="text" name="fournisseur" value="{{ item.fournisseur }}" placeholder="Fournisseur">
+                    <input type="text" name="type" value="{{ item.type }}" placeholder="Type">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" placeholder="Quantité">
+                    <textarea name="remarks" placeholder="Remarques">{{ item.remarks }}</textarea>
+                    <button type="submit">Mettre à jour</button>
+                </form>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="stock_item_id" value="{{ item.id }}">
+                    <button type="submit">Supprimer</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        {% if user.is_superuser or user.profile.role == 'manager' %}
+        <tr>
+            <form method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <td><input type="text" name="code" placeholder="Code"></td>
+                <td><input type="text" name="designation" placeholder="Désignation"></td>
+                <td><input type="text" name="fournisseur" placeholder="Fournisseur"></td>
+                <td><input type="text" name="type" placeholder="Type"></td>
+                <td><input type="number" name="quantity" placeholder="Quantité"></td>
+                <td><textarea name="remarks" placeholder="Remarques"></textarea></td>
+                <td><button type="submit">Créer</button></td>
+            </form>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

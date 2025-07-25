@@ -1,0 +1,13 @@
+/* Feuille de style principale pour ICTGROUP */
+body {
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.logo-ictgroup {
+    height: 48px;
+    width: auto;
+    border-radius: 0.375rem;
+    background: #fff;
+    padding: 0.25rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}

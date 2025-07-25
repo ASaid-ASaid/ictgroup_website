@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ company_name }} - Accueil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#004080',
+              secondary: '#0090FF',
+              success: '#10B981',
+              dark: '#1F2937'
+            },
+            fontFamily: {
+              inter: ['Inter', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body class="bg-gray-50 text-dark font-inter">
+
+    <!-- Header -->
+    <header class="bg-primary text-white p-5 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <img src="{% static 'img/logo_ictgroup.png' %}" alt="ICTGROUP" class="logo-ictgroup">
+                <span class="text-2xl font-bold">ICTGROUP</span>
+            </div>
+            <nav>
+                <ul class="flex space-x-6 text-lg">
+                    <li><a href="/" class="hover:text-secondary">Accueil</a></li>
+                    <li><a href="#fibre" class="hover:text-secondary">Fibre Optique</a></li>
+                    <li><a href="#services" class="hover:text-secondary">Services</a></li>
+                    <li><a href="#contact" class="hover:text-secondary">Contact</a></li>
+                    <li><a href="/extranet/login/" class="bg-secondary hover:bg-blue-500 text-white px-4 py-2 rounded-md">Extranet</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="container mx-auto p-6 mt-10 space-y-20">
+
+        <!-- Accueil -->
+        <section class="text-center">
+            <h1 class="text-5xl font-extrabold text-primary mb-6">Bienvenue chez {{ company_name }}</h1>
+            <p class="text-lg text-gray-700 max-w-3xl mx-auto">Experts en télécoms et infrastructures numériques, nous déployons des réseaux fibre optique partout.</p>
+        </section>
+
+        <!-- Déploiement Fibre -->
+        <section id="fibre">
+            <h2 class="text-4xl font-bold text-primary text-center mb-10">Déploiement de la Fibre Optique</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Études & Ingénierie</h3>
+                    <p class="text-gray-700">Cartographie, relevés de terrain, modélisation et ingénierie des réseaux FTTH/FTTO.</p>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Travaux & Génie Civil</h3>
+                    <p class="text-gray-700">Création de tranchées, tirage de câbles, pose de PBO, raccordement des armoires optiques.</p>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Tests & Recette</h3>
+                    <p class="text-gray-700">Mesures optiques, tests OTDR, vérification QoS, mise en conformité, livrables clients.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services -->
+        <section id="services">
+            <h2 class="text-4xl font-bold text-primary text-center mb-10">Nos Services</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition">
+                    <h4 class="text-xl font-semibold text-secondary mb-2">Réseaux d'Entreprise</h4>
+                    <p>Conception, déploiement et maintenance de réseaux LAN/WAN sécurisés et performants.</p>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition">
+                    <h4 class="text-xl font-semibold text-secondary mb-2">VoIP & Communications</h4>
+                    <p>Solutions IP-PBX, communications unifiées et interconnexion multi-sites.</p>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition">
+                    <h4 class="text-xl font-semibold text-secondary mb-2">Sécurité & Systèmes</h4>
+                    <p>Firewall, antivirus, audits SSI et supervision 24/7 des infrastructures critiques.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nos Partenaires -->
+        <section id="partners" class="bg-gray-100 py-10">
+            <h2 class="text-4xl font-bold text-primary text-center mb-10">Nous font confiance</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-center">
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/orange.png' %}" alt="Orange" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/free.png' %}" alt="FREE" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/bouygues.png' %}" alt="Bouygues Telecom" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/sfr.png' %}" alt="SFR" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/altitudes.png' %}" alt="Altitudes Infra" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/vinci.png' %}" alt="VINCI" class="h-16">
+                </div>
+                <div class="flex justify-center">
+                    <img src="{% static 'img/partners/spie.png' %}" alt="SPIE" class="h-16">
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="bg-white p-10 rounded-lg shadow text-center">
+            <h2 class="text-3xl font-bold text-primary mb-4">Contactez-nous</h2>
+            <p class="text-lg text-gray-700 mb-4">Un besoin ? Un projet fibre ? Nous sommes à votre écoute.</p>
+            <p class="text-xl font-medium text-success mb-2">📧 contact@ictgroup.com</p>
+            <p class="text-xl font-medium text-success mb-6">📞 +33 1 23 45 67 89</p>
+            <a href="mailto:contact@ictgroup.com" class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-md transition">Envoyer un email</a>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white p-6 mt-20">
+        <div class="container mx-auto text-center">
+            <p class="text-sm">&copy; 2025 ICTGROUP. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

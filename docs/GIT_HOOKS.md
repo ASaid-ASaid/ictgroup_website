@@ -10,6 +10,17 @@ Installation (une seule fois par développeur)
 bash scripts/install-git-hooks.sh
 ```
 
+Optionnel: utiliser `pre-commit` (recommandé)
+
+```bash
+# Installer pre-commit
+pip install pre-commit
+# Installer les hooks définis dans .pre-commit-config.yaml
+pre-commit install
+# Lancer pre-commit sur tous les fichiers (une fois)
+pre-commit run --all-files
+```
+
 Que fait le hook ?
 - Exécute `scripts/prepare_commit.sh` : formate (black, isort) et lance flake8 si installés.
 - Lance un sous-ensemble de tests rapides via `pytest` si installé.

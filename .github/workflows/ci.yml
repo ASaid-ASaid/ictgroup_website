@@ -1,0 +1,12 @@
+name: CI (disabled)
+
+# This workflow has been deprecated in favour of `ci-cd.yml`.
+# Keeping this file as a disabled placeholder to avoid accidental duplicate runs.
+on: [workflow_dispatch]
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op
+        run: echo "This workflow is intentionally disabled. Use .github/workflows/ci-cd.yml"

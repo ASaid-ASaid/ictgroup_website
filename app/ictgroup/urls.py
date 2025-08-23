@@ -66,7 +66,7 @@ def sitemap_xml(request):
         <priority>0.6</priority>
     </url>
 </urlset>"""
-    return HttpResponse(content, content_type='application/xml'))
+    return HttpResponse(content, content_type='application/xml')
 
 urlpatterns = [
     path(

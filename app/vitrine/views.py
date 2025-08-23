@@ -3,8 +3,9 @@
 # Chaque fonction gère une page publique du site vitrine
 # =====================
 
-from django.shortcuts import render
 import logging
+
+from django.shortcuts import render
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,11 @@ def services(request):
     logger.info(
         f"[services] Page services appelée par {request.user if request.user.is_authenticated else 'anonyme'}"
     )
-    return render(request, "vitrine/services.html", {
-        "company_name": "ICTGROUP",
-        "page_title": "Services - ICTGROUP"
-    })
+    return render(
+        request,
+        "vitrine/services.html",
+        {"company_name": "ICTGROUP", "page_title": "Services - ICTGROUP"},
+    )
 
 
 # Ajoutez ici d'autres vues pour la vitrine si besoin (services, contact, etc.)

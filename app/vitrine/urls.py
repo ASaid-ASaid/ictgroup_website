@@ -4,6 +4,7 @@
 # =====================
 
 from django.urls import path
+
 from . import views
 
 # Nom de l'application pour la gestion des espaces de noms d'URL

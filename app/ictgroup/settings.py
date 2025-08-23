@@ -12,8 +12,9 @@ Ce fichier contient la configuration principale du projet.
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
 import dj_database_url
+from dotenv import load_dotenv
 
 # Charge les variables d'environnement depuis le fichier .env
 load_dotenv()
@@ -24,9 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Clé secrète Django.
 # À garder secrète en production ! Utilisez une variable d'environnement.
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY", "insecure-default-key-for-dev-only"
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "insecure-default-key-for-dev-only")
 
 
 # Mode de débogage.
@@ -36,7 +35,9 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 # Hôtes autorisés.
 # En production, listez votre nom de domaine (ex: .ictgroup.fr) et le domaine Fly.io.
 ALLOWED_HOSTS = (
-    ["*"] if DEBUG else ["ictgroup-website.fly.dev", ".fly.dev", "localhost", "127.0.0.1"]
+    ["*"]
+    if DEBUG
+    else ["ictgroup-website.fly.dev", ".fly.dev", "localhost", "127.0.0.1"]
 )
 
 
@@ -89,9 +90,7 @@ WSGI_APPLICATION = "ictgroup.wsgi.application"
 
 
 # Configuration de la base de données PostgreSQL via DATABASE_URL
-DATABASES = {
-    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
-}
+DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
 
 # Configuration du mot de passe
 AUTH_PASSWORD_VALIDATORS = [
@@ -138,10 +137,10 @@ STATICFILES_DIRS = [
 if not DEBUG:
     # Force HTTPS pour les fichiers statiques en production
     SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
-    
+
     # Configuration WhiteNoise plus agressive
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_AUTOREFRESH = True

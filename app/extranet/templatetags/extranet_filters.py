@@ -2,6 +2,7 @@ from django import template
 
 register = template.Library()
 
+
 @register.filter
 def get_nb_days(leave):
     """
@@ -11,12 +12,14 @@ def get_nb_days(leave):
         return 0.5
     return (leave.end_date - leave.start_date).days + 1
 
+
 @register.filter
 def get_item(dictionary, key):
     """
     Récupère un élément d'un dictionnaire par sa clé.
     """
     return dictionary.get(key)
+
 
 @register.filter
 def get_balance_attr(user_balances, user_and_attr):
@@ -25,12 +28,13 @@ def get_balance_attr(user_balances, user_and_attr):
     Format: user_balances|get_balance_attr:"user_id,attr_name"
     """
     try:
-        user_id, attr_name = str(user_and_attr).split(',', 1)
+        user_id, attr_name = str(user_and_attr).split(",", 1)
         user_id = int(user_id)
         balance = user_balances.get(user_id, {})
         return balance.get(attr_name, 0)
     except (ValueError, AttributeError):
         return 0
+
 
 @register.filter
 def get_user_balance(user_balances, user_id):

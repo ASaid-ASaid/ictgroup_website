@@ -4,19 +4,22 @@ La liste `urlpatterns` achemine les URLs vers les vues appropriées.
 Inclut les routes admin, vitrine et extranet.
 """
 
-from django.contrib import admin
-from django.urls import (
-    path,
-    include,
-)  # Importe include pour inclure les URLs d'autres applications
+import os
+
 from django.conf import settings
 from django.conf.urls.static import static
-from django.http import JsonResponse, HttpResponse
-import os
+from django.contrib import admin
+from django.http import HttpResponse, JsonResponse
+from django.urls import (  # Importe include pour inclure les URLs d'autres applications
+    include,
+    path,
+)
+
 
 def health_check(request):
     """Health check endpoint for Fly.io"""
-    return JsonResponse({'status': 'healthy'})
+    return JsonResponse({"status": "healthy"})
+
 
 def robots_txt(request):
     """Serve robots.txt file"""
@@ -38,7 +41,8 @@ Allow: /static/img/
 
 # Crawl delay
 Crawl-delay: 1"""
-    return HttpResponse(content, content_type='text/plain')
+    return HttpResponse(content, content_type="text/plain")
+
 
 def sitemap_xml(request):
     """Generate sitemap.xml"""
@@ -72,12 +76,11 @@ def sitemap_xml(request):
         <priority>0.6</priority>
     </url>
 </urlset>"""
-    return HttpResponse(content, content_type='application/xml')
+    return HttpResponse(content, content_type="application/xml")
+
 
 urlpatterns = [
-    path(
-        "admin/", admin.site.urls
-    ),  # URL pour l'interface d'administration de Django
+    path("admin/", admin.site.urls),  # URL pour l'interface d'administration de Django
     path(
         "", include("vitrine.urls")
     ),  # Inclut les URLs de l'application 'vitrine' pour la racine du site
@@ -92,6 +95,4 @@ urlpatterns = [
 # Ajoute la gestion des fichiers statiques en mode développement
 # Ceci est nécessaire pour que les fichiers statiques soient servis par Django en mode DEBUG=True
 if settings.DEBUG:
-    urlpatterns += static(
-        settings.STATIC_URL, document_root=settings.STATIC_ROOT
-    )
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

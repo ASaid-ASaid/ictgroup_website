@@ -20,4 +20,18 @@ def index(request):
     return render(request, "vitrine/index.html", {"company_name": "ICTGROUP"})
 
 
+# Vue pour la page services (SEO)
+def services(request):
+    """
+    Affiche la page services dédiée au SEO.
+    """
+    logger.info(
+        f"[services] Page services appelée par {request.user if request.user.is_authenticated else 'anonyme'}"
+    )
+    return render(request, "vitrine/services.html", {
+        "company_name": "ICTGROUP",
+        "page_title": "Services - ICTGROUP"
+    })
+
+
 # Ajoutez ici d'autres vues pour la vitrine si besoin (services, contact, etc.)

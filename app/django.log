@@ -3,3 +3,11 @@
 [2025-08-23 23:06:03,061] INFO django.utils.autoreload Watching for file changes with StatReloader
 [2025-08-23 23:06:13,145] INFO django.utils.autoreload /code/app/ictgroup/urls.py changed, reloading.
 [2025-08-23 23:06:14,449] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:17:42,554] INFO django.utils.autoreload /code/app/ictgroup/urls.py changed, reloading.
+[2025-08-23 23:17:44,142] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:25:15,442] INFO django.utils.autoreload /code/app/vitrine/urls.py changed, reloading.
+[2025-08-23 23:25:16,609] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:25:38,970] INFO django.utils.autoreload /code/app/vitrine/views.py changed, reloading.
+[2025-08-23 23:25:39,968] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:25:55,494] INFO django.utils.autoreload /code/app/ictgroup/urls.py changed, reloading.
+[2025-08-23 23:25:56,484] INFO django.utils.autoreload Watching for file changes with StatReloader

@@ -51,6 +51,12 @@ def sitemap_xml(request):
         <lastmod>2025-08-23</lastmod>
     </url>
     <url>
+        <loc>https://ictgroup.fr/services/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+        <lastmod>2025-08-23</lastmod>
+    </url>
+    <url>
         <loc>https://ictgroup.fr/#services</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>

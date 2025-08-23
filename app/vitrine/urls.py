@@ -12,5 +12,7 @@ app_name = "vitrine"
 urlpatterns = [
     # URL pour la page d'accueil de la vitrine
     path("", views.index, name="index"),
+    # Page services pour le SEO
+    path("services/", views.services, name="services"),
     # Ajoutez ici d'autres URLs pour la vitrine (services, contact, etc.)
 ]

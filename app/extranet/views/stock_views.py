@@ -1,5 +1,6 @@
 """
 Vues de gestion du stock et des mouvements.
+Accès autorisé pour tous les utilisateurs en France.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -16,18 +17,150 @@ logger = logging.getLogger(__name__)
 
 
 def can_manage_stock(user):
-    """Vérifie si l'utilisateur peut gérer le stock."""
-    return (hasattr(user, 'profile') and 
-            user.profile.role in ['admin', 'manager'])
+    """Vérifie si l'utilisateur peut gérer le stock - Accès pour tous les utilisateurs France."""
+    # Accès pour tous les utilisateurs en France
+    if hasattr(user, 'profile'):
+        return user.profile.site in ['france', 'FR', 'France']
+    # Si pas de profil, on autorise par défaut (compatibilité)
+    return True
 
 
 @login_required
 @user_passes_test(can_manage_stock)
 def stock(request):
-    """Vue principale de gestion du stock."""
+    """Vue principale de gestion du stock - Accessible à tous les utilisateurs France."""
     
     # Récupération des articles de stock
     stock_items = StockItem.objects.all().order_by('designation')
+    
+    # Recherche
+    search = request.GET.get('search', '')
+    if search:
+        stock_items = stock_items.filter(
+            Q(designation__icontains=search) |
+            Q(code__icontains=search) |
+            Q(type__icontains=search)
+        )
+    
+    # Statistiques
+    total_items = stock_items.count()
+    low_stock_items = stock_items.filter(quantity__lt=5)
+    out_of_stock_items = stock_items.filter(quantity=0)
+    
+    context = {
+        'stock_items': stock_items,
+        'search': search,
+        'total_items': total_items,
+        'low_stock_count': low_stock_items.count(),
+        'out_of_stock_count': out_of_stock_items.count(),
+    }
+    
+    logger.info(f"[stock] Utilisateur {request.user.username} consulte le stock - {total_items} articles")
+    
+    return render(request, 'extranet/stock.html', context)
+
+
+@login_required
+@user_passes_test(can_manage_stock)
+def entry_exit(request):
+    """Vue pour gérer les entrées et sorties de stock."""
+    
+    if request.method == 'POST':
+        # Création d'un nouvel article
+        if 'create_item' in request.POST:
+            code = request.POST.get('code')
+            designation = request.POST.get('designation')
+            fournisseur = request.POST.get('fournisseur')
+            type_item = request.POST.get('type')
+            quantity = int(request.POST.get('quantity', 0))
+            remarks = request.POST.get('remarks', '')
+            
+            if StockItem.objects.filter(code=code).exists():
+                messages.error(request, f"Un article avec le code '{code}' existe déjà.")
+            else:
+                StockItem.objects.create(
+                    code=code,
+                    designation=designation,
+                    fournisseur=fournisseur,
+                    type=type_item,
+                    quantity=quantity,
+                    remarks=remarks
+                )
+                messages.success(request, f"Article '{designation}' créé avec succès.")
+                logger.info(f"[entry_exit] Nouvel article créé: {code} par {request.user.username}")
+        
+        # Mouvement de stock
+        elif 'movement' in request.POST:
+            item_id = request.POST.get('stock_item')
+            movement_type = request.POST.get('movement_type')
+            quantity = int(request.POST.get('quantity'))
+            remarks = request.POST.get('remarks', '')
+            
+            stock_item = get_object_or_404(StockItem, id=item_id)
+            
+            # Vérification pour les sorties
+            if movement_type == 'exit' and quantity > stock_item.quantity:
+                messages.error(request, f"Quantité insuffisante. Stock disponible: {stock_item.quantity}")
+            else:
+                # Créer le mouvement
+                StockMovement.objects.create(
+                    stock_item=stock_item,
+                    user=request.user,
+                    movement_type=movement_type,
+                    quantity=quantity,
+                    remarks=remarks
+                )
+                
+                # Mettre à jour le stock
+                if movement_type == 'entry':
+                    stock_item.quantity += quantity
+                else:  # exit
+                    stock_item.quantity -= quantity
+                
+                stock_item.save()
+                
+                messages.success(request, f"Mouvement enregistré: {movement_type} de {quantity} unité(s)")
+                logger.info(f"[entry_exit] Mouvement: {movement_type} {quantity} {stock_item.code} par {request.user.username}")
+        
+        return redirect('extranet:entry_exit')
+    
+    # GET request
+    stock_items = StockItem.objects.all().order_by('designation')
+    
+    context = {
+        'stock_items': stock_items,
+    }
+    
+    return render(request, 'extranet/entry_exit.html', context)
+
+
+@login_required
+@user_passes_test(can_manage_stock)
+def movements_view(request):
+    """Vue pour afficher l'historique des mouvements de stock."""
+    
+    movements = StockMovement.objects.select_related('stock_item', 'user').order_by('-date')
+    
+    # Filtres
+    movement_type = request.GET.get('type', '')
+    user_filter = request.GET.get('user', '')
+    
+    if movement_type:
+        movements = movements.filter(movement_type=movement_type)
+    
+    if user_filter:
+        movements = movements.filter(user__username__icontains=user_filter)
+    
+    # Pagination simple - derniers 100 mouvements
+    movements = movements[:100]
+    
+    context = {
+        'movements': movements,
+        'movement_type': movement_type,
+        'user_filter': user_filter,
+    }
+    
+    return render(request, 'extranet/movements.html', context)
     
     # Recherche
     search = request.GET.get('search', '')

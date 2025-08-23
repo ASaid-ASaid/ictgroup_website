@@ -11,3 +11,9 @@
 [2025-08-23 23:25:39,968] INFO django.utils.autoreload Watching for file changes with StatReloader
 [2025-08-23 23:25:55,494] INFO django.utils.autoreload /code/app/ictgroup/urls.py changed, reloading.
 [2025-08-23 23:25:56,484] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:43:50,221] INFO django.utils.autoreload /code/app/extranet/views/stock_views.py changed, reloading.
+[2025-08-23 23:43:51,814] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:46:12,883] INFO django.utils.autoreload /code/app/extranet/views/stock_views.py changed, reloading.
+[2025-08-23 23:46:14,196] INFO django.utils.autoreload Watching for file changes with StatReloader
+[2025-08-23 23:54:40,255] INFO django.utils.autoreload /code/app/extranet/views/stock_views.py changed, reloading.
+[2025-08-23 23:54:41,469] INFO django.utils.autoreload Watching for file changes with StatReloader

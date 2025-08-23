@@ -7,10 +7,10 @@ from django.urls import path
 from . import views
 
 # Nom de l'application pour la gestion des espaces de noms d'URL
-app_name = 'vitrine'
+app_name = "vitrine"
 
 urlpatterns = [
     # URL pour la page d'accueil de la vitrine
-    path('', views.index, name='index'),
+    path("", views.index, name="index"),
     # Ajoutez ici d'autres URLs pour la vitrine (services, contact, etc.)
 ]

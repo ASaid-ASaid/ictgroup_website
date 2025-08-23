@@ -1,0 +1,286 @@
+{% extends 'extranet/base.html' %}
+{% load static %}
+
+{% block title %}Accueil - Extranet ICTGROUP{% endblock %}
+
+{% block content %}
+<main role="main" class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <!-- Header avec informations utilisateur optimisé -->
+    <section class="bg-white rounded-xl shadow-lg p-8 mb-8" aria-labelledby="welcome-title">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 id="welcome-title" class="text-4xl font-bold text-primary mb-2">
+                    Bonjour {{ user.get_full_name|default:user.username }} !
+                </h1>
+                <p class="text-xl text-gray-600">Bienvenue sur votre espace personnel ICTGROUP</p>
+                <div class="flex items-center mt-4 text-gray-500" role="group" aria-label="Informations utilisateur">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>Site : {{ user.profile.site|default:"Non défini"|capfirst }}</span>
+                </div>
+            </div>
+            <div class="text-right" role="region" aria-label="Solde de congés">
+                <div class="text-3xl font-bold text-success" aria-label="{{ leave_balance.balance }} jours de congés restants">
+                    {{ leave_balance.balance }} jours
+                </div>
+                <div class="text-gray-600">Solde de congés restant</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistiques rapides optimisées -->
+    <section aria-labelledby="stats-title" class="mb-8">
+        <h2 id="stats-title" class="sr-only">Statistiques de congés</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-full" aria-hidden="true">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-800">{{ leave_balance.acquired }}</div>
+                        <div class="text-gray-600">Congés acquis</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-full" aria-hidden="true">
+                        <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-800">{{ leave_balance.taken }}</div>
+                        <div class="text-gray-600">Congés pris</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="bg-orange-100 p-3 rounded-full" aria-hidden="true">
+                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-800">{{ recent_leaves|length }}</div>
+                        <div class="text-gray-600">Demandes récentes</div>
+                    </div>
+                </div>
+            </article>
+
+            {% if pending_validations > 0 %}
+            <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="bg-red-100 p-3 rounded-full" aria-hidden="true">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.966-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-800">{{ pending_validations }}</div>
+                        <div class="text-gray-600">En attente de validation</div>
+                    </div>
+                </div>
+            </article>
+            {% endif %}
+        </div>
+    </section>    <!-- Actions rapides -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Actions principales -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Actions rapides</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="{% url 'extranet:new_leave_request' %}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-300">
+                    <div class="bg-primary p-2 rounded-lg mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-800">Nouveau congé</div>
+                        <div class="text-sm text-gray-600">Faire une demande</div>
+                    </div>
+                </a>
+
+                <a href="{% url 'extranet:new_telework_request' %}" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors duration-300">
+                    <div class="bg-success p-2 rounded-lg mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5v6m8-6v6m-8 4h8"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-800">Télétravail</div>
+                        <div class="text-sm text-gray-600">Nouvelle demande</div>
+                    </div>
+                </a>
+
+                <a href="{% url 'extranet:presence_calendar' %}" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors duration-300">
+                    <div class="bg-purple-600 p-2 rounded-lg mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-800">Calendrier</div>
+                        <div class="text-sm text-gray-600">Voir mes présences</div>
+                    </div>
+                </a>
+
+                {% if pending_validations > 0 %}
+                <a href="{% url 'extranet:validation' %}" class="flex items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-300">
+                    <div class="bg-red-600 p-2 rounded-lg mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-800">Validation</div>
+                        <div class="text-sm text-gray-600">{{ pending_validations }} en attente</div>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Demandes récentes -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Mes dernières demandes</h2>
+            {% if recent_leaves or recent_teleworks %}
+                <div class="space-y-4 max-h-80 overflow-y-auto">
+                    {% for leave in recent_leaves %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-800">Congé - {{ leave.start_date|date:"d/m/Y" }}</div>
+                            <div class="text-sm text-gray-600">{{ leave.start_date|date:"d/m/Y" }} au {{ leave.end_date|date:"d/m/Y" }}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if leave.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif leave.status == 'rejected' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {% if leave.status == 'approved' %}Approuvé
+                            {% elif leave.status == 'rejected' %}Rejeté
+                            {% else %}En attente{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+
+                    {% for telework in recent_teleworks %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-800">Télétravail - {{ telework.start_date|date:"d/m/Y" }}</div>
+                            <div class="text-sm text-gray-600">{{ telework.start_date|date:"d/m/Y" }} au {{ telework.end_date|date:"d/m/Y" }}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if telework.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif telework.status == 'rejected' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {% if telework.status == 'approved' %}Approuvé
+                            {% elif telework.status == 'rejected' %}Rejeté
+                            {% else %}En attente{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500">Aucune demande récente</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informations supplémentaires -->
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Informations utiles</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 mb-2">Support IT</h3>
+                <p class="text-gray-600 text-sm">Besoin d'aide ? Contactez l'équipe support pour toute assistance technique.</p>
+            </div>
+
+            <div class="text-center">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 mb-2">Procédures RH</h3>
+                <p class="text-gray-600 text-sm">Consultez les procédures et politiques RH de l'entreprise dans votre espace.</p>
+            </div>
+
+            <div class="text-center">
+                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 mb-2">Équipe</h3>
+                <p class="text-gray-600 text-sm">Restez connecté avec votre équipe et suivez les actualités de l'entreprise.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Performance optimizations for home page -->
+<script>
+    (function() {
+        'use strict';
+        
+        // Lazy load non-critical animations
+        const animateElements = document.querySelectorAll('.hover\\:scale-105, .transform');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        animateElements.forEach(el => observer.observe(el));
+        
+        // Enhanced accessibility for statistics cards
+        const statCards = document.querySelectorAll('article[class*="bg-white"]');
+        statCards.forEach(card => {
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    const link = card.querySelector('a');
+                    if (link) {
+                        e.preventDefault();
+                        link.click();
+                    }
+                }
+            });
+            
+            // Make cards focusable if they contain links
+            if (card.querySelector('a')) {
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('role', 'button');
+            }
+        });
+        
+    })();
+</script>
+{% endblock %}

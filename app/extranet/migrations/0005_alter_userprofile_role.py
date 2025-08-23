@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0004_leaverequest_admin_validated_and_more'),
+        ("extranet", "0004_leaverequest_admin_validated_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='role',
-            field=models.CharField(choices=[('user', 'Utilisateur'), ('manager', 'Manager'), ('rh', 'RH'), ('admin', 'Admin')], default='user', max_length=20),
+            model_name="userprofile",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("user", "Utilisateur"),
+                    ("manager", "Manager"),
+                    ("rh", "RH"),
+                    ("admin", "Admin"),
+                ],
+                default="user",
+                max_length=20,
+            ),
         ),
     ]

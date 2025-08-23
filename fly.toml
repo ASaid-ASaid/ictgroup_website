@@ -1,0 +1,33 @@
+# fly.toml app configuration file generated for ictgroup-website on 2025-08-23T00:23:37+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'ictgroup-website'
+primary_region = 'cdg'
+console_command = '/code/app/manage.py shell'
+
+[build]
+  dockerfile = "docker/Dockerfile"
+
+[deploy]
+  # release_command = 'cd app && python manage.py migrate --noinput'
+
+[env]
+  PORT = '8000'
+  DJANGO_SETTINGS_MODULE = 'ictgroup.settings_fly'
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+
+[[statics]]
+  guest_path = '/code/app/staticfiles'
+  url_prefix = '/static/'

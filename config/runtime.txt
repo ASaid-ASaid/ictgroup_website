@@ -1,0 +1,2 @@
+# Runtime dependencies for Fly.io deployment
+python-3.11.*

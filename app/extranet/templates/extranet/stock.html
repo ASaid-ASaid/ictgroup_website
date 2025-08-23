@@ -1,68 +1,291 @@
 {% extends 'extranet/base.html' %}
-{% block title %}Stock{% endblock %}
+{% block title %}Gestion du Stock - ICTGROUP{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Stock</h1>
-<table class="min-w-full bg-white rounded-lg shadow-md">
-    <thead class="bg-blue-100">
-        <tr>
-            <th class="py-2 px-4">Code</th>
-            <th class="py-2 px-4">Désignation</th>
-            <th class="py-2 px-4">Fournisseur</th>
-            <th class="py-2 px-4">Type</th>
-            <th class="py-2 px-4">Quantité</th>
-            <th class="py-2 px-4">Remarques</th>
-            {% if user.is_superuser or user.profile.role == 'manager' %}
-            <th class="py-2 px-4">Actions</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in stock_items %}
-        <tr>
-            <td class="py-2 px-4">{{ item.code }}</td>
-            <td class="py-2 px-4">{{ item.designation }}</td>
-            <td class="py-2 px-4">{{ item.fournisseur }}</td>
-            <td class="py-2 px-4">{{ item.type }}</td>
-            <td class="py-2 px-4">{{ item.quantity }}</td>
-            <td class="py-2 px-4">{{ item.remarks }}</td>
-            {% if user.is_superuser or user.profile.role == 'manager' %}
-            <td class="py-2 px-4">
-                <form method="post" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="stock_item_id" value="{{ item.id }}">
-                    <input type="text" name="designation" value="{{ item.designation }}" placeholder="Désignation">
-                    <input type="text" name="fournisseur" value="{{ item.fournisseur }}" placeholder="Fournisseur">
-                    <input type="text" name="type" value="{{ item.type }}" placeholder="Type">
-                    <input type="number" name="quantity" value="{{ item.quantity }}" placeholder="Quantité">
-                    <textarea name="remarks" placeholder="Remarques">{{ item.remarks }}</textarea>
-                    <button type="submit">Mettre à jour</button>
-                </form>
-                <form method="post" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="stock_item_id" value="{{ item.id }}">
-                    <button type="submit">Supprimer</button>
-                </form>
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-        {% if user.is_superuser or user.profile.role == 'manager' %}
-        <tr>
-            <form method="post" action="">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="create">
-                <td><input type="text" name="code" placeholder="Code"></td>
-                <td><input type="text" name="designation" placeholder="Désignation"></td>
-                <td><input type="text" name="fournisseur" placeholder="Fournisseur"></td>
-                <td><input type="text" name="type" placeholder="Type"></td>
-                <td><input type="number" name="quantity" placeholder="Quantité"></td>
-                <td><textarea name="remarks" placeholder="Remarques"></textarea></td>
-                <td><button type="submit">Créer</button></td>
-            </form>
-        </tr>
-        {% endif %}
-    </tbody>
-</table>
+<main role="main" class="space-y-8">
+    <h1 class="text-3xl font-extrabold text-primary mb-4 text-center tracking-tight">
+        Gestion du Stock
+    </h1>
+    <p class="text-gray-600 text-center mb-8">
+        Gérez les articles en stock et suivez les mouvements d'inventaire
+    </p>
+
+
+    <!-- Formulaire d'ajout optimisé -->
+    {% if user.is_superuser or user.profile.role == 'manager' %}
+    <section class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in" aria-labelledby="add-item">
+        <h2 id="add-item" class="text-2xl font-bold text-primary mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Ajouter un nouvel article
+        </h2>
+        <form method="post" 
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              role="form"
+              aria-label="Formulaire d'ajout d'article">
+            {% csrf_token %}
+            <input type="hidden" name="add_new_item" value="1">
+            
+            <div class="form-group">
+                <label for="code" class="block text-sm font-medium text-gray-700 mb-1">
+                    Code article <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="code"
+                       name="code" 
+                       placeholder="Ex: ITM001" 
+                       required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            
+            <div class="form-group">
+                <label for="designation" class="block text-sm font-medium text-gray-700 mb-1">
+                    Désignation <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="designation"
+                       name="designation" 
+                       placeholder="Nom de l'article" 
+                       required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            
+            <div class="form-group">
+                <label for="fournisseur" class="block text-sm font-medium text-gray-700 mb-1">
+                    Fournisseur <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="fournisseur"
+                       name="fournisseur" 
+                       placeholder="Nom du fournisseur" 
+                       required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            
+            <div class="form-group">
+                <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                    Type <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="type"
+                       name="type" 
+                       placeholder="Catégorie" 
+                       required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                    Quantité <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="quantity"
+                       name="quantity" 
+                       placeholder="0" 
+                       min="0"
+                       required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            
+            <div class="form-group md:col-span-2">
+                <label for="remarks" class="block text-sm font-medium text-gray-700 mb-1">
+                    Remarques
+                </label>
+                <textarea id="remarks"
+                          name="remarks" 
+                          placeholder="Informations supplémentaires..." 
+                          rows="3"
+                          class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-vertical"></textarea>
+            </div>
+            
+            <div class="md:col-span-2 lg:col-span-1">
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-success to-green-600 hover:from-success/90 hover:to-green-600/90 text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 transform hover:scale-105 flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Ajouter l'article
+                </button>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    <!-- Tableau du stock optimisé -->
+    <section aria-labelledby="stock-list">
+        <h2 id="stock-list" class="text-2xl font-bold text-primary mb-6">
+            Inventaire actuel
+        </h2>
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full" role="table" aria-label="Liste des articles en stock">
+                    <thead class="bg-gradient-to-r from-primary/10 to-secondary/10">
+                        <tr>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Code</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Désignation</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Fournisseur</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Type</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Quantité</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Remarques</th>
+                            {% if user.is_superuser or user.profile.role == 'manager' %}
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for item in stock_items %}
+                        <tr class="hover:bg-primary/5 transition-colors duration-200" id="item-{{ item.id }}">
+                            <td class="py-4 px-6 font-medium text-gray-900">
+                                <code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ item.code }}</code>
+                            </td>
+                            <td class="py-4 px-6 text-gray-700 font-medium">{{ item.designation }}</td>
+                            <td class="py-4 px-6 text-gray-700">{{ item.fournisseur }}</td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ item.type }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold
+                                    {% if item.quantity == 0 %}bg-red-100 text-red-800{% elif item.quantity < 10 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ item.quantity }}
+                                    {% if item.quantity == 0 %}
+                                        🔴 Rupture
+                                    {% elif item.quantity < 10 %}
+                                        ⚠️ Faible
+                                    {% else %}
+                                        ✅ Disponible
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-gray-700">
+                                {% if item.remarks %}
+                                    <span class="inline-block max-w-xs truncate" title="{{ item.remarks }}">
+                                        {{ item.remarks }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400 italic">Aucune remarque</span>
+                                {% endif %}
+                            </td>
+                            {% if user.is_superuser or user.profile.role == 'manager' %}
+                            <td class="py-4 px-6">
+                                <div class="flex space-x-2">
+                                    <button onclick="editItem({{ item.id }})" 
+                                            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                            aria-label="Modifier l'article {{ item.designation }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <form method="post" 
+                                          class="inline"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="stock_item_id" value="{{ item.id }}">
+                                        <button type="submit" 
+                                                class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1 rounded-lg transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                aria-label="Supprimer l'article {{ item.designation }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{% if user.is_superuser or user.profile.role == 'manager' %}7{% else %}6{% endif %}" class="text-center py-12">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun article en stock</h3>
+                                    <p class="text-gray-500">Commencez par ajouter votre premier article.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+/* Animations d'apparition */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+/* Focus visible amélioré */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Amélioration de l'accessibilité pour les tableaux */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Animations pour les boutons */
+button:hover {
+    transform: translateY(-1px);
+}
+
+/* Amélioration des tooltips */
+[title] {
+    position: relative;
+}
+
+/* Styles pour les champs de formulaire */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    transition: all 0.2s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<script>
+function editItem(itemId) {
+    // Fonction pour éditer un article - à implémenter selon les besoins
+    console.log('Édition de l\'article ID:', itemId);
+    // Ici vous pouvez ajouter une modale ou rediriger vers une page d'édition
+}
+
+// Animation d'apparition pour les lignes du tableau
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            row.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
 {% endblock %}
+
+

@@ -1,0 +1,1 @@
+web: cd app && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn ictgroup.wsgi:application --bind 0.0.0.0:$PORT

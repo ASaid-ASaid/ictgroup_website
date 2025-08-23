@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0005_alter_userprofile_role'),
+        ("extranet", "0005_alter_userprofile_role"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='leaverequest',
-            name='demi_jour',
-            field=models.CharField(choices=[('full', 'Journée complète'), ('am', 'Matin'), ('pm', 'Après-midi')], default='full', help_text='Demi-journée ou journée complète', max_length=4),
+            model_name="leaverequest",
+            name="demi_jour",
+            field=models.CharField(
+                choices=[
+                    ("full", "Journée complète"),
+                    ("am", "Matin"),
+                    ("pm", "Après-midi"),
+                ],
+                default="full",
+                help_text="Demi-journée ou journée complète",
+                max_length=4,
+            ),
         ),
     ]

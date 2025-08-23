@@ -15,19 +15,46 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='LeaveRequest',
+            name="LeaveRequest",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('reason', models.TextField(blank=True, null=True)),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('pending', 'En attente'), ('approved', 'Approuvée'), ('rejected', 'Rejetée'), ('cancelled', 'Annulée')], default='pending', max_length=10)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='leave_requests', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                ("reason", models.TextField(blank=True, null=True)),
+                ("submitted_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "En attente"),
+                            ("approved", "Approuvée"),
+                            ("rejected", "Rejetée"),
+                            ("cancelled", "Annulée"),
+                        ],
+                        default="pending",
+                        max_length=10,
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="leave_requests",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-submitted_at'],
+                "ordering": ["-submitted_at"],
             },
         ),
     ]

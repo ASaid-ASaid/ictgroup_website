@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ictgroup.fr/sitemap.xml
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /extranet/
+Disallow: /static/admin/
+
+# Allow specific static files
+Allow: /static/css/
+Allow: /static/js/
+Allow: /static/img/
+
+# Crawl delay
+Crawl-delay: 1

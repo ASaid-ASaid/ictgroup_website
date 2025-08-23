@@ -7,22 +7,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0002_teleworkrequest'),
+        ("extranet", "0002_teleworkrequest"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='teleworkrequest',
-            options={'ordering': ['-start_date']},
+            name="teleworkrequest",
+            options={"ordering": ["-start_date"]},
         ),
         migrations.RenameField(
-            model_name='teleworkrequest',
-            old_name='date',
-            new_name='end_date',
+            model_name="teleworkrequest",
+            old_name="date",
+            new_name="end_date",
         ),
         migrations.AddField(
-            model_name='teleworkrequest',
-            name='start_date',
+            model_name="teleworkrequest",
+            name="start_date",
             field=models.DateField(default=django.utils.timezone.now),
             preserve_default=False,
         ),

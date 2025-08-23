@@ -8,33 +8,67 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0007_userprofile_site'),
+        ("extranet", "0007_userprofile_site"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StockItem',
+            name="StockItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=50, unique=True)),
-                ('designation', models.CharField(max_length=255)),
-                ('fournisseur', models.CharField(max_length=255)),
-                ('type', models.CharField(max_length=100)),
-                ('quantity', models.IntegerField(default=0)),
-                ('remarks', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=50, unique=True)),
+                ("designation", models.CharField(max_length=255)),
+                ("fournisseur", models.CharField(max_length=255)),
+                ("type", models.CharField(max_length=100)),
+                ("quantity", models.IntegerField(default=0)),
+                ("remarks", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='StockMovement',
+            name="StockMovement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('movement_type', models.CharField(choices=[('entry', 'Entrée'), ('exit', 'Sortie')], max_length=10)),
-                ('quantity', models.IntegerField()),
-                ('date', models.DateTimeField(auto_now_add=True)),
-                ('remarks', models.TextField(blank=True, null=True)),
-                ('stock_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='extranet.stockitem')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "movement_type",
+                    models.CharField(
+                        choices=[("entry", "Entrée"), ("exit", "Sortie")],
+                        max_length=10,
+                    ),
+                ),
+                ("quantity", models.IntegerField()),
+                ("date", models.DateTimeField(auto_now_add=True)),
+                ("remarks", models.TextField(blank=True, null=True)),
+                (
+                    "stock_item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="extranet.stockitem",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

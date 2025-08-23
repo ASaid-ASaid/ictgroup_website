@@ -1,0 +1,89 @@
+# =============================================================================
+# .gitignore pour ICTGROUP Website
+# =============================================================================
+
+# Environnement Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Base de données
+*.db
+*.sqlite3
+postgres_data/
+
+# IDE et éditeurs
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs et données temporaires
+logs/
+*.log
+performance_report_*.json
+load_test_*.json
+
+# Docker
+.dockerignore
+
+# Dossiers de build et distribution
+build/
+dist/
+*.egg-info/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Sauvegardes
+backups/*.sql
+backups/*.tar.gz
+security_report.json
+
+# Cache et fichiers temporaires
+.cache
+.pytest_cache/
+.mypy_cache/
+.tox/
+
+# Fichiers temporaires du système
+Thumbs.db
+Desktop.ini
+
+# Fichiers de backup
+*.bak
+*.backup
+*.tmp
+
+# Dossiers personnels
+agent/
+temp/
+tmp/

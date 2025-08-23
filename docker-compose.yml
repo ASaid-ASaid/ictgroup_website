@@ -1,74 +1,36 @@
 # =============================
-# Fichier de configuration Docker Compose pour orchestrer les services de l'application
-# - db : service PostgreSQL
-# - web : application Django
-# Les variables sensibles sont à placer dans un fichier .env à la racine du projet
+# Fichier de configuration Docker Compose pour l'application ICTGROUP avec Supabase
+# - web : application Django (utilise Supabase comme base de données)
+# Les variables Supabase sont à placer dans un fichier .env à la racine du projet
 # =============================
+
+# Version de Docker Compose
+version: '3.8'
+
 # Définition des services de l'application
 services:
-  # Service de base de données PostgreSQL
-  db:
-    # Image Docker de PostgreSQL version 16 (alpine pour une taille réduite)
-    image: postgres:16-alpine
-    # Variables d'environnement pour la configuration de la base de données
-    environment:
-      POSTGRES_DB: ${DB_NAME} # Nom de la base de données, tiré du fichier .env
-      POSTGRES_USER: ${DB_USER} # Utilisateur de la base de données, tiré du fichier .env
-      POSTGRES_PASSWORD: ${DB_PASSWORD} # Mot de passe de l'utilisateur, tiré du fichier .env
-    # Volumes pour persister les données de la base de données
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    # Exposition du port 5432 du conteneur vers le port 5432 de l'hôte
-    # Ceci est utile pour se connecter à la DB depuis l'extérieur du conteneur en développement
-    ports:
-      - "5432:5432"
-    # Vérification de l'état de santé du service de base de données
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"] # Commande pour vérifier la connexion
-      interval: 5s # Intervalle entre les vérifications
-      timeout: 5s # Temps maximum pour une vérification
-      retries: 5 # Nombre de tentatives avant de considérer le service comme non sain
-
-  # Service de l'application web Django
+  # Service de l'application web Django avec Supabase
   web:
-    # Construction de l'image Docker à partir du Dockerfile dans le répertoire courant
+    # Construction de l'image Docker à partir du Dockerfile dans le répertoire docker
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     # Commande à exécuter au démarrage du conteneur web
-    # Exécute les migrations Django puis démarre le serveur de développement
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    # Montage du dossier 'app' de l'hôte dans le dossier '/app' du conteneur
-    volumes:
-      - ./app:/app
+    # Variables d'environnement chargées depuis le fichier .env
+    env_file:
+      - .env
     # Exposition du port 8000 du conteneur vers le port 8000 de l'hôte
     ports:
       - "8000:8000"
-    # Variables d'environnement pour l'application Django
+    # Volumes pour le développement (hot reload)
+    volumes:
+      - .:/code
+    # Variables d'environnement spécifiques à Docker
     environment:
-      DJANGO_SETTINGS_MODULE: ictgroup.settings # Chemin vers le fichier de paramètres Django
-      SECRET_KEY: ${DJANGO_SECRET_KEY} # Clé secrète Django, tirée du fichier .env
-      DB_NAME: ${DB_NAME} # Nom de la base de données pour Django
-      DB_USER: ${DB_USER} # Utilisateur de la base de données pour Django
-      DB_PASSWORD: ${DB_PASSWORD} # Mot de passe de la base de données pour Django
-      DB_HOST: db # Nom d'hôte de la base de données (nom du service Docker)
-      DB_PORT: 5432 # Port de la base de données
-      DEBUG: ${DEBUG} # Mode debug, tiré du fichier .env
-      DATABASE_URL: ${DATABASE_URL} # Ajout de la variable d'environnement manquante
-    # Dépendance sur le service 'db', le service 'web' ne démarrera que si 'db' est sain
-    depends_on:
-      db:
-        condition: service_healthy
+      - DEBUG=True
+      - PYTHONUNBUFFERED=1
 
-  # Interface web Adminer pour PostgreSQL
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-    depends_on:
-      - db
-
-# Définition des volumes Docker
-volumes:
-  postgres_data: # Volume pour les données persistantes de PostgreSQL
+# Note: Les services PostgreSQL locaux ont été supprimés car nous utilisons Supabase
+# Pour accéder à votre base Supabase, utilisez le dashboard web sur supabase.com
+# URL du dashboard: https://ksjouzrbwrltuzyekvle.supabase.co

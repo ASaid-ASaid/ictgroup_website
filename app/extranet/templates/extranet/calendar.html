@@ -1,61 +1,133 @@
 {% extends 'extranet/base.html' %}
 {% load static %}
-{% block title %}Calendrier de Présence{% endblock %}
+
+{% block title %}Calendrier de Présence - ICTGROUP{% endblock %}
+
 {% block content %}
-<style>
-.demi-jour {
-    background-color: #f9c2ff !important; /* rose pâle */
-    color: #a1006b !important;
-    font-weight: bold;
-}
-</style>
-<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
-    <h2 class="text-3xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Calendrier de Présence</h2>
-    <div class="flex justify-center mb-6 gap-4">
-        <a href="?mode=me" class="px-4 py-2 rounded-md text-white font-bold transition duration-200 {% if mode == 'me' %}bg-blue-700{% else %}bg-blue-400 hover:bg-blue-600{% endif %}">Mon calendrier</a>
-        {% if can_see_global %}
-        <a href="?mode=global" class="px-4 py-2 rounded-md text-white font-bold transition duration-200 {% if mode == 'global' %}bg-green-700{% else %}bg-green-400 hover:bg-green-600{% endif %}">Calendrier global</a>
-        {% endif %}
-    </div>
-    <form method="get" class="mb-8 flex flex-col md:flex-row md:items-center md:space-x-4 justify-center">
+<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+        <h1 class="text-3xl font-extrabold text-primary mb-8 text-center tracking-tight">
+            Calendrier de Présence
+        </h1>
+        
+        <!-- Navigation des modes -->
+        <nav class="flex justify-center mb-6 gap-4" role="tablist" aria-label="Mode d'affichage du calendrier">
+            <a href="?mode=me" 
+               class="px-4 py-2 rounded-md text-white font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {% if mode == 'me' %}bg-primary{% else %}bg-primary/70 hover:bg-primary{% endif %}"
+               role="tab"
+               aria-selected="{% if mode == 'me' %}true{% else %}false{% endif %}"
+               aria-label="Afficher mon calendrier personnel">
+                Mon calendrier
+            </a>
+            {% if can_see_global %}
+            <a href="?mode=global" 
+               class="px-4 py-2 rounded-md text-white font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 {% if mode == 'global' %}bg-success{% else %}bg-success/70 hover:bg-success{% endif %}"
+               role="tab"
+               aria-selected="{% if mode == 'global' %}true{% else %}false{% endif %}"
+               aria-label="Afficher le calendrier global">
+                Calendrier global
+            </a>
+            {% endif %}
+        </nav>
+    
+    <!-- Formulaire de sélection optimisé -->
+    <form method="get" 
+          class="mb-8 flex flex-col md:flex-row md:items-center md:space-x-4 justify-center"
+          role="form"
+          aria-label="Sélection de période et utilisateur">
         <input type="hidden" name="mode" value="{{ mode }}">
+        
         {% if mode == 'global' and users %}
-            <label for="user_id" class="text-lg font-semibold text-blue-700">Utilisateur :</label>
-            <select id="user_id" name="user_id" class="ml-2 p-2 rounded-md border border-blue-300 focus:border-blue-500 focus:ring-blue-500">
-                {% for u in users %}
-                    <option value="{{ u.id }}" {% if u.id == selected_user.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+            <div class="flex items-center mb-4 md:mb-0">
+                <label for="user_id" class="text-lg font-semibold text-primary mr-2">Utilisateur :</label>
+                <select id="user_id" 
+                        name="user_id" 
+                        class="p-2 rounded-md border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        aria-label="Sélectionner un utilisateur">
+                    {% for u in users %}
+                        <option value="{{ u.id }}" {% if u.id == selected_user.id %}selected{% endif %}>
+                            {{ u.get_full_name|default:u.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+        
+        <div class="flex items-center mb-4 md:mb-0">
+            <label for="month" class="text-lg font-semibold text-primary mr-2">Mois :</label>
+            <select id="month" 
+                    name="month" 
+                    class="p-2 rounded-md border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                    aria-label="Sélectionner le mois">
+                {% for m in month_range %}
+                    {% with m_str=m|stringformat:'02d' %}
+                    <option value="{{ m_str }}" {% if selected_month|slice:'5:' == m_str %}selected{% endif %}>
+                        {{ m_str }}
+                    </option>
+                    {% endwith %}
                 {% endfor %}
             </select>
-        {% endif %}
-        <label for="month" class="text-lg font-semibold text-blue-700 ml-4">Mois :</label>
-        <select id="month" name="month" class="ml-2 p-2 rounded-md border border-blue-300 focus:border-blue-500 focus:ring-blue-500">
-            {% for m in month_range %}
-                {% with m_str=m|stringformat:'02d' %}
-                <option value="{{ m_str }}" {% if selected_month|slice:'5:' == m_str %}selected{% endif %}>{{ m_str }}</option>
-                {% endwith %}
-            {% endfor %}
-        </select>
-        <label for="year" class="text-lg font-semibold text-blue-700 ml-4">Année :</label>
-        <select id="year" name="year" class="ml-2 p-2 rounded-md border border-blue-300 focus:border-blue-500 focus:ring-blue-500">
-            {% for y in year_range %}
-                {% with y_str=y|stringformat:'04d' %}
-                <option value="{{ y_str }}" {% if selected_month|slice:':4' == y_str %}selected{% endif %}>{{ y_str }}</option>
-                {% endwith %}
-            {% endfor %}
-        </select>
-        <button type="submit" class="ml-2 bg-gradient-to-r from-blue-600 to-green-400 hover:from-blue-700 hover:to-green-500 text-white px-4 py-2 rounded-md transition duration-300 ease-in-out shadow-lg btn">Afficher</button>
+        </div>
+        
+        <div class="flex items-center mb-4 md:mb-0">
+            <label for="year" class="text-lg font-semibold text-primary mr-2">Année :</label>
+            <select id="year" 
+                    name="year" 
+                    class="p-2 rounded-md border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                    aria-label="Sélectionner l'année">
+                {% for y in year_range %}
+                    {% with y_str=y|stringformat:'04d' %}
+                    <option value="{{ y_str }}" {% if selected_month|slice:':4' == y_str %}selected{% endif %}>
+                        {{ y_str }}
+                    </option>
+                    {% endwith %}
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit" 
+                class="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-6 py-2 rounded-md transition-all duration-300 ease-in-out shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transform hover:scale-105"
+                aria-label="Afficher le calendrier pour la période sélectionnée">
+            Afficher
+        </button>
     </form>
+    
+    <!-- Légende pour l'accessibilité -->
+    <section class="mb-6" aria-labelledby="legend-title">
+        <h2 id="legend-title" class="sr-only">Légende du calendrier</h2>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                <span>Congé</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-orange-500 rounded mr-2"></div>
+                <span>Télétravail</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                <span>Présent</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 rounded mr-2" style="background-color: #f9c2ff;"></div>
+                <span>Demi-journée</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Tableau du calendrier optimisé -->
     <div class="overflow-x-auto">
-        <table class="min-w-full bg-white rounded-xl shadow-md text-center">
+        <table class="min-w-full bg-white rounded-xl shadow-md text-center" 
+               role="table" 
+               aria-label="Calendrier de présence pour {{ selected_month }}">
             <thead>
-                <tr>
-                    <th class="py-2 px-2">Lun</th>
-                    <th class="py-2 px-2">Mar</th>
-                    <th class="py-2 px-2">Mer</th>
-                    <th class="py-2 px-2">Jeu</th>
-                    <th class="py-2 px-2">Ven</th>
-                    <th class="py-2 px-2">Sam</th>
-                    <th class="py-2 px-2">Dim</th>
+                <tr class="bg-gradient-to-r from-primary/10 to-secondary/10">
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Lun</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Mar</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Mer</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Jeu</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Ven</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Sam</th>
+                    <th class="py-3 px-4 font-bold text-primary" scope="col">Dim</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,21 +135,27 @@
                 <tr>
                     {% for day in week %}
                         {% if day %}
-                            <td class="py-2 px-2 rounded-lg
-                                {% if day.is_holiday %} bg-green-200 text-green-900 font-bold {% endif %}
-                                {% if day.is_leave and not day.demi_jour %} bg-red-200 text-red-900 font-bold {% endif %}
-                                {% if day.is_telework %} bg-blue-200 text-blue-900 font-bold {% endif %}
-                                {% if day.is_weekend %} bg-weekend {% endif %}
-                                {% if day.is_today %} border-2 border-blue-700 {% endif %}
-                                {% if day.demi_jour %} demi-jour {% endif %}
+                            <td class="py-3 px-4 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md
+                                {% if day.is_holiday %} bg-success/20 text-success font-bold {% endif %}
+                                {% if day.is_leave and not day.demi_jour %} bg-red-500/20 text-red-800 font-bold {% endif %}
+                                {% if day.is_telework %} bg-orange-500/20 text-orange-800 font-bold {% endif %}
+                                {% if day.is_weekend %} bg-gray-100 text-gray-600 {% endif %}
+                                {% if day.is_today %} ring-2 ring-primary ring-offset-2 {% endif %}
+                                {% if day.demi_jour %} bg-pink-200 text-pink-800 font-bold {% endif %}
                                 relative"
+                               {% if day.is_today %}
+                               aria-current="date"
+                               {% endif %}
+                               aria-label="{% if day.is_holiday %}Jour férié{% elif day.is_leave %}Congé{% elif day.is_telework %}Télétravail{% elif day.is_weekend %}Week-end{% else %}Jour de travail{% endif %} {{ day.day }} {{ selected_month }}"
                             >
                                 <span class="relative z-10">
-                                    {% if day.demi_jour %}0.5{% else %}{{ day.day }}{% endif %}
+                                    {% if day.demi_jour %}
+                                        {% if day.demi_jour == 'am' %}AM{% elif day.demi_jour == 'pm' %}PM{% else %}{{ day.day }}{% endif %}
+                                    {% else %}{{ day.day }}{% endif %}
                                 </span>
                             </td>
                         {% else %}
-                            <td></td>
+                            <td class="py-3 px-4" aria-hidden="true"></td>
                         {% endif %}
                     {% endfor %}
                 </tr>
@@ -85,35 +163,107 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-10 flex flex-col md:flex-row md:justify-center md:space-x-8 items-center">
-        <div class="bg-blue-50 p-6 rounded-lg shadow text-center mb-4 md:mb-0">
-            <div class="text-2xl font-bold text-blue-700 mb-2">Jours au bureau</div>
-            <div class="text-4xl font-extrabold text-blue-800">{{ days_at_office }}</div>
+    
+    <!-- Statistiques mensuelles optimisées -->
+    <section class="mt-10" aria-labelledby="stats-title">
+        <h2 id="stats-title" class="sr-only">Statistiques du mois</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <article class="bg-gradient-to-br from-primary/10 to-primary/20 p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300">
+                <h3 class="text-lg font-bold text-primary mb-2">Jours au bureau</h3>
+                <p class="text-3xl font-extrabold text-primary">{{ days_at_office }}</p>
+            </article>
+            <article class="bg-gradient-to-br from-success/10 to-success/20 p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300">
+                <h3 class="text-lg font-bold text-success mb-2">Jours fériés</h3>
+                <p class="text-3xl font-extrabold text-success">{{ holidays_count }}</p>
+            </article>
+            <article class="bg-gradient-to-br from-red-500/10 to-red-500/20 p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300">
+                <h3 class="text-lg font-bold text-red-700 mb-2">Jours de congé</h3>
+                <p class="text-3xl font-extrabold text-red-800">{{ leaves_count }}</p>
+            </article>
+            <article class="bg-gradient-to-br from-orange-500/10 to-orange-500/20 p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300">
+                <h3 class="text-lg font-bold text-orange-700 mb-2">Jours télétravail</h3>
+                <p class="text-3xl font-extrabold text-orange-800">{{ telework_count }}</p>
+            </article>
+            <article class="bg-gradient-to-br from-gray-500/10 to-gray-500/20 p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-all duration-300">
+                <h3 class="text-lg font-bold text-gray-700 mb-2">Week-ends</h3>
+                <p class="text-3xl font-extrabold text-gray-800">{{ weekends_count }}</p>
+            </article>
         </div>
-        <div class="bg-green-50 p-6 rounded-lg shadow text-center mb-4 md:mb-0">
-            <div class="text-2xl font-bold text-green-700 mb-2">Jours fériés</div>
-            <div class="text-4xl font-extrabold text-green-800">{{ holidays_count }}</div>
+    </section>
+    
+    <!-- Solde de congés optimisé -->
+    {% if leave_balance %}
+    <section class="mt-8 bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-xl shadow-lg" aria-labelledby="balance-title">
+        <h2 id="balance-title" class="text-2xl font-bold text-orange-800 mb-4 text-center">
+            Solde de Congés ({{ selected_user.get_full_name|default:selected_user.username }})
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <article class="bg-white p-4 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-primary">Acquis</h3>
+                <p class="text-2xl font-bold text-primary">{{ leave_balance.acquired }}</p>
+                <p class="text-sm text-gray-600">Période {{ leave_balance.period_start|date:"d/m/Y" }} - {{ leave_balance.period_end|date:"d/m/Y" }}</p>
+            </article>
+            <article class="bg-white p-4 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-red-600">Pris</h3>
+                <p class="text-2xl font-bold text-red-800">{{ leave_balance.taken }}</p>
+                <p class="text-sm text-gray-600">Congés validés</p>
+            </article>
+            <article class="bg-white p-4 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-success">Solde</h3>
+                <p class="text-2xl font-bold text-success">{{ leave_balance.balance }}</p>
+                <p class="text-sm text-gray-600">Restant disponible</p>
+            </article>
+            <article class="bg-white p-4 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-orange-600">Report</h3>
+                <p class="text-2xl font-bold text-orange-800">{{ leave_balance.report }}</p>
+                <p class="text-sm text-gray-600">Année précédente</p>
+            </article>
         </div>
-        <div class="bg-red-50 p-6 rounded-lg shadow text-center mb-4 md:mb-0">
-            <div class="text-2xl font-bold text-red-700 mb-2">Jours de congé</div>
-            <div class="text-4xl font-extrabold text-red-800">{{ leaves_count }}</div>
+        {% if leave_balance.must_take_before_april > 0 %}
+        <div class="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg" role="alert">
+            <p class="text-yellow-800 font-semibold text-center">
+                ⚠️ {{ leave_balance.must_take_before_april }} jours de report à prendre avant le 30 avril
+            </p>
         </div>
-        <div class="bg-blue-50 p-6 rounded-lg shadow text-center mb-4 md:mb-0">
-            <div class="text-2xl font-bold text-blue-700 mb-2">Jours télétravail</div>
-            <div class="text-4xl font-extrabold text-blue-800">{{ telework_count }}</div>
+        {% endif %}
+        <div class="mt-2 text-center text-sm text-gray-600">
+            Site: {{ leave_balance.site|title }} • Règle: {% if leave_balance.site == "france" %}2.5 jours ouvrables/mois{% else %}1.8 jours ouvrés/mois{% endif %}
         </div>
-        <div class="bg-gray-50 p-6 rounded-lg shadow text-center">
-            <div class="text-2xl font-bold text-gray-700 mb-2">Week-ends</div>
-            <div class="text-4xl font-extrabold text-gray-800">{{ weekends_count }}</div>
-        </div>
-    </div>
-    <div class="mt-8 flex flex-wrap justify-center gap-4 text-sm">
-        <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-200 text-blue-900 font-semibold">Télétravail</span>
-        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-200 text-red-900 font-semibold">Congé</span>
-        <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-200 text-green-900 font-semibold">Férié</span>
-        <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-200 text-gray-700 font-semibold">Week-end</span>
-        <span class="inline-flex items-center px-3 py-1 rounded-full border border-blue-700 text-blue-700 font-semibold">Aujourd'hui</span>
-        <span class="inline-flex items-center px-3 py-1 rounded-full demi-jour">Demi-journée</span>
-    </div>
-</div>
+    </section>
+    {% endif %}
+</main>
+
+<style>
+.demi-jour {
+    background-color: #f9c2ff !important;
+    color: #a1006b !important;
+    font-weight: bold;
+}
+
+/* Animations d'apparition */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+/* Focus visible amélioré */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Amélioration de l'accessibilité pour les liens */
+a:focus,
+button:focus,
+select:focus,
+input:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+</style>
 {% endblock %}

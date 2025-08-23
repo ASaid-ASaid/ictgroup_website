@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0006_leaverequest_demi_jour'),
+        ("extranet", "0006_leaverequest_demi_jour"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='site',
-            field=models.CharField(choices=[('tunisie', 'Tunisie'), ('france', 'France')], default='tunisie', max_length=10),
+            model_name="userprofile",
+            name="site",
+            field=models.CharField(
+                choices=[("tunisie", "Tunisie"), ("france", "France")],
+                default="tunisie",
+                max_length=10,
+            ),
         ),
     ]

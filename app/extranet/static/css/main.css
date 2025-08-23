@@ -1,26 +1,26 @@
 /* Modern extranet theme: white, blue, sky blue, green, responsive, with fiber optic background */
 body {
-    background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
-    min-height: 100vh;
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%) !important;
+    min-height: 100vh !important;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
 }
 
 .logo-ictgroup {
-    height: 48px;
-    filter: drop-shadow(0 2px 8px #0ea5e9);
-    transition: transform 0.2s;
+    height: 48px !important;
+    filter: drop-shadow(0 2px 8px #0ea5e9) !important;
+    transition: transform 0.2s !important;
 }
 .logo-ictgroup:hover {
-    transform: scale(1.05) rotate(-2deg);
+    transform: scale(1.05) rotate(-2deg) !important;
 }
 
 header {
-    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%);
-    box-shadow: 0 2px 8px rgba(33,150,243,0.15);
+    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%) !important;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.15) !important;
 }
 
 footer {
-    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%);
+    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%) !important;
 }
 
 .bg-fiber {

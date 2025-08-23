@@ -1,105 +1,448 @@
 {% extends 'extranet/base.html' %}
-{% block title %}Validation des demandes{% endblock %}
+{% block title %}Validation des demandes - ICTGROUP{% endblock %}
+
 {% block content %}
-<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
-    <h2 class="text-2xl font-extrabold text-blue-800 mb-8 text-center tracking-tight">Validation des demandes</h2>
-    <div class="mb-8">
+<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <h1 class="text-3xl font-extrabold text-primary mb-4 text-center tracking-tight">
+        Validation des demandes
+    </h1>
+    <p class="text-gray-600 text-center">
+        Gérez les demandes de congés et de télétravail de votre équipe
+    </p>
+    
+    <!-- Navigation par type -->
+    <nav class="mb-8" role="tablist" aria-label="Types de demandes">
         <ul class="flex flex-wrap gap-4 justify-center">
-            <li><a href="?type=leave" class="px-4 py-2 rounded-md shadow bg-blue-100 text-blue-800 font-semibold {% if type == 'leave' %}ring-2 ring-blue-400{% endif %}">Congés</a></li>
-            <li><a href="?type=telework" class="px-4 py-2 rounded-md shadow bg-blue-100 text-blue-800 font-semibold {% if type == 'telework' %}ring-2 ring-blue-400{% endif %}">Télétravail</a></li>
+            <li role="presentation">
+                <a href="?type=leave" 
+                   class="px-6 py-3 rounded-lg shadow-md bg-gradient-to-r transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 
+                          {% if type == 'leave' %}from-primary to-secondary text-white ring-2 ring-primary/30{% else %}from-gray-100 to-gray-200 text-gray-700 hover:from-primary/10 hover:to-secondary/10{% endif %}"
+                   role="tab"
+                   aria-selected="{% if type == 'leave' %}true{% else %}false{% endif %}"
+                   aria-label="Voir les demandes de congés">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Congés
+                        {% if user.is_authenticated and user.profile.role in 'manager rh admin' and leave_validation_count %}
+                            <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-2">
+                                {{ leave_validation_count }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="?type=telework" 
+                   class="px-6 py-3 rounded-lg shadow-md bg-gradient-to-r transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+                          {% if type == 'telework' %}from-orange-500 to-sky-400 text-white ring-2 ring-orange-500/30{% else %}from-gray-100 to-gray-200 text-gray-700 hover:from-orange-500/10 hover:to-sky-400/10{% endif %}"
+                   role="tab"
+                   aria-selected="{% if type == 'telework' %}true{% else %}false{% endif %}"
+                   aria-label="Voir les demandes de télétravail">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        Télétravail
+                        {% if user.is_authenticated and user.profile.role in 'manager rh admin' and telework_validation_count %}
+                            <span class="inline-flex items-center justify-center bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-2">
+                                {{ telework_validation_count }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </a>
+            </li>
         </ul>
-    </div>
+    </nav>
+    
     {% if type == 'leave' %}
-        <h3 class="text-xl font-bold mb-4">Demandes de congés à valider</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white rounded-xl shadow-md">
-                <thead class="bg-blue-100 text-blue-800">
-                    <tr>
-                        <th class="py-3 px-4">Utilisateur</th>
-                        <th class="py-3 px-4">Période</th>
-                        <th class="py-3 px-4">Statut</th>
-                        <th class="py-3 px-4">Manager</th>
-                        <th class="py-3 px-4">RH</th>
-                        <th class="py-3 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for leave in leaves %}
-                    <tr class="hover:bg-blue-50 transition">
-                        <td class="py-2 px-4">{{ leave.user.get_full_name|default:leave.user.username }}</td>
-                        <td class="py-2 px-4">{{ leave.start_date }} au {{ leave.end_date }}</td>
-                        <td class="py-2 px-4">
-                            <span class="px-2 py-1 rounded text-xs font-bold {% if leave.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif leave.status == 'approved' %}bg-green-100 text-green-800{% elif leave.status == 'rejected' %}bg-red-100 text-red-800{% endif %}">{{ leave.get_status_display }}</span>
-                        </td>
-                        <td class="py-2 px-4">{% if leave.manager_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
-                        <td class="py-2 px-4">{% if leave.rh_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
-                        <td class="py-2 px-4">
-                            <form method="post" class="flex gap-2 items-center">
-                                {% csrf_token %}
-                                <input type="hidden" name="leave_id" value="{{ leave.id }}">
-                                {% if not leave.manager_validated and user.profile.role in 'manager admin' %}
-                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (Manager)</button>
+        <section aria-labelledby="leave-section">
+            <h2 id="leave-section" class="text-2xl font-bold mb-6 text-primary">
+                Demandes de congés à valider
+            </h2>
+            <div class="overflow-x-auto rounded-lg shadow-md">
+                <table class="min-w-full bg-white" role="table" aria-label="Demandes de congés">
+                    <thead class="bg-gradient-to-r from-primary/10 to-secondary/10">
+                        <tr>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Utilisateur</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Période</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Statut</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Manager</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">RH</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-primary">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for leave in leaves %}
+                        <tr class="hover:bg-primary/5 transition-colors duration-200">
+                            <td class="py-4 px-6 font-medium text-gray-900">
+                                {{ leave.user.get_full_name|default:leave.user.username }}
+                            </td>
+                            <td class="py-4 px-6 text-gray-700">
+                                <time datetime="{{ leave.start_date|date:'Y-m-d' }}">{{ leave.start_date|date:'d/m/Y' }}</time>
+                                au 
+                                <time datetime="{{ leave.end_date|date:'Y-m-d' }}">{{ leave.end_date|date:'d/m/Y' }}</time>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                    {% if leave.status == 'pending' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% elif leave.status == 'approved' %}bg-green-100 text-green-800 border border-green-200{% elif leave.status == 'rejected' %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                                    {{ leave.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if leave.manager_validated %}
+                                    <span class="inline-flex items-center text-success font-semibold">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Validé
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center text-yellow-600">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        En attente
+                                    </span>
                                 {% endif %}
-                                {% if leave.manager_validated and not leave.rh_validated and user.profile.role in 'rh admin' %}
-                                    <button name="action" value="rh_approve" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (RH)</button>
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if leave.rh_validated %}
+                                    <span class="inline-flex items-center text-success font-semibold">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Validé
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center text-yellow-600">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        En attente
+                                    </span>
                                 {% endif %}
-                                {% if not leave.manager_validated and leave.manager_validated == False and user.profile.role == 'manager' and user.profile.role == 'rh' %}
-                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (Manager)</button>
-                                    <button name="action" value="rh_approve" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider (RH)</button>
-                                {% endif %}
-                                {% if leave.status == 'pending' %}
-                                    <button name="action" value="reject" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Rejeter</button>
-                                {% endif %}
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="6" class="text-center py-4 text-gray-500">Aucune demande à valider.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex flex-wrap gap-3 items-center justify-center min-w-max">
+                                    <form method="post" class="flex flex-wrap gap-3 justify-center">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                                        
+                                        {% if not leave.manager_validated and can_validate_as_manager and leave.user.profile.manager == user %}
+                                            <button name="action" value="manager_approve" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-blue-600"
+                                                    aria-label="Valider en tant que manager">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                ✅ VALIDER (Manager)
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if leave.manager_validated and not leave.rh_validated and can_validate_as_rh and leave.user.profile.rh == user %}
+                                            <button name="action" value="rh_approve" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-green-600"
+                                                    aria-label="Valider en tant que RH">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                ✅ VALIDER (RH)
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if leave.status == 'pending' %}
+                                            <button name="action" value="reject" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-red-600"
+                                                    onclick="return confirm('Êtes-vous sûr de vouloir rejeter cette demande ?')"
+                                                    aria-label="Rejeter la demande">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                                ❌ REJETER
+                                            </button>
+                                        {% endif %} 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-success to-green-600 hover:from-success/90 hover:to-green-600/90 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                    aria-label="Valider en tant que RH">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                Valider (RH)
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if leave.status == 'pending' %}
+                                            <button name="action" value="reject" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                    onclick="return confirm('Êtes-vous sûr de vouloir rejeter cette demande ?')"
+                                                    aria-label="Rejeter la demande">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                                Rejeter
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Aucune demande de congé à valider.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
     {% elif type == 'telework' %}
-        <h3 class="text-xl font-bold mb-4">Demandes de télétravail à valider</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white rounded-xl shadow-md">
-                <thead class="bg-blue-100 text-blue-800">
-                    <tr>
-                        <th class="py-3 px-4">Utilisateur</th>
-                        <th class="py-3 px-4">Période</th>
-                        <th class="py-3 px-4">Statut</th>
-                        <th class="py-3 px-4">Manager</th>
-                        <th class="py-3 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tw in teleworks %}
-                    <tr class="hover:bg-blue-50 transition">
-                        <td class="py-2 px-4">{{ tw.user.get_full_name|default:tw.user.username }}</td>
-                        <td class="py-2 px-4">{{ tw.start_date }} au {{ tw.end_date }}</td>
-                        <td class="py-2 px-4">
-                            <span class="px-2 py-1 rounded text-xs font-bold {% if tw.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif tw.status == 'approved' %}bg-green-100 text-green-800{% elif tw.status == 'rejected' %}bg-red-100 text-red-800{% endif %}">{{ tw.get_status_display }}</span>
-                        </td>
-                        <td class="py-2 px-4">{% if tw.manager_validated %}<span class="text-green-600 font-bold">Validé</span>{% else %}<span class="text-yellow-600">En attente</span>{% endif %}</td>
-                        <td class="py-2 px-4">
-                            <form method="post" class="flex gap-2 items-center">
-                                {% csrf_token %}
-                                <input type="hidden" name="tw_id" value="{{ tw.id }}">
-                                {% if not tw.manager_validated and user.profile.role == 'manager' %}
-                                    <button name="action" value="manager_approve" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow btn transition">Valider</button>
+        <section aria-labelledby="telework-section">
+            <h2 id="telework-section" class="text-2xl font-bold mb-6 text-orange-600">
+                Demandes de télétravail à valider
+            </h2>
+            <div class="overflow-x-auto rounded-lg shadow-md">
+                <table class="min-w-full bg-white" role="table" aria-label="Demandes de télétravail">
+                    <thead class="bg-gradient-to-r from-orange-500/10 to-sky-400/10">
+                        <tr>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-orange-600">Utilisateur</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-orange-600">Période</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-orange-600">Statut</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-orange-600">Manager</th>
+                            <th scope="col" class="py-4 px-6 text-left font-bold text-orange-600">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for tw in teleworks %}
+                        <tr class="hover:bg-orange-50 transition-colors duration-200">
+                            <td class="py-4 px-6 font-medium text-gray-900">
+                                {{ tw.user.get_full_name|default:tw.user.username }}
+                            </td>
+                            <td class="py-4 px-6 text-gray-700">
+                                <time datetime="{{ tw.start_date|date:'Y-m-d' }}">{{ tw.start_date|date:'d/m/Y' }}</time>
+                                au 
+                                <time datetime="{{ tw.end_date|date:'Y-m-d' }}">{{ tw.end_date|date:'d/m/Y' }}</time>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                    {% if tw.status == 'pending' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% elif tw.status == 'approved' %}bg-green-100 text-green-800 border border-green-200{% elif tw.status == 'rejected' %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                                    {{ tw.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if tw.manager_validated %}
+                                    <span class="inline-flex items-center text-success font-semibold">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Validé
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center text-yellow-600">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        En attente
+                                    </span>
                                 {% endif %}
-                                {% if tw.status == 'pending' %}
-                                    <button name="action" value="reject" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow btn transition">Rejeter</button>
-                                {% endif %}
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center py-4 text-gray-500">Aucune demande à valider.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center min-w-max">
+                                    <form method="post" class="flex flex-col sm:flex-row gap-2 w-full">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="tw_id" value="{{ tw.id }}">
+                                        {% if not tw.manager_validated and can_validate_as_manager and tw.user.profile.manager == user %}
+                                            <button name="action" value="manager_approve" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-sky-400 hover:from-orange-600 hover:to-sky-500 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                    aria-label="Valider la demande de télétravail">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                Valider
+                                            </button>
+                                        {% endif %}
+                                        {% if tw.status == 'pending' %}
+                                            <button name="action" value="reject" 
+                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                    onclick="return confirm('Êtes-vous sûr de vouloir rejeter cette demande ?')"
+                                                    aria-label="Rejeter la demande">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                                Rejeter
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    Aucune demande de télétravail à valider.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
     {% endif %}
-</div>
+</main>
+
+<style>
+/* Animations d'apparition */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+/* Focus visible amélioré */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Amélioration de l'accessibilité pour les tableaux */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Animations pour les boutons */
+button:hover {
+    transform: translateY(-1px);
+}
+
+/* Responsiveness améliorée pour les actions */
+@media (max-width: 768px) {
+    .actions-column {
+        min-width: 200px;
+    }
+    
+    .actions-column form {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .actions-column button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    /* Navigation par type responsive */
+    nav[role="tablist"] ul {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+    
+    nav[role="tablist"] li {
+        width: 100%;
+    }
+    
+    nav[role="tablist"] a {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Gestion du débordement des tableaux */
+.table-container {
+    overflow-x: auto;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+    .table-container {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+/* Badges notification améliorés */
+.notification-badge {
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Animation pulsation pour les badges */
+@keyframes animate-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: animate-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Amélioration des boutons de navigation par type */
+nav[role="tablist"] a {
+    position: relative;
+    overflow: hidden;
+}
+
+nav[role="tablist"] a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+nav[role="tablist"] a:hover::before {
+    left: 100%;
+}
+
+/* Styles spécifiques pour les formulaires dans les tableaux */
+form {
+    margin: 0;
+}
+
+form button {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Amélioration des transitions */
+* {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+</style>
 {% endblock %}
+

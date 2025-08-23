@@ -4,126 +4,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Extranet ICTGROUP - Plateforme collaborative pour la gestion des congés, télétravail et ressources internes">
+    <meta name="author" content="ICTGROUP">
     <title>{% block title %}Extranet ICTGROUP{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="{% static 'img/logo_ictgroup.png' %}" as="image">
+    
+    <!-- Critical CSS inline -->
     <style>
-        body {
+        /* Critical CSS - Above the fold */
+        html { scroll-behavior: smooth; }
+        body { 
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            padding: 0;
+            color: #1f2937;
         }
+        
+        /* Header critical styles */
         header {
-            background-color: #004080; /* primary */
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(30, 64, 175, 0.2);
         }
-        header a {
-            color: #ffffff; /* white */
+        .logo-ictgroup {
+            height: 2.5rem !important;
+            width: auto;
+            filter: brightness(1.1) drop-shadow(0 2px 8px #0ea5e9) !important;
+            border-radius: 0.5rem;
+            transition: transform 0.2s !important;
         }
-        header a:hover {
-            color: #0090FF; /* secondary */
+        .logo-ictgroup:hover {
+            transform: scale(1.05) rotate(-2deg) !important;
+        }
+        
+        /* Navigation critical styles */
+        header nav a {
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        header nav a:hover {
+            color: #fbbf24 !important;
+            transform: translateY(-1px);
+        }
+        
+        header h1 a {
+            color: #ffffff !important;
+        }
+        header h1 a:hover {
+            color: #fbbf24 !important;
+        }
+        
+        /* Fix button logout visibility */
+        header form button {
+            color: #374151 !important;
+            background-color: #ffffff;
+        }
+        header form button:hover {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* Footer critical styles */
+        footer {
+            background: linear-gradient(135deg, #004080 0%, #0090FF 100%) !important;
+        }
+        
+        /* Layout critical */
+        main {
+            min-height: calc(100vh - 200px);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        /* Header mobile optimization */
+        @media (max-width: 768px) {
+            main {
+                min-height: calc(100vh - 150px); /* Moins d'espace réservé pour le header */
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                padding: 1rem !important; /* Padding réduit sur mobile */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            main {
+                min-height: calc(100vh - 120px);
+                padding: 0.75rem !important;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    
+    <!-- Fonts loaded asynchronously -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS loaded synchronously -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004080',
+                        secondary: '#0090FF',
+                        success: '#10B981',
+                        dark: '#1F2937'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-in-out',
+                        'slide-up': 'slideUp 0.8s ease-out'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS loaded immediately after Tailwind -->
+        <!-- Custom CSS loaded immediately after Tailwind -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- Non-critical CSS loaded asynchronously -->
+    <style id="non-critical-styles">
+        /* Dropdown and menu enhancements */
+        .dropdown-menu {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        footer {
+            background: linear-gradient(135deg, #004080 0%, #0090FF 100%);
+        }
+        
+        /* Enhanced sub-menus */
+        nav[aria-label="Menu principal"] .relative.group {
+            position: relative;
         }
         nav[aria-label="Menu principal"] .relative.group ul {
-            background-color: #004080; /* primary */
-            color: #ffffff; /* white */
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 220px;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+        nav[aria-label="Menu principal"] .relative.group:hover ul,
+        nav[aria-label="Menu principal"] .relative.group:focus-within ul {
+            display: block;
+        }
+        nav[aria-label="Menu principal"] .relative.group ul li {
+            width: 100%;
         }
         nav[aria-label="Menu principal"] .relative.group ul a {
-            color: #ffffff; /* white */
+            display: block;
+            padding: 0.875rem 1.25rem;
+            color: #374151 !important;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+            text-decoration: none;
+        }
+        nav[aria-label="Menu principal"] .relative.group ul a:last-child {
+            border-bottom: none;
         }
         nav[aria-label="Menu principal"] .relative.group ul a:hover {
-            background-color: #0090FF; /* secondary */
-            color: #ffffff; /* white */
+            background: linear-gradient(135deg, #004080 0%, #0090FF 100%) !important;
+            color: white !important;
+            transform: translateX(5px);
         }
-        footer {
-            background-color: #004080; /* primary */
-            color: #ffffff; /* white */
+        nav[aria-label="Menu principal"] .relative.group ul:hover {
+            display: block;
         }
-        .rounded-md {
-            border-radius: 0.375rem;
-        }
-        .shadow-md {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .text-lg {
-            font-size: 1.125rem;
-        }
-        .text-blue-200 {
-            color: #BFDBFE;
-        }
-        .text-blue-900 {
-            color: #004080;
-        }
-        .bg-blue-600 {
-            background-color: #004080;
-        }
-        .bg-blue-700 {
-            background-color: #004080;
-        }
-        .bg-blue-800 {
-            background-color: #004080;
-        }
-        .bg-blue-100 {
-            background-color: #DBEAFE;
-        }
-        .hover\:bg-blue-100:hover {
-            background-color: #DBEAFE;
-        }
-        .hover\:bg-blue-200:hover {
-            background-color: #BFDBFE;
-        }
+        
+        /* Navigation mobile */
         @media (max-width: 768px) {
-            nav[aria-label="Menu principal"] ul {
+            header {
+                padding: 1rem !important; /* Réduit le padding sur mobile */
+            }
+            
+            header .container {
+                flex-direction: row; /* Garde le logo et menu toggle sur la même ligne */
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                align-items: center;
+            }
+            
+            /* Logo et titre plus compacts */
+            .logo-ictgroup {
+                height: 2rem !important; /* Logo plus petit sur mobile */
+            }
+            
+            header h1 {
+                font-size: 1.25rem !important; /* Titre plus petit */
+                line-height: 1.5;
+            }
+            
+            /* Navigation mobile */
+            #main-nav {
+                width: 100%;
+                order: 3; /* Place la nav en bas */
+            }
+            
+            #main-nav.mobile-hidden {
+                display: none !important;
+            }
+            
+            #main-nav.mobile-visible {
+                display: block !important;
+            }
+            
+            #main-nav.mobile-visible ul {
+                display: flex !important;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 0.5rem;
+                gap: 0.25rem;
+                width: 100%;
+                padding: 0.5rem 0;
+                margin-top: 0.5rem;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 0.5rem;
             }
+            
+            /* Override default hidden class on mobile */
+            #main-nav ul {
+                display: flex !important;
+            }
+            
             nav[aria-label="Menu principal"] li {
                 width: 100%;
             }
-            nav[aria-label="Menu principal"] .relative.group > a {
+            
+            nav[aria-label="Menu principal"] a {
+                font-size: 0.875rem !important; /* Texte plus petit */
+                padding: 0.5rem 0.75rem; /* Padding réduit */
+                display: block;
                 width: 100%;
-                justify-content: space-between;
             }
+            
+            nav[aria-label="Menu principal"] .relative.group > a {
+                justify-content: space-between;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 0.375rem;
+            }
+            
             nav[aria-label="Menu principal"] ul ul {
                 position: static;
                 box-shadow: none;
                 width: 100%;
                 margin-top: 0.25rem;
+                border-radius: 0.375rem;
+                background: rgba(255, 255, 255, 0.05);
+            }
+            
+            /* Badges plus petits sur mobile */
+            .animate-pulse {
+                font-size: 0.625rem !important;
+                padding: 0.125rem 0.375rem !important;
+                min-width: 1rem;
+                height: 1rem;
+            }
+            
+            /* Conteneur logo + titre */
+            header .flex.items-center.space-x-4 {
+                space-x: 0.5rem;
+                flex: 1; /* Prend l'espace disponible */
+            }
+            
+            /* Menu toggle button */
+            #mobile-menu-toggle {
+                order: 2;
+                flex-shrink: 0;
             }
         }
-        /* Sous-menus accessibles au clic/touch */
-        nav[aria-label="Menu principal"] .relative.group:focus-within ul,
-        nav[aria-label="Menu principal"] .relative.group:hover ul {
-            display: block !important;
+        
+        /* Pour les très petits écrans */
+        @media (max-width: 480px) {
+            header {
+                padding: 0.75rem !important;
+            }
+            
+            header .container {
+                gap: 0.5rem;
+            }
+            
+            .logo-ictgroup {
+                height: 1.75rem !important;
+            }
+            
+            header h1 {
+                font-size: 1.125rem !important;
+            }
+            
+            nav[aria-label="Menu principal"] a {
+                font-size: 0.8rem !important;
+                padding: 0.375rem 0.5rem;
+            }
         }
-        nav[aria-label="Menu principal"] .relative.group ul {
-            display: none;
+        
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
-    <header class="bg-blue-800 text-white p-6 shadow-md sticky top-0 z-50">
-        <div class="container mx-auto flex flex-wrap justify-between items-center gap-2">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-inter" role="document">
+    <!-- Header with semantic structure -->
+    <header class="text-white p-6 shadow-2xl sticky top-0 z-50" role="banner">
+        <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center space-x-4">
-                <img src="{% static 'img/logo_ictgroup.png' %}" alt="Logo ICT Group" class="logo-ictgroup" />
-                <h1 class="text-3xl font-bold rounded-md">
-                    <a href="/" class="hover:text-blue-200">ICTGROUP</a>
+                <img src="{% static 'img/logo_ictgroup.png' %}" 
+                     alt="Logo ICT Group" 
+                     class="logo-ictgroup"
+                     width="40" 
+                     height="40" />
+                <h1 class="text-2xl font-bold">
+                    <a href="/" 
+                       class="hover:text-secondary transition-colors duration-300"
+                       aria-label="Retour à l'accueil">ICTGROUP</a>
                 </h1>
             </div>
-            <nav aria-label="Menu principal">
-                <ul class="flex flex-wrap space-x-4 md:space-x-6 items-center">
-                    <li><a href="/" class="hover:text-blue-200 text-lg font-medium rounded-md">Retour à l'accueil</a></li>
+            
+            <!-- Bouton menu mobile -->
+            <button id="mobile-menu-toggle" class="md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors" aria-label="Toggle menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            
+            <nav aria-label="Menu principal" id="main-nav" class="w-full md:w-auto mobile-hidden">
+                <ul class="flex flex-wrap space-x-4 md:space-x-6 items-center text-sm md:text-base"
+                    <li><a href="{% url 'extranet:home' %}" class="hover:text-secondary font-medium rounded-md transition-all duration-300">Dashboard</a></li>
                     {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.profile and user.profile.role == 'admin' %}
                     <li class="relative group">
-                        <a href="#" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center">Admin
+                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Admin
                             <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </a>
-                        <ul class="absolute left-0 mt-2 w-56 bg-white text-blue-900 rounded-lg shadow-lg z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:user_admin' %}" class="block px-4 py-2 hover:bg-blue-100">Utilisateurs</a></li>
-                            <li><a href="{% url 'extranet:admin_leaves' %}" class="block px-4 py-2 hover:bg-blue-100">Congés (admin)</a></li>
-                            <li><a href="{% url 'extranet:admin_teleworks' %}" class="block px-4 py-2 hover:bg-blue-100">Télétravail (admin)</a></li>
-                            <li><a href="{% url 'extranet:admin_monthly_report' %}" class="block px-4 py-2 hover:bg-blue-100">Récapitulatif mensuel</a></li>
+                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
+                            <li><a href="{% url 'extranet:user_admin' %}" class="block px-4 py-3">Utilisateurs</a></li>
+                            <li><a href="{% url 'extranet:admin_leaves' %}" class="block px-4 py-3">Congés (admin)</a></li>
+                            <li><a href="{% url 'extranet:admin_teleworks' %}" class="block px-4 py-3">Télétravail (admin)</a></li>
+                            <li><a href="{% url 'extranet:admin_monthly_report' %}" class="block px-4 py-3">Récapitulatif mensuel</a></li>
                         </ul>
                     </li>
                     {% endif %}
-                    <li><a href="{% url 'extranet:validation' %}" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center gap-1">
+                    <li><a href="{% url 'extranet:validation' %}" class="hover:text-secondary font-medium rounded-md flex items-center gap-1 transition-all duration-300">
                         Validation
                         {% if user.is_authenticated and user.profile.role in 'manager rh admin' %}
                             <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
@@ -132,70 +385,101 @@
                         {% endif %}
                     </a></li>
                     <li class="relative group">
-                        <a href="#" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center">Congés
+                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Congés
+                            {% if user.is_authenticated and user.profile.role in 'manager rh admin' and leave_validation_count %}
+                                <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
+                                    {{ leave_validation_count }}
+                                </span>
+                            {% endif %}
                             <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </a>
-                        <ul class="absolute left-0 mt-2 w-56 bg-white text-blue-900 rounded-lg shadow-lg z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:new_leave_request' %}" class="block px-4 py-2 hover:bg-blue-100">Nouvelle demande</a></li>
-                            <li><a href="{% url 'extranet:leave_list' %}" class="block px-4 py-2 hover:bg-blue-100">Mes demandes</a></li>
+                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
+                            <li><a href="{% url 'extranet:new_leave_request' %}" class="block px-4 py-3">Nouvelle demande</a></li>
+                            <li><a href="{% url 'extranet:leave_list' %}" class="block px-4 py-3">Mes demandes</a></li>
                         </ul>
                     </li>
                     <li class="relative group">
-                        <a href="#" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center">Télétravail
+                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Télétravail
+                            {% if user.is_authenticated and user.profile.role in 'manager rh admin' and telework_validation_count %}
+                                <span class="inline-flex items-center justify-center bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
+                                    {{ telework_validation_count }}
+                                </span>
+                            {% endif %}
                             <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </a>
-                        <ul class="absolute left-0 mt-2 w-56 bg-white text-blue-900 rounded-lg shadow-lg z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:new_telework_request' %}" class="block px-4 py-2 hover:bg-blue-100">Nouvelle demande</a></li>
-                            <li><a href="{% url 'extranet:telework_list' %}" class="block px-4 py-2 hover:bg-blue-100">Mes demandes</a></li>
+                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
+                            <li><a href="{% url 'extranet:new_telework_request' %}" class="block px-4 py-3">Nouvelle demande</a></li>
+                            <li><a href="{% url 'extranet:telework_list' %}" class="block px-4 py-3">Mes demandes</a></li>
                         </ul>
                     </li>
+                    {% if user.is_authenticated and user.profile.site|lower == 'france' %}
                     <li class="relative group">
-                        <a href="#" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center">Magasin
+                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Magasin
                             <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </a>
-                        <ul class="absolute left-0 mt-2 w-56 bg-white text-blue-900 rounded-lg shadow-lg z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:stock' %}" class="block px-4 py-2 hover:bg-blue-100">Stock</a></li>
-                            <li><a href="{% url 'extranet:entry_exit' %}" class="block px-4 py-2 hover:bg-blue-100">Entrée - Sortie</a></li>
-                            <li><a href="{% url 'extranet:movements' %}" class="block px-4 py-2 hover:bg-blue-100">Mouvements</a></li>
+                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
+                            <li><a href="{% url 'extranet:stock' %}" class="block px-4 py-3">Stock</a></li>
+                            <li><a href="{% url 'extranet:entry_exit' %}" class="block px-4 py-3">Entrée - Sortie</a></li>
+                            <li><a href="{% url 'extranet:movements' %}" class="block px-4 py-3">Mouvements</a></li>
                         </ul>
                     </li>
-                    <li><a href="{% url 'extranet:presence_calendar' %}" class="hover:text-blue-200 text-lg font-medium rounded-md">Calendrier</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'extranet:presence_calendar' %}" class="hover:text-secondary font-medium rounded-md transition-all duration-300">Calendrier</a></li>
                     {% if user.is_authenticated %}
-                        <li><span class="text-lg font-medium">Bienvenue!</span></li>
+                        <li><span class="font-medium">Bienvenue</span></li>
                         <li class="relative group">
-                            <a href="#" class="hover:text-blue-200 text-lg font-medium rounded-md flex items-center">{{ user.username }}
+                            <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">{{ user.username }}
                                 <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                             </a>
-                            <ul class="absolute left-0 mt-2 w-56 bg-white text-blue-900 rounded-lg shadow-lg z-50 hidden group-hover:block">
-                                <li><a href="{% url 'extranet:account_settings' %}" class="block px-4 py-2 hover:bg-blue-100">Mon profil</a></li>
+                            <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
+                                <li><a href="{% url 'extranet:account_settings' %}" class="block px-4 py-3">Mon profil</a></li>
                                 <li>
                                     <form method="post" action="{% url 'extranet:logout' %}" style="display:inline;">
                                         {% csrf_token %}
-                                        <button type="submit" class="w-full text-left px-4 py-2 hover:bg-blue-100">Déconnexion</button>
+                                        <button type="submit" class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-800 transition-all duration-300 rounded-md font-medium border-0 bg-transparent">
+                                            <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                            </svg>
+                                            Déconnexion
+                                        </button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     {% else %}
-                        <li><a href="{% url 'extranet:login' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300 ease-in-out shadow-lg">Connexion Extranet</a></li>
+                        <li><a href="{% url 'extranet:login' %}" class="bg-secondary hover:bg-blue-500 text-white px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl font-medium">Connexion Extranet</a></li>
                     {% endif %}
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="container mx-auto my-8 p-6 bg-white rounded-lg shadow-xl flex-grow">
-        <div class="bg-fiber mb-8"></div>
+    <main class="container mx-auto my-8 p-6 rounded-2xl shadow-2xl flex-grow animate-slide-up">
         {% if messages %}
-            <div class="mb-4">
+            <div class="mb-6">
                 {% for message in messages %}
-                    <div class="p-4 rounded-md shadow-md mb-2 text-white font-semibold
-                        {% if 'success' in message.tags %} bg-green-500
-                        {% elif 'error' in message.tags %} bg-red-500
-                        {% elif 'info' in message.tags %} bg-sky-500
-                        {% else %} bg-blue-600
+                    <div class="p-4 rounded-xl shadow-lg mb-3 text-white font-semibold animate-fade-in
+                        {% if 'success' in message.tags %} bg-gradient-to-r from-green-500 to-green-600
+                        {% elif 'error' in message.tags %} bg-gradient-to-r from-red-500 to-red-600
+                        {% elif 'info' in message.tags %} bg-gradient-to-r from-blue-500 to-blue-600
+                        {% else %} bg-gradient-to-r from-primary to-secondary
                         {% endif %}">
-                        {{ message }}
+                        <div class="flex items-center">
+                            {% if 'success' in message.tags %}
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            {% elif 'error' in message.tags %}
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.966-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            {% else %}
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            {% endif %}
+                            {{ message }}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -203,41 +487,186 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-blue-800 text-white py-4 mt-8 shadow-inner rounded-t-lg">
-        <div class="container mx-auto text-center text-sm">
-            &copy; {{ now|date:'Y' }} ICTGROUP. Tous droits réservés.
+    <footer class="text-white py-6 mt-8 shadow-inner rounded-t-2xl">
+        <div class="container mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-2">
+                <img src="{% static 'img/logo_ictgroup.png' %}" alt="ICTGROUP" class="h-6 filter brightness-110">
+                <span class="text-lg font-semibold">ICTGROUP</span>
+            </div>
+            <p class="text-sm opacity-90">&copy; {{ now|date:'Y' }} ICTGROUP. Tous droits réservés. | Conçu avec passion pour l'excellence.</p>
         </div>
     </footer>
     {% block extra_js %}{% endblock %}
     <script src="{% static 'js/user_admin.js' %}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gestion du clic pour ouvrir/fermer les sous-menus sur mobile
-        document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group > a').forEach(function(trigger) {
-            trigger.addEventListener('click', function(e) {
-                const parent = trigger.parentElement;
-                if (window.innerWidth <= 1024) {
-                    e.preventDefault();
-                    parent.classList.toggle('open');
-                    document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group').forEach(function(other) {
-                        if (other !== parent) other.classList.remove('open');
-                    });
-                    const submenu = parent.querySelector('ul');
-                    if (submenu) submenu.style.display = parent.classList.contains('open') ? 'block' : 'none';
+        // Gestion du menu mobile
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mainNav = document.getElementById('main-nav');
+        
+        console.log('Mobile menu toggle:', mobileMenuToggle);
+        console.log('Main nav:', mainNav);
+        
+        if (mobileMenuToggle && mainNav) {
+            // Initialiser le menu comme caché sur mobile
+            function initMobileMenu() {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.add('mobile-hidden');
+                    mainNav.classList.remove('mobile-visible');
+                } else {
+                    mainNav.classList.remove('mobile-hidden', 'mobile-visible');
+                }
+            }
+            
+            // Initialiser au chargement
+            initMobileMenu();
+            
+            mobileMenuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Menu toggle clicked');
+                
+                if (mainNav.classList.contains('mobile-hidden')) {
+                    mainNav.classList.remove('mobile-hidden');
+                    mainNav.classList.add('mobile-visible');
+                    console.log('Menu ouvert');
+                } else {
+                    mainNav.classList.add('mobile-hidden');
+                    mainNav.classList.remove('mobile-visible');
+                    console.log('Menu fermé');
                 }
             });
+            
+            // Gérer le redimensionnement de la fenêtre
+            window.addEventListener('resize', function() {
+                initMobileMenu();
+            });
+        } else {
+            console.error('Éléments du menu mobile non trouvés');
+        }
+        
+        // Amélioration de la gestion des sous-menus
+        const dropdowns = document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group');
+        
+        dropdowns.forEach(function(dropdown) {
+            const trigger = dropdown.querySelector('a');
+            const menu = dropdown.querySelector('ul');
+            
+            if (!menu) return;
+            
+            let timeoutId;
+            
+            // Afficher le menu au survol
+            dropdown.addEventListener('mouseenter', function() {
+                clearTimeout(timeoutId);
+                menu.style.display = 'block';
+            });
+            
+            // Masquer le menu avec délai au survol sortant
+            dropdown.addEventListener('mouseleave', function() {
+                timeoutId = setTimeout(function() {
+                    menu.style.display = 'none';
+                }, 300); // 300ms de délai
+            });
+            
+            // Maintenir le menu ouvert quand on survole le menu lui-même
+            menu.addEventListener('mouseenter', function() {
+                clearTimeout(timeoutId);
+            });
+            
+            menu.addEventListener('mouseleave', function() {
+                timeoutId = setTimeout(function() {
+                    menu.style.display = 'none';
+                }, 300);
+            });
+            
+            // Gestion mobile/tablette
+            if (window.innerWidth <= 1024) {
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isOpen = menu.style.display === 'block';
+                    
+                    // Fermer tous les autres menus
+                    dropdowns.forEach(function(other) {
+                        if (other !== dropdown) {
+                            const otherMenu = other.querySelector('ul');
+                            if (otherMenu) otherMenu.style.display = 'none';
+                        }
+                    });
+                    
+                    // Basculer ce menu
+                    menu.style.display = isOpen ? 'none' : 'block';
+                });
+            }
         });
-        // Fermer les sous-menus au clic ailleurs
-        document.addEventListener('click', function(e) {
-            document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group').forEach(function(parent) {
-                if (!parent.contains(e.target)) {
-                    parent.classList.remove('open');
-                    const submenu = parent.querySelector('ul');
-                    if (submenu) submenu.style.display = '';
+        
+        // Fermer le menu mobile quand on clique sur un lien
+        const mobileNavLinks = document.querySelectorAll('#main-nav a');
+        mobileNavLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.add('mobile-hidden');
+                    mainNav.classList.remove('mobile-visible');
                 }
             });
         });
     });
     </script>
+    
+    <!-- Performance optimizations script -->
+    <script>
+        // Optimize performance and interactivity
+        (function() {
+            'use strict';
+            
+            // Lazy load non-critical CSS
+            function loadNonCriticalCSS() {
+                const style = document.getElementById('non-critical-styles');
+                if (style) {
+                    style.media = 'all';
+                }
+            }
+            
+            // Load after page interaction or 3 seconds
+            const events = ['keydown', 'mousemove', 'touchstart'];
+            events.forEach(event => {
+                document.addEventListener(event, function loadCSS() {
+                    loadNonCriticalCSS();
+                    events.forEach(e => document.removeEventListener(e, loadCSS));
+                }, { passive: true });
+            });
+            
+            setTimeout(loadNonCriticalCSS, 3000);
+            
+            // Enhanced accessibility
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+            
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('nav[aria-label="Menu principal"]')) {
+                    const dropdowns = document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group ul');
+                    dropdowns.forEach(function(dropdown) {
+                        dropdown.style.display = 'none';
+                    });
+                }
+            });
+            
+        })();
+    </script>
+    
+    <!-- Add keyboard navigation styles -->
+    <style>
+        .keyboard-navigation *:focus {
+            outline: 2px solid #0090FF !important;
+            outline-offset: 2px !important;
+        }
+    </style>
 </body>
 </html>

@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+# Pre-commit hook: run prepare_commit.sh and quick tests
+# Compute repository root reliably. If git is available, use it; otherwise fallback to parent of .githooks
+if git_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+  REPO_ROOT="$git_root"
+else
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+fi
+
+echo "[pre-commit] Running prepare_commit.sh (repo root: $REPO_ROOT)"
+bash "$REPO_ROOT/scripts/prepare_commit.sh"
+
+echo "[pre-commit] Running quick unit tests (fast subset)"
+# Run a fast test subset if pytest is available, otherwise skip
+if command -v pytest >/dev/null 2>&1; then
+  pytest -q -k "not slow" || { echo 'Tests failed'; exit 1; }
+else
+  echo "pytest not installed; skipping tests"
+fi
+
+echo "[pre-commit] All checks passed"

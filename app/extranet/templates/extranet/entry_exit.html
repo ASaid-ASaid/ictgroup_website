@@ -1,28 +1,454 @@
 {% extends 'extranet/base.html' %}
-{% block title %}Entrée - Sortie{% endblock %}
+{% block title %}Gestion des Mouvements de Stock - ICTGROUP{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">Entrée - Sortie</h1>
-<form method="post">
-    {% csrf_token %}
-    <label for="stock_item">Article :</label>
-    <select id="stock_item" name="stock_item" class="block w-full mb-4">
-        {% for item in stock_items %}
-        <option value="{{ item.id }}">{{ item.designation }}</option>
-        {% endfor %}
-    </select>
+<main role="main" class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-extrabold text-primary mb-4 text-center tracking-tight flex items-center justify-center gap-3">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        Gestion des Mouvements de Stock
+    </h1>
+    <p class="text-gray-600 text-center">
+        Enregistrement des entrées et sorties de matériel
+    </p>
 
-    <label for="movement_type">Type de mouvement :</label>
-    <select id="movement_type" name="movement_type" class="block w-full mb-4">
-        <option value="entry">Entrée</option>
-        <option value="exit">Sortie</option>
-    </select>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Enregistrement de mouvement -->
+        <section class="bg-white rounded-xl shadow-lg p-6" aria-labelledby="movement-form">
+            <h2 id="movement-form" class="text-xl font-bold text-primary mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                Enregistrer un mouvement
+            </h2>
+            
+            <form method="post" 
+                  class="space-y-6"
+                  role="form"
+                  aria-label="Formulaire d'enregistrement de mouvement de stock"
+                  novalidate>
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="stock_item" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        Article concerné
+                        <span class="text-red-500" aria-label="Champ obligatoire">*</span>
+                    </label>
+                    <select id="stock_item" 
+                            name="stock_item" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                            required
+                            aria-describedby="stock-item-help">
+                        <option value="">Sélectionner un article</option>
+                        {% for item in stock_items %}
+                        <option value="{{ item.id }}" data-quantity="{{ item.quantity }}">
+                            {{ item.designation }} ({{ item.code }}) - Stock: {{ item.quantity }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p id="stock-item-help" class="mt-1 text-sm text-gray-500">
+                        Choisissez l'article pour lequel enregistrer un mouvement
+                    </p>
+                </div>
 
-    <label for="quantity">Quantité :</label>
-    <input type="number" id="quantity" name="quantity" class="block w-full mb-4" required>
+                <div class="form-group">
+                    <label for="movement_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Type de mouvement
+                        <span class="text-red-500" aria-label="Champ obligatoire">*</span>
+                    </label>
+                    <select id="movement_type" 
+                            name="movement_type" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                            required
+                            aria-describedby="movement-type-help">
+                        <option value="">Sélectionner le type</option>
+                        <option value="entry" class="text-green-600">📥 Entrée en stock</option>
+                        <option value="exit" class="text-red-600">📤 Sortie de stock</option>
+                    </select>
+                    <p id="movement-type-help" class="mt-1 text-sm text-gray-500">
+                        Entrée = ajout au stock, Sortie = retrait du stock
+                    </p>
+                </div>
 
-    <label for="remarks">Remarques :</label>
-    <textarea id="remarks" name="remarks" class="block w-full mb-4"></textarea>
+                <div class="form-group">
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                        </svg>
+                        Quantité
+                        <span class="text-red-500" aria-label="Champ obligatoire">*</span>
+                    </label>
+                    <input type="number" 
+                           id="quantity" 
+                           name="quantity" 
+                           min="1"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                           placeholder="Entrez la quantité"
+                           required
+                           aria-describedby="quantity-help">
+                    <p id="quantity-help" class="mt-1 text-sm text-gray-500">
+                        Nombre d'unités concernées par le mouvement
+                    </p>
+                    <div id="stock-warning" class="hidden mt-2 p-2 bg-orange-100 border border-orange-400 rounded text-orange-700 text-sm">
+                        ⚠️ Attention : La quantité demandée dépasse le stock disponible
+                    </div>
+                </div>
 
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Enregistrer</button>
-</form>
+                <div class="form-group">
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Date du mouvement
+                        <span class="text-red-500" aria-label="Champ obligatoire">*</span>
+                    </label>
+                    <input type="date" 
+                           id="date" 
+                           name="date" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                           required
+                           aria-describedby="date-help">
+                    <p id="date-help" class="mt-1 text-sm text-gray-500">
+                        Date effective du mouvement de stock
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Remarques / Justification
+                    </label>
+                    <textarea id="remarks" 
+                              name="remarks" 
+                              rows="4" 
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-vertical"
+                              placeholder="Détails supplémentaires, raison du mouvement, destination..."
+                              aria-describedby="remarks-help"></textarea>
+                    <p id="remarks-help" class="mt-1 text-sm text-gray-500">
+                        Informations complémentaires sur ce mouvement (optionnel)
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                    <button type="button" 
+                            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                            onclick="document.querySelector('form').reset(); updateStockInfo();"
+                            aria-label="Réinitialiser le formulaire">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Réinitialiser
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            aria-label="Enregistrer le mouvement de stock">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Enregistrer le mouvement
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Ajout d'un nouvel article -->
+        <section class="bg-white rounded-xl shadow-lg p-6" aria-labelledby="new-item-form">
+            <h2 id="new-item-form" class="text-xl font-bold text-secondary mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Ajouter un nouvel article
+            </h2>
+            
+            <form method="post" 
+                  class="space-y-6"
+                  role="form"
+                  aria-label="Formulaire d'ajout d'article"
+                  novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="add_new_item" value="1">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
+                            Code article <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="code" 
+                               name="code" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200"
+                               placeholder="Ex: IT-001"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Type <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="type" 
+                               name="type" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200"
+                               placeholder="Ex: Informatique"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="designation" class="block text-sm font-medium text-gray-700 mb-2">
+                        Désignation <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="designation" 
+                           name="designation" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200"
+                           placeholder="Ex: Ordinateur portable Dell Latitude"
+                           required>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="fournisseur" class="block text-sm font-medium text-gray-700 mb-2">
+                            Fournisseur <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="fournisseur" 
+                               name="fournisseur" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200"
+                               placeholder="Ex: Dell Technologies"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity_new" class="block text-sm font-medium text-gray-700 mb-2">
+                            Quantité initiale <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" 
+                               id="quantity_new" 
+                               name="quantity" 
+                               min="0"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200"
+                               placeholder="0"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="remarks_new" class="block text-sm font-medium text-gray-700 mb-2">
+                        Remarques
+                    </label>
+                    <textarea id="remarks_new" 
+                              name="remarks" 
+                              rows="3" 
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all duration-200 resize-vertical"
+                              placeholder="Informations complémentaires sur l'article..."></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-secondary to-green-600 hover:from-secondary/90 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2">
+                    <span class="flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ajouter l'article au stock
+                    </span>
+                </button>
+            </form>
+        </section>
+    </div>
+
+    <!-- Messages de statut -->
+    {% if messages %}
+        <section class="fixed bottom-6 right-6 z-50 space-y-2" aria-label="Messages de statut">
+            {% for message in messages %}
+                <div class="max-w-sm p-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300 transform hover:scale-105
+                    {% if 'success' in message.tags %}bg-green-500{% elif 'error' in message.tags %}bg-red-500{% elif 'warning' in message.tags %}bg-yellow-500{% else %}bg-blue-500{% endif %}"
+                     role="alert"
+                     aria-live="polite">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            {% if 'success' in message.tags %}
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            {% elif 'error' in message.tags %}
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            {% else %}
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            {% endif %}
+                        </svg>
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+</main>
+
+<style>
+/* Animations d'apparition */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+/* Focus visible amélioré */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Styles pour les champs de formulaire */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    transition: all 0.2s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Auto-hide pour les messages toast */
+@keyframes toast-fade-out {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(100%); }
+}
+
+[role="alert"] {
+    animation: toast-fade-out 5s forwards 3s;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation de la date du jour
+    const dateInput = document.getElementById('date');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+    
+    // Gestion des informations de stock
+    const stockItemSelect = document.getElementById('stock_item');
+    const movementTypeSelect = document.getElementById('movement_type');
+    const quantityInput = document.getElementById('quantity');
+    const stockWarning = document.getElementById('stock-warning');
+    
+    function updateStockInfo() {
+        const selectedOption = stockItemSelect.options[stockItemSelect.selectedIndex];
+        const availableStock = selectedOption ? parseInt(selectedOption.dataset.quantity) || 0 : 0;
+        const quantity = parseInt(quantityInput.value) || 0;
+        const movementType = movementTypeSelect.value;
+        
+        // Afficher/masquer l'avertissement de stock
+        if (movementType === 'exit' && quantity > availableStock && availableStock > 0) {
+            stockWarning.classList.remove('hidden');
+            quantityInput.classList.add('border-orange-500');
+        } else {
+            stockWarning.classList.add('hidden');
+            quantityInput.classList.remove('border-orange-500');
+        }
+        
+        // Mettre à jour le placeholder selon le type de mouvement
+        if (movementType === 'exit') {
+            quantityInput.setAttribute('max', availableStock);
+            quantityInput.placeholder = `Max disponible: ${availableStock}`;
+        } else {
+            quantityInput.removeAttribute('max');
+            quantityInput.placeholder = 'Entrez la quantité';
+        }
+    }
+    
+    // Écouteurs d'événements
+    stockItemSelect.addEventListener('change', updateStockInfo);
+    movementTypeSelect.addEventListener('change', updateStockInfo);
+    quantityInput.addEventListener('input', updateStockInfo);
+    
+    // Validation du formulaire
+    document.querySelector('form[role="form"]').addEventListener('submit', function(e) {
+        const selectedOption = stockItemSelect.options[stockItemSelect.selectedIndex];
+        const availableStock = selectedOption ? parseInt(selectedOption.dataset.quantity) || 0 : 0;
+        const quantity = parseInt(quantityInput.value) || 0;
+        const movementType = movementTypeSelect.value;
+        
+        if (movementType === 'exit' && quantity > availableStock) {
+            e.preventDefault();
+            alert('⚠️ Attention !\n\nLa quantité demandée (' + quantity + ') dépasse le stock disponible (' + availableStock + ').\n\nVeuillez ajuster la quantité ou vérifier le stock.');
+            quantityInput.focus();
+            return false;
+        }
+    });
+    
+    // Auto-hide des messages toast
+    const toastMessages = document.querySelectorAll('[role="alert"]');
+    toastMessages.forEach(toast => {
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    });
+    
+    // Validation en temps réel pour le formulaire d'ajout d'article
+    const codeInput = document.getElementById('code');
+    const designationInput = document.getElementById('designation');
+    
+    function validateCode() {
+        const code = codeInput.value.trim();
+        if (code && !/^[A-Z0-9-]+$/i.test(code)) {
+            codeInput.setCustomValidity('Le code doit contenir uniquement des lettres, chiffres et tirets');
+        } else {
+            codeInput.setCustomValidity('');
+        }
+    }
+    
+    codeInput.addEventListener('input', validateCode);
+    
+    // Animation d'apparition progressive des sections
+    const sections = document.querySelectorAll('section');
+    sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    // Initialisation
+    updateStockInfo();
+});
+
+// Fonction globale pour la réinitialisation
+function updateStockInfo() {
+    // Réinitialisation des warnings
+    const stockWarning = document.getElementById('stock-warning');
+    const quantityInput = document.getElementById('quantity');
+    
+    if (stockWarning) {
+        stockWarning.classList.add('hidden');
+    }
+    if (quantityInput) {
+        quantityInput.classList.remove('border-orange-500');
+    }
+}
+</script>
 {% endblock %}

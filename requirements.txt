@@ -17,3 +17,13 @@ dj-database-url
 
 # Bibliothèque pour les calendriers et les jours fériés
 workalendar
+
+# Client Supabase pour Python
+supabase
+
+# Middleware pour servir les fichiers statiques en production
+whitenoise
+
+# Production dependencies for Fly.io
+whitenoise
+django-environ

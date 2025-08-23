@@ -8,49 +8,122 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0003_alter_teleworkrequest_options_and_more'),
+        ("extranet", "0003_alter_teleworkrequest_options_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='leaverequest',
-            name='admin_validated',
-            field=models.BooleanField(default=False, help_text='Validation admin'),
+            model_name="leaverequest",
+            name="admin_validated",
+            field=models.BooleanField(
+                default=False, help_text="Validation admin"
+            ),
         ),
         migrations.AddField(
-            model_name='leaverequest',
-            name='manager_validated',
-            field=models.BooleanField(default=False, help_text='Validation du manager'),
+            model_name="leaverequest",
+            name="manager_validated",
+            field=models.BooleanField(
+                default=False, help_text="Validation du manager"
+            ),
         ),
         migrations.AddField(
-            model_name='leaverequest',
-            name='rh_validated',
-            field=models.BooleanField(default=False, help_text='Validation RH'),
+            model_name="leaverequest",
+            name="rh_validated",
+            field=models.BooleanField(
+                default=False, help_text="Validation RH"
+            ),
         ),
         migrations.AddField(
-            model_name='teleworkrequest',
-            name='manager_validated',
-            field=models.BooleanField(default=False, help_text='Validation du manager'),
+            model_name="teleworkrequest",
+            name="manager_validated",
+            field=models.BooleanField(
+                default=False, help_text="Validation du manager"
+            ),
         ),
         migrations.AlterField(
-            model_name='leaverequest',
-            name='status',
-            field=models.CharField(choices=[('pending', 'En attente'), ('approved', 'Approuvée'), ('rejected', 'Rejetée'), ('cancelled', 'Annulée')], default='pending', help_text='Statut de la demande (workflow de validation)', max_length=10),
+            model_name="leaverequest",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "En attente"),
+                    ("approved", "Approuvée"),
+                    ("rejected", "Rejetée"),
+                    ("cancelled", "Annulée"),
+                ],
+                default="pending",
+                help_text="Statut de la demande (workflow de validation)",
+                max_length=10,
+            ),
         ),
         migrations.AlterField(
-            model_name='teleworkrequest',
-            name='status',
-            field=models.CharField(choices=[('pending', 'En attente'), ('approved', 'Approuvée'), ('rejected', 'Rejetée'), ('cancelled', 'Annulée')], default='pending', help_text='Statut de la demande', max_length=10),
+            model_name="teleworkrequest",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "En attente"),
+                    ("approved", "Approuvée"),
+                    ("rejected", "Rejetée"),
+                    ("cancelled", "Annulée"),
+                ],
+                default="pending",
+                help_text="Statut de la demande",
+                max_length=10,
+            ),
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('admin', 'Admin'), ('manager', 'Manager'), ('rh', 'RH'), ('user', 'User')], default='user', max_length=20)),
-                ('manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='managed_users', to=settings.AUTH_USER_MODEL)),
-                ('rh', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='rh_users', to=settings.AUTH_USER_MODEL)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("admin", "Admin"),
+                            ("manager", "Manager"),
+                            ("rh", "RH"),
+                            ("user", "User"),
+                        ],
+                        default="user",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "manager",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="managed_users",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "rh",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="rh_users",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

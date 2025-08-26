@@ -4,13 +4,14 @@ Vues du calendrier de présence.
 
 import calendar
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
+
+# django.utils.timezone not used in this module
 from workalendar.europe import France
 
 from ..models import LeaveRequest, TeleworkRequest, get_leave_balance
@@ -20,7 +21,12 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def calendar_view(request):
-    """Affiche le calendrier mensuel de présence (congés, télétravail, fériés, week-ends, jours au bureau)."""
+    """
+    Affiche le calendrier mensuel de présence.
+
+    Montre congés, télétravail, fériés, week-ends et jours au bureau pour un
+    utilisateur ou en mode global (pour les admins/managers).
+    """
     user = request.user
     today = date.today()
     # Mode global si superuser/admin/manager/rh et paramètre global présent
@@ -85,7 +91,8 @@ def calendar_view(request):
     for leave in leaves:
         if leave.demi_jour != "full" and leave.start_date == leave.end_date:
             demi_jour_days[leave.start_date] = leave.demi_jour
-            # Pour les demi-journées, on ne les compte pas comme des jours complets de congé pour le calcul des jours au bureau
+            # Pour les demi-journées, on ne les compte pas comme des jours complets
+            # de congé pour le calcul des jours au bureau
         else:
             for n in range((leave.end_date - leave.start_date).days + 1):
                 leave_days.add(leave.start_date + timedelta(days=n))
@@ -125,8 +132,8 @@ def calendar_view(request):
     for d in workdays:
         if d <= today:
             if d in demi_jour_days:
-                # Demi-journée : 0 jour au bureau (pas de travail au bureau ce jour-là)
-                days_at_office += 0
+                # Demi-journée : considéré comme jour hors bureau (0 jour au bureau)
+                pass  # N'ajoute rien, donc 0 jour au bureau
             elif d not in leave_days and d not in telework_days:
                 # Jour normal : on ajoute 1 jour au bureau
                 days_at_office += 1

@@ -25,7 +25,7 @@
         {% endif %}
     </p>
     
-    {% if telework_requests %}
+    {% if teleworks %}
         <section aria-labelledby="requests-section">
             <h2 id="requests-section" class="text-2xl font-bold mb-6 text-orange-600">
                 Liste des demandes de télétravail
@@ -47,7 +47,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        {% for request in telework_requests %}
+                        {% for request in teleworks %}
                         <tr class="hover:bg-orange-50 transition-colors duration-200">
                             <td class="py-4 px-4 font-medium text-gray-900">#{{ request.id }}</td>
                             {% if user.is_superuser %}

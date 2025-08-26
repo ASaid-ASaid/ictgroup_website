@@ -5,11 +5,12 @@ Tests d'authentification et d'autorisation pour l'application extranet
 
 import os
 import sys
+
 import django
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from django.urls import reverse
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
 
 # Configuration Django pour les tests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ictgroup.settings")
@@ -28,7 +29,7 @@ class AuthenticationTest(TestCase):
             username="authuser", email="auth@ictgroup.com", password="securepass123"
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="Tunisie"
+            user=self.user, role="user", site="tunisie"
         )
 
     def test_user_authentication_success(self):
@@ -87,28 +88,28 @@ class AuthorizationTest(TestCase):
             username="admin", email="admin@ictgroup.com", password="adminpass123"
         )
         self.admin_profile = UserProfile.objects.create(
-            user=self.admin_user, role="admin", site="Tunisie"
+            user=self.admin_user, role="admin", site="tunisie"
         )
 
         self.manager_user = User.objects.create_user(
             username="manager", email="manager@ictgroup.com", password="managerpass123"
         )
         self.manager_profile = UserProfile.objects.create(
-            user=self.manager_user, role="manager", site="Tunisie"
+            user=self.manager_user, role="manager", site="tunisie"
         )
 
         self.rh_user = User.objects.create_user(
             username="rh", email="rh@ictgroup.com", password="rhpass123"
         )
         self.rh_profile = UserProfile.objects.create(
-            user=self.rh_user, role="rh", site="Tunisie"
+            user=self.rh_user, role="rh", site="tunisie"
         )
 
         self.normal_user = User.objects.create_user(
             username="user", email="user@ictgroup.com", password="userpass123"
         )
         self.normal_profile = UserProfile.objects.create(
-            user=self.normal_user, role="user", site="Tunisie"
+            user=self.normal_user, role="user", site="tunisie"
         )
 
     def test_admin_access_to_admin_pages(self):

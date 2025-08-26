@@ -16,6 +16,6 @@ class ExtranetConfig(AppConfig):
         Importe les signaux pour l'invalidation automatique du cache.
         """
         try:
-            import extranet.signals
+            import extranet.signals  # noqa: F401 (import for side-effects)
         except ImportError:
             pass

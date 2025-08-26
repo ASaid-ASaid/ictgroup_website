@@ -7,8 +7,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import F, Q, Sum
-from django.http import JsonResponse
+from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -57,7 +56,9 @@ def stock(request):
     }
 
     logger.info(
-        f"[stock] Utilisateur {request.user.username} consulte le stock - {total_items} articles"
+        "[stock] Utilisateur %s consulte le stock - %s articles",
+        request.user.username,
+        total_items,
     )
 
     return render(request, "extranet/stock.html", context)
@@ -131,10 +132,15 @@ def entry_exit(request):
 
                 messages.success(
                     request,
-                    f"Mouvement enregistré: {movement_type} de {quantity} unité(s)",
+                    "Mouvement enregistré: %s de %s unité(s)"
+                    % (movement_type, quantity),
                 )
                 logger.info(
-                    f"[entry_exit] Mouvement: {movement_type} {quantity} {stock_item.code} par {request.user.username}"
+                    "[entry_exit] Mouvement: %s %s %s par %s",
+                    movement_type,
+                    quantity,
+                    stock_item.code,
+                    request.user.username,
                 )
 
         return redirect("extranet:entry_exit")
@@ -175,95 +181,6 @@ def movements_view(request):
         "movements": movements,
         "movement_type": movement_type,
         "user_filter": user_filter,
-    }
-
-    return render(request, "extranet/movements.html", context)
-
-    # Recherche
-    search = request.GET.get("search", "")
-    if search:
-        stock_items = stock_items.filter(
-            Q(designation__icontains=search)
-            | Q(code__icontains=search)
-            | Q(type__icontains=search)
-        )
-
-    # Statistiques
-    stats = _calculate_stock_stats(stock_items)
-
-    context = {
-        "stock_items": stock_items,
-        "search": search,
-        "stats": stats,
-    }
-
-    return render(request, "extranet/stock.html", context)
-
-
-@login_required
-@user_passes_test(can_manage_stock)
-def entry_exit(request):
-    """Vue pour enregistrer les entrées et sorties de stock."""
-
-    if request.method == "POST":
-        if "add_new_item" in request.POST:
-            success = _handle_new_item_creation(request)
-        else:
-            success = _handle_stock_movement(request)
-
-        if success:
-            return redirect("extranet:entry_exit")
-
-    # Récupération des articles pour le formulaire
-    stock_items = StockItem.objects.all().order_by("designation")
-
-    context = {
-        "stock_items": stock_items,
-    }
-
-    return render(request, "extranet/entry_exit.html", context)
-
-
-@login_required
-@user_passes_test(can_manage_stock)
-def movements_view(request):
-    """Vue de l'historique des mouvements de stock."""
-
-    # Récupération des mouvements
-    movements = (
-        StockMovement.objects.select_related("stock_item", "user")
-        .all()
-        .order_by("-date")
-    )
-
-    # Filtres
-    item_filter = request.GET.get("item")
-    type_filter = request.GET.get("type")
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
-
-    if item_filter:
-        movements = movements.filter(stock_item__id=item_filter)
-    if type_filter:
-        movements = movements.filter(movement_type=type_filter)
-    if date_from:
-        movements = movements.filter(date__gte=date_from)
-    if date_to:
-        movements = movements.filter(date__lte=date_to)
-
-    # Statistiques des mouvements
-    movement_stats = _calculate_movement_stats(movements)
-
-    context = {
-        "movements": movements,
-        "stock_items": StockItem.objects.all(),
-        "movement_stats": movement_stats,
-        "filters": {
-            "item": item_filter,
-            "type": type_filter,
-            "date_from": date_from,
-            "date_to": date_to,
-        },
     }
 
     return render(request, "extranet/movements.html", context)
@@ -309,11 +226,12 @@ def _handle_new_item_creation(request):
                 movement_type="entry",
                 quantity=quantity,
                 date=timezone.now().date(),
-                remarks=f"Création initiale de l'article",
+                remarks="Création initiale de l'article",
             )
-
-        logger.info(f"[stock] Nouvel article créé: {code} par {request.user.username}")
-        messages.success(request, f"Article {designation} créé avec succès.")
+        logger.info(
+            "[stock] Nouvel article créé: %s par %s" % (code, request.user.username)
+        )
+        messages.success(request, "Article %s créé avec succès." % designation)
         return True
 
     except Exception as e:
@@ -349,7 +267,7 @@ def _handle_stock_movement(request):
             return False
 
         # Création du mouvement
-        movement = StockMovement.objects.create(
+        StockMovement.objects.create(
             stock_item=stock_item,
             user=request.user,
             movement_type=movement_type,
@@ -367,9 +285,13 @@ def _handle_stock_movement(request):
         stock_item.save()
 
         logger.info(
-            f"[stock] Mouvement enregistré: {movement_type} {quantity} {stock_item.code} par {request.user.username}"
+            "[stock] Mouvement enregistré: %s %s %s par %s",
+            movement_type,
+            quantity,
+            stock_item.code,
+            request.user.username,
         )
-        messages.success(request, f"Mouvement de stock enregistré avec succès.")
+        messages.success(request, "Mouvement de stock enregistré avec succès.")
         return True
 
     except Exception as e:

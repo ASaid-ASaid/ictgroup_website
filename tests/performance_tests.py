@@ -11,14 +11,15 @@ Usage:
 Note: Ce fichier n'est pas versionné dans Git (.gitignore)
 """
 
+import json
 import os
+import statistics
 import sys
 import time
-import json
-import requests
-import statistics
-from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+
+import requests
 
 # Configuration Django pour les tests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ictgroup.settings")
@@ -28,10 +29,11 @@ try:
 
     django.setup()
 
-    from django.test import Client
     from django.contrib.auth.models import User
     from django.db import connection
-    from extranet.models import LeaveRequest, TeleworkRequest, UserProfile, StockItem
+    from django.test import Client
+    from extranet.models import (LeaveRequest, StockItem, TeleworkRequest,
+                                 UserProfile)
 
     DJANGO_AVAILABLE = True
 except ImportError:
@@ -124,8 +126,8 @@ class DatabasePerformanceTests(PerformanceMonitor):
         if not DJANGO_AVAILABLE:
             return
 
-        from django.db import reset_queries
         from django.conf import settings
+        from django.db import reset_queries
 
         # Activer le debug temporairement
         old_debug = settings.DEBUG

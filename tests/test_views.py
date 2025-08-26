@@ -1,22 +1,30 @@
 #!/usr/bin/env python3
 """
-Tests unitaires pour les vues de l'application extranet
+Tests unitaires pour les vues de l'applicatio        self.user = User.objects.create_user(
+            username="dashboarduser",
+            email="dashboard@ictgroup.com",
+            password="testpass123",
+        )
+        self.profile = UserProfile.objects.create(
+            user=self.user, role="user", site="tunisie"
+        )et
 """
 
 import os
 import sys
-import django
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from django.urls import reverse
-from django.contrib.messages import get_messages
 from datetime import date, timedelta
+
+import django
+from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
+from django.test import Client, TestCase
+from django.urls import reverse
 
 # Configuration Django pour les tests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ictgroup.settings")
 django.setup()
 
-from extranet.models import UserProfile, LeaveRequest, TeleworkRequest
+from extranet.models import LeaveRequest, TeleworkRequest, UserProfile
 
 
 class AuthViewsTest(TestCase):
@@ -29,7 +37,7 @@ class AuthViewsTest(TestCase):
             username="testuser", email="test@ictgroup.com", password="testpass123"
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="Tunisie"
+            user=self.user, role="user", site="tunisie"
         )
 
     def test_login_page_loads(self):
@@ -101,7 +109,7 @@ class LeaveViewsTest(TestCase):
             username="leave_user", email="leave@ictgroup.com", password="testpass123"
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="Tunisie"
+            user=self.user, role="user", site="tunisie"
         )
 
     def test_leave_list_requires_login(self):
@@ -155,7 +163,7 @@ class TeleworkViewsTest(TestCase):
             password="testpass123",
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="France"
+            user=self.user, role="user", site="france"
         )
 
     def test_telework_list_requires_login(self):
@@ -189,7 +197,7 @@ class AdminViewsTest(TestCase):
             username="admin_user", email="admin@ictgroup.com", password="adminpass123"
         )
         self.admin_profile = UserProfile.objects.create(
-            user=self.admin_user, role="admin", site="Tunisie"
+            user=self.admin_user, role="admin", site="tunisie"
         )
 
         # Utilisateur normal
@@ -199,7 +207,7 @@ class AdminViewsTest(TestCase):
             password="normalpass123",
         )
         self.normal_profile = UserProfile.objects.create(
-            user=self.normal_user, role="user", site="Tunisie"
+            user=self.normal_user, role="user", site="tunisie"
         )
 
     def test_admin_pages_require_admin_role(self):
@@ -225,7 +233,7 @@ class AdminViewsTest(TestCase):
             password="managerpass123",
         )
         manager_profile = UserProfile.objects.create(
-            user=manager, role="manager", site="Tunisie"
+            user=manager, role="manager", site="tunisie"
         )
 
         self.client.login(username="manager_user", password="managerpass123")

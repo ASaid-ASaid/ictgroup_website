@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from ..forms import TeleworkRequestForm
-from ..models import TeleworkRequest, UserProfile
+from ..models import TeleworkRequest, get_leave_balance, LeaveRequest
 
 logger = logging.getLogger(__name__)
 
@@ -20,26 +20,61 @@ logger = logging.getLogger(__name__)
 def telework_request(request):
     """Permet à l'utilisateur de soumettre une nouvelle demande de télétravail."""
     logger.info(
-        f"[telework_request] Demande par {request.user.username} (méthode: {request.method})"
+        "[telework_request] Demande par %s (méthode: %s)",
+        request.user.username,
+        request.method,
     )
 
     if request.method == "POST":
         form = TeleworkRequestForm(request.POST)
         if form.is_valid():
-            telework_request = form.save(commit=False)
-            telework_request.user = request.user
-            telework_request.save()
+            # Validation manuelle des conflits avec les congés
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            
+            # Vérifier les conflits avec les congés approuvés ou en attente
+            conflicting_leaves = LeaveRequest.objects.filter(
+                user=request.user,
+                status__in=['pending', 'approved'],
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            
+            if conflicting_leaves.exists():
+                leave_dates = []
+                for leave in conflicting_leaves:
+                    if leave.start_date == leave.end_date:
+                        leave_dates.append(f"{leave.start_date.strftime('%d/%m/%Y')}")
+                    else:
+                        leave_dates.append(f"{leave.start_date.strftime('%d/%m/%Y')} - {leave.end_date.strftime('%d/%m/%Y')}")
+                
+                messages.error(
+                    request, 
+                    f"Impossible de planifier du télétravail pendant une période de congé. "
+                    f"Congés en conflit : {', '.join(leave_dates)}"
+                )
+            else:
+                telework_request = form.save(commit=False)
+                telework_request.user = request.user
+                telework_request.save()
 
-            logger.info(
-                f"[telework_request] Demande créée pour {request.user.username}: {telework_request.start_date} - {telework_request.end_date}"
-            )
-            messages.success(
-                request, "Votre demande de télétravail a été soumise avec succès."
-            )
-            return redirect("extranet:telework_list")
+                logger.info(
+                    "[telework_request] Demande créée pour %s: %s - %s"
+                    % (
+                        request.user.username,
+                        telework_request.start_date,
+                        telework_request.end_date,
+                    )
+                )
+                messages.success(
+                    request, "Votre demande de télétravail a été soumise avec succès."
+                )
+                return redirect("extranet:telework_list")
         else:
             logger.warning(
-                f"[telework_request] Erreurs de validation pour {request.user.username}: {form.errors}"
+                "[telework_request] Erreurs de validation pour %s: %s",
+                request.user.username,
+                form.errors,
             )
             messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
     else:
@@ -114,11 +149,12 @@ def validate_telework(request):
     pending_teleworks = _get_teleworks_to_validate(user)
 
     context = {
-        "pending_teleworks": pending_teleworks,
+        "teleworks": pending_teleworks,
+        "type": "telework",
         "user_role": user.profile.role if hasattr(user, "profile") else None,
     }
 
-    return render(request, "extranet/telework_validation.html", context)
+    return render(request, "extranet/validation.html", context)
 
 
 def _can_user_validate_telework(user, telework_request):
@@ -131,8 +167,9 @@ def _can_user_validate_telework(user, telework_request):
     if role == "admin":
         return True
     elif role == "manager":
+        # Un manager peut valider ses propres demandes OU celles de ses subordonnés
         return (
-            telework_request.user.profile.manager == user
+            (telework_request.user.profile.manager == user or telework_request.user == user)
             and not telework_request.manager_validated
         )
     elif role == "rh":
@@ -202,8 +239,12 @@ def _get_teleworks_to_validate(user):
             "-submitted_at"
         )
     elif role == "manager":
+        # Un manager peut valider ses propres demandes ET celles de ses subordonnés
         return TeleworkRequest.objects.filter(
-            status="pending", user__profile__manager=user, manager_validated=False
+            status="pending", 
+            manager_validated=False
+        ).filter(
+            Q(user__profile__manager=user) | Q(user=user)  # Ses subordonnés OU lui-même
         ).order_by("-submitted_at")
     elif role == "rh":
         return TeleworkRequest.objects.filter(
@@ -220,14 +261,16 @@ def _get_teleworks_to_validate(user):
 def telework_validation(request):
     """Vue pour la validation des demandes de télétravail par les managers et RH."""
     user = request.user
-
     # Affiche les demandes à valider selon le rôle
     if hasattr(user, "profile") and user.profile.role in [
         "manager",
         "rh",
         "admin",
     ]:
-        # Manager : demandes de ses subordonnés + ses propres TT, RH : tous sauf les siens, Admin : tous
+        # Règles de visibilité :
+        # - Manager : demandes de ses subordonnés + ses propres télétravails
+        # - RH : toutes les demandes sauf les siennes
+        # - Admin : toutes
         if user.profile.role == "manager":
             telework_requests = TeleworkRequest.objects.filter(
                 Q(user__profile__manager=user) | Q(user=user), status="pending"

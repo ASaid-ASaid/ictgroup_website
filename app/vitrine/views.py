@@ -16,7 +16,8 @@ def index(request):
     Affiche la page d'accueil de la vitrine.
     """
     logger.info(
-        f"[index] Page d'accueil appelée par {request.user if request.user.is_authenticated else 'anonyme'}"
+        "[index] Page d'accueil appelée par %s",
+        request.user if request.user.is_authenticated else "anonyme",
     )
     return render(request, "vitrine/index.html", {"company_name": "ICTGROUP"})
 
@@ -27,7 +28,8 @@ def services(request):
     Affiche la page services dédiée au SEO.
     """
     logger.info(
-        f"[services] Page services appelée par {request.user if request.user.is_authenticated else 'anonyme'}"
+        "[services] Page services appelée par %s",
+        request.user if request.user.is_authenticated else "anonyme",
     )
     return render(
         request,

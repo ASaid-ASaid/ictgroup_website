@@ -4,8 +4,6 @@ La liste `urlpatterns` achemine les URLs vers les vues appropriées.
 Inclut les routes admin, vitrine et extranet.
 """
 
-import os
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin

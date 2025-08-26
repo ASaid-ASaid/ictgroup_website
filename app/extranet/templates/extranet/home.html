@@ -22,8 +22,8 @@
                 </div>
             </div>
             <div class="text-right" role="region" aria-label="Solde de congés">
-                <div class="text-3xl font-bold text-success" aria-label="{{ leave_balance.balance }} jours de congés restants">
-                    {{ leave_balance.balance }} jours
+                <div class="text-3xl font-bold text-success" aria-label="{{ leave_balance.remaining }} jours de congés restants">
+                    {{ leave_balance.remaining }} jours
                 </div>
                 <div class="text-gray-600">Solde de congés restant</div>
             </div>
@@ -91,13 +91,30 @@
                 </div>
             </article>
             {% endif %}
+            
+            <!-- Heures supplémentaires ce mois (affiché seulement si > 0) -->
+            {% if stats.overtime_hours_this_month > 0 %}
+            <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-full" aria-hidden="true">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-800">{{ stats.overtime_hours_this_month|floatformat:1 }}h</div>
+                        <div class="text-gray-600">Heures sup. ce mois</div>
+                    </div>
+                </div>
+            </article>
+            {% endif %}
         </div>
-    </section>    <!-- Actions rapides -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    </section>    <!-- Actions rapides et Documents récents -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <!-- Actions principales -->
         <div class="bg-white rounded-xl shadow-lg p-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Actions rapides</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4">
                 <a href="{% url 'extranet:new_leave_request' %}" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-300">
                     <div class="bg-primary p-2 rounded-lg mr-4">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,6 +137,18 @@
                     <div>
                         <div class="font-semibold text-gray-800">Télétravail</div>
                         <div class="text-sm text-gray-600">Nouvelle demande</div>
+                    </div>
+                </a>
+
+                <a href="{% url 'extranet:overtime_list' %}" class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors duration-300">
+                    <div class="bg-orange-600 p-2 rounded-lg mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-800">Heures sup.</div>
+                        <div class="text-sm text-gray-600">Déclarer heures weekend</div>
                     </div>
                 </a>
 
@@ -154,7 +183,7 @@
         <!-- Demandes récentes -->
         <div class="bg-white rounded-xl shadow-lg p-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Mes dernières demandes</h2>
-            {% if recent_leaves or recent_teleworks %}
+            {% if recent_leaves or recent_teleworks or recent_overtimes %}
                 <div class="space-y-4 max-h-80 overflow-y-auto">
                     {% for leave in recent_leaves %}
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -189,6 +218,23 @@
                         </span>
                     </div>
                     {% endfor %}
+
+                    {% for overtime in recent_overtimes %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-800">Heures sup. - {{ overtime.work_date|date:"d/m/Y" }}</div>
+                            <div class="text-sm text-gray-600">{{ overtime.hours }}h - {{ overtime.work_date|date:"l"|capfirst }}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if overtime.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif overtime.status == 'rejected' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {% if overtime.status == 'approved' %}Approuvé
+                            {% elif overtime.status == 'rejected' %}Rejeté
+                            {% else %}En attente{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
                 </div>
             {% else %}
                 <div class="text-center py-8">
@@ -196,6 +242,76 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <p class="text-gray-500">Aucune demande récente</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Documents récents -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📄 Documentation récente</h2>
+                <a href="{% url 'extranet:document_list' %}" 
+                   class="text-primary hover:text-primary/80 text-sm font-medium transition-colors">
+                    Voir tout →
+                </a>
+            </div>
+            {% if recent_documents %}
+                <div class="space-y-3 max-h-80 overflow-y-auto">
+                    {% for document in recent_documents %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                {% if document.document_type == 'link' %}
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                        </svg>
+                                    </div>
+                                {% else %}
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-medium text-gray-800 truncate">{{ document.title }}</div>
+                                <div class="text-sm text-gray-600">
+                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-200 text-gray-700">
+                                        {{ document.get_category_display }}
+                                    </span>
+                                    <span class="mx-2">•</span>
+                                    {{ document.uploaded_at|date:"d/m/Y" }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            {% if document.document_type == 'link' %}
+                                <a href="{{ document.link_url }}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors">
+                                    🔗 Ouvrir
+                                </a>
+                            {% else %}
+                                <a href="{% url 'extranet:document_download' document.id %}"
+                                   class="inline-flex items-center px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                                    📎 Télécharger
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500 mb-2">Aucun document récent</p>
+                    <a href="{% url 'extranet:document_list' %}" 
+                       class="text-primary hover:text-primary/80 text-sm font-medium">
+                        Parcourir les documents →
+                    </a>
                 </div>
             {% endif %}
         </div>

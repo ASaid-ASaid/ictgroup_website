@@ -5,10 +5,11 @@ Tests unitaires pour les formulaires de l'application extranet
 
 import os
 import sys
-import django
-from django.test import TestCase
-from django.contrib.auth.models import User
 from datetime import date, timedelta
+
+import django
+from django.contrib.auth.models import User
+from django.test import TestCase
 
 # Configuration Django pour les tests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ictgroup.settings")
@@ -95,45 +96,23 @@ class UserProfileFormTest(TestCase):
 
     def test_valid_profile_form(self):
         """Test d'un formulaire de profil valide"""
-        form_data = {"role": "user", "site": "Tunisie", "carry_over": 0.0}
+        form_data = {"role": "user", "site": "tunisie"}
         form = UserProfileForm(data=form_data)
         self.assertTrue(form.is_valid())
 
     def test_invalid_role(self):
         """Test avec un rôle invalide"""
-        form_data = {"role": "invalid_role", "site": "Tunisie", "carry_over": 0.0}
+        form_data = {"role": "invalid_role", "site": "tunisie"}
         form = UserProfileForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("role", form.errors)
 
     def test_invalid_site(self):
         """Test avec un site invalide"""
-        form_data = {"role": "user", "site": "Invalid Site", "carry_over": 0.0}
+        form_data = {"role": "user", "site": "Invalid Site"}
         form = UserProfileForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("site", form.errors)
-
-    def test_negative_carry_over(self):
-        """Test avec un report de congés négatif"""
-        form_data = {"role": "user", "site": "Tunisie", "carry_over": -5.0}
-        form = UserProfileForm(data=form_data)
-        # Devrait être invalide si la validation est implémentée
-        # Sinon, le test passera et c'est OK
-        if not form.is_valid():
-            self.assertIn("carry_over", form.errors)
-
-    def test_excessive_carry_over(self):
-        """Test avec un report de congés excessif"""
-        form_data = {
-            "role": "user",
-            "site": "Tunisie",
-            "carry_over": 15.0,  # Plus que le maximum autorisé
-        }
-        form = UserProfileForm(data=form_data)
-        # Devrait être invalide si la validation est implémentée
-        # Sinon, le test passera et c'est OK
-        if not form.is_valid():
-            self.assertIn("carry_over", form.errors)
 
 
 if __name__ == "__main__":

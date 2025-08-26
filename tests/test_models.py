@@ -5,23 +5,19 @@ Tests unitaires pour les modèles de l'application extranet
 
 import os
 import sys
+from datetime import date, timedelta
+
 import django
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from datetime import date, timedelta
+from django.test import TestCase
 
 # Configuration Django pour les tests
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ictgroup.settings")
 django.setup()
 
-from extranet.models import (
-    UserProfile,
-    LeaveRequest,
-    TeleworkRequest,
-    StockItem,
-    StockMovement,
-)
+from extranet.models import (LeaveRequest, StockItem, StockMovement,
+                             TeleworkRequest, UserProfile)
 
 
 class UserProfileModelTest(TestCase):
@@ -36,17 +32,16 @@ class UserProfileModelTest(TestCase):
     def test_user_profile_creation(self):
         """Test de création d'un profil utilisateur"""
         profile = UserProfile.objects.create(
-            user=self.user, role="user", site="Tunisie"
+            user=self.user, role="user", site="tunisie"
         )
         self.assertEqual(profile.user, self.user)
         self.assertEqual(profile.role, "user")
-        self.assertEqual(profile.site, "Tunisie")
-        self.assertEqual(profile.carry_over, 0.0)
+        self.assertEqual(profile.site, "tunisie")
 
     def test_user_profile_str_method(self):
         """Test de la méthode __str__ du profil"""
         profile = UserProfile.objects.create(
-            user=self.user, role="manager", site="France"
+            user=self.user, role="manager", site="france"
         )
         expected_str = f"{self.user.username} - manager"
         self.assertEqual(str(profile), expected_str)
@@ -55,7 +50,7 @@ class UserProfileModelTest(TestCase):
         """Test de validation des choix de rôles"""
         valid_roles = ["user", "manager", "rh", "admin"]
         for role in valid_roles:
-            profile = UserProfile(user=self.user, role=role, site="Tunisie")
+            profile = UserProfile(user=self.user, role=role, site="tunisie")
             try:
                 profile.full_clean()
             except ValidationError:
@@ -81,7 +76,7 @@ class LeaveRequestModelTest(TestCase):
             username="employee", email="employee@ictgroup.com", password="testpass123"
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="Tunisie"
+            user=self.user, role="user", site="tunisie"
         )
 
     def test_leave_request_creation(self):
@@ -147,7 +142,7 @@ class TeleworkRequestModelTest(TestCase):
             password="testpass123",
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="user", site="France"
+            user=self.user, role="user", site="france"
         )
 
     def test_telework_request_creation(self):
@@ -190,7 +185,7 @@ class StockModelTest(TestCase):
             username="stockmanager", email="stock@ictgroup.com", password="testpass123"
         )
         self.profile = UserProfile.objects.create(
-            user=self.user, role="admin", site="Tunisie"
+            user=self.user, role="admin", site="tunisie"
         )
 
     def test_stock_item_creation(self):

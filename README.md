@@ -364,7 +364,7 @@ docker-compose exec web python manage.py collectstatic --clear
 
 - **Issues GitHub** : [github.com/ASaid-ASaid/ictgroup_website/issues](https://github.com/ASaid-ASaid/ictgroup_website/issues)
 - **Documentation** : Dossier `docs/`
-- **Email** : support@ictgroup.com
+- **Email** : ahmed.said@ictgroup.com
 
 ## 📄 Licence
 

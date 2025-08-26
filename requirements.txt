@@ -1,29 +1,50 @@
-# Liste des dépendances Python pour le projet Django
+# Liste des dépendances Python pour le projet Django ICT Group
+# Version optimisée pour les performances
 
-# Framework web Django
-Django>=4.0
+# Framework web Django (version stable)
+Django>=5.0,<5.3
 
-# Adaptateur PostgreSQL pour Django (version binaire pour une installation plus facile)
-psycopg2-binary
+# Base de données PostgreSQL (version optimisée)
+psycopg2-binary>=2.9.5
 
-# Serveur WSGI pour la production (utilisé par exemple sur Fly.io)
-gunicorn
+# Cache Redis pour améliorer les performances
+django-redis>=5.2.0
+redis>=4.5.0
 
-# Bibliothèque pour charger les variables d'environnement depuis un fichier .env
-python-dotenv
+# Serveur WSGI pour la production
+gunicorn>=21.0.0
 
-# Gestion de l'URL de la base de données
-dj-database-url
+# Configuration et environnement
+python-dotenv>=1.0.0
+dj-database-url>=2.0.0
+django-environ>=0.10.0
 
-# Bibliothèque pour les calendriers et les jours fériés
-workalendar
+# Calendriers et jours fériés
+workalendar>=17.0.0
 
 # Client Supabase pour Python
-supabase
+supabase>=1.0.0
 
 # Middleware pour servir les fichiers statiques en production
-whitenoise
+whitenoise[brotli]>=6.4.0
 
-# Production dependencies for Fly.io
-whitenoise
-django-environ
+# Optimisations de performance
+django-debug-toolbar>=4.0.0  # Debugging en développement
+django-extensions>=3.2.0     # Extensions utiles
+django-compressor>=4.3.1     # Compression CSS/JS
+
+# Monitoring et logging
+sentry-sdk>=1.20.0           # Monitoring des erreurs
+
+# Développement et tests
+isort>=5.12.0                # Organisation des imports
+black>=23.0.0                # Formatage du code
+flake8>=6.0.0                # Linting
+
+# Production optimizations
+django-cachalot>=2.5.1       # Cache automatique des requêtes ORM
+django-cleanup>=6.0.0        # Nettoyage automatique des fichiers
+
+# Security
+django-csp>=3.7              # Content Security Policy
+django-cors-headers>=4.0.0   # CORS pour l'API

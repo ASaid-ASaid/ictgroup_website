@@ -103,6 +103,24 @@
                     </div>
                 {% endif %}
             </div>
+            
+            <!-- Prévisualisation du calcul des jours -->
+            <div id="days-preview" class="form-group hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center mb-2">
+                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-blue-800">Calcul prévisionnel</h3>
+                </div>
+                <div id="days-calculation" class="text-blue-700"></div>
+                <div class="mt-2 text-sm text-blue-600">
+                    {% if user.profile.site == "france" %}
+                        <span class="font-medium">France :</span> Jours ouvrables (si vendredi pris = samedi automatiquement compté)
+                    {% else %}
+                        <span class="font-medium">Tunisie :</span> Jours ouvrés uniquement (lundi à vendredi)
+                    {% endif %}
+                </div>
+            </div>
         </fieldset>
         
         <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
@@ -166,4 +184,132 @@
     border-radius: 4px;
 }
 </style>
+
+<script>
+// Configuration selon le site de l'utilisateur
+const USER_SITE = '{{ user.profile.site|default:"tunisie" }}';
+
+// Fonction pour calculer les jours de congés selon les règles de chaque site
+function calculateLeaveDays(startDate, endDate, isHalfDay = false) {
+    if (!startDate || !endDate) return 0;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (end < start) return 0;
+    
+    // Demi-journée
+    if (isHalfDay) return 0.5;
+    
+    let totalDays = 0;
+    let current = new Date(start);
+    
+    if (USER_SITE === 'france') {
+        // France : jours ouvrables avec règle spéciale vendredi-samedi
+        while (current <= end) {
+            const weekday = current.getDay(); // 0=dimanche, 1=lundi, ..., 6=samedi
+            
+            if (weekday >= 1 && weekday <= 5) { // lundi à vendredi
+                totalDays++;
+                
+                // Règle spéciale : si c'est un vendredi, le samedi suivant est automatiquement congé
+                if (weekday === 5) { // vendredi
+                    const saturday = new Date(current);
+                    saturday.setDate(saturday.getDate() + 1);
+                    if (saturday <= end) {
+                        totalDays++; // ajouter le samedi automatiquement
+                    }
+                }
+            } else if (weekday === 6) { // samedi
+                // Samedi uniquement s'il n'a pas déjà été compté avec un vendredi
+                const previousDay = new Date(current);
+                previousDay.setDate(previousDay.getDate() - 1);
+                if (previousDay < start || previousDay.getDay() !== 5) {
+                    totalDays++;
+                }
+            }
+            
+            current.setDate(current.getDate() + 1);
+        }
+    } else {
+        // Tunisie : jours ouvrés uniquement (lundi-vendredi)
+        while (current <= end) {
+            const weekday = current.getDay();
+            if (weekday >= 1 && weekday <= 5) { // lundi à vendredi
+                totalDays++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+    }
+    
+    return totalDays;
+}
+
+// Fonction pour mettre à jour la prévisualisation
+function updateDaysPreview() {
+    const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+    const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+    const halfDayInputs = document.querySelectorAll('input[name="demi_jour"]');
+    const previewDiv = document.getElementById('days-preview');
+    const calculationDiv = document.getElementById('days-calculation');
+    
+    if (!startDateInput || !endDateInput || !previewDiv || !calculationDiv) return;
+    
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    
+    // Vérifier si c'est une demi-journée
+    let isHalfDay = false;
+    halfDayInputs.forEach(input => {
+        if (input.checked && (input.value === 'am' || input.value === 'pm')) {
+            isHalfDay = true;
+        }
+    });
+    
+    if (startDate && endDate) {
+        const days = calculateLeaveDays(startDate, endDate, isHalfDay);
+        
+        if (days > 0) {
+            previewDiv.classList.remove('hidden');
+            
+            let message = `<strong>${days} jour${days > 1 ? 's' : ''}</strong> sera${days > 1 ? 'ont' : ''} déduit${days > 1 ? 's' : ''} de votre solde`;
+            
+            if (isHalfDay) {
+                message += ' (demi-journée)';
+            } else if (USER_SITE === 'france' && days > 1) {
+                message += '<br><small>Inclut les samedis automatiques si vendredi pris</small>';
+            }
+            
+            calculationDiv.innerHTML = message;
+        } else {
+            previewDiv.classList.add('hidden');
+        }
+    } else {
+        previewDiv.classList.add('hidden');
+    }
+}
+
+// Ajouter les écouteurs d'événements
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+    const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+    const halfDayInputs = document.querySelectorAll('input[name="demi_jour"]');
+    
+    if (startDateInput) {
+        startDateInput.addEventListener('change', updateDaysPreview);
+    }
+    
+    if (endDateInput) {
+        endDateInput.addEventListener('change', updateDaysPreview);
+    }
+    
+    halfDayInputs.forEach(input => {
+        input.addEventListener('change', updateDaysPreview);
+    });
+    
+    // Mise à jour initiale
+    updateDaysPreview();
+});
+</script>
+
 {% endblock %}

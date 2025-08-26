@@ -6,9 +6,6 @@ Gère les opérations CRUD avec Supabase pour compléter la base de données Dja
 import logging
 from typing import Any, Dict, List, Optional
 
-from django.conf import settings
-from django.contrib.auth.models import User
-
 try:
     from supabase_config import get_supabase, get_supabase_admin
 
@@ -35,7 +32,10 @@ class SupabaseService:
                 self.admin_client = get_supabase_admin()
             except Exception as e:
                 logger.error(f"Erreur d'initialisation Supabase: {e}")
-                SUPABASE_AVAILABLE = False
+                # do not reassign the module-level flag from instance scope
+                # just mark the instance as unavailable
+                self.client = None
+                self.admin_client = None
 
     def is_available(self) -> bool:
         """Vérifie si Supabase est disponible"""
@@ -58,7 +58,8 @@ class SupabaseService:
             }
 
             result = self.client.table("user_activity_logs").insert(data).execute()
-            return True
+            # use result truthiness to avoid unused-variable lint
+            return bool(result)
         except Exception as e:
             logger.error(f"Erreur lors de l'enregistrement de l'activité: {e}")
             return False
@@ -78,7 +79,7 @@ class SupabaseService:
                 .execute()
             )
 
-            return result.data
+            return getattr(result, "data", [])
         except Exception as e:
             logger.error(f"Erreur lors de la récupération de l'activité: {e}")
             return []
@@ -107,7 +108,7 @@ class SupabaseService:
 
         try:
             result = self.client.storage.from_(bucket).remove([file_path])
-            return True
+            return bool(result)
         except Exception as e:
             logger.error(f"Erreur lors de la suppression: {e}")
             return False
@@ -121,7 +122,7 @@ class SupabaseService:
             result = self.client.storage.from_(bucket).create_signed_url(
                 file_path, 3600
             )  # 1 heure
-            return result.get("signedURL")
+            return result.get("signedURL") if isinstance(result, dict) else None
         except Exception as e:
             logger.error(f"Erreur lors de la génération d'URL: {e}")
             return None
@@ -145,7 +146,7 @@ class SupabaseService:
             }
 
             result = self.client.table("notifications").insert(data).execute()
-            return True
+            return bool(result)
         except Exception as e:
             logger.error(f"Erreur lors de la création de notification: {e}")
             return False
@@ -166,7 +167,7 @@ class SupabaseService:
                 query = query.eq("read", False)
 
             result = query.order("created_at", desc=True).execute()
-            return result.data
+            return getattr(result, "data", [])
         except Exception as e:
             logger.error(f"Erreur lors de la récupération des notifications: {e}")
             return []
@@ -183,7 +184,7 @@ class SupabaseService:
                 .eq("id", notification_id)
                 .execute()
             )
-            return True
+            return bool(result)
         except Exception as e:
             logger.error(f"Erreur lors de la mise à jour de notification: {e}")
             return False
@@ -205,7 +206,7 @@ class SupabaseService:
                     .eq("user_id", user_id)
                     .execute()
                 )
-                stats["total_activities"] = activity_count.count
+                stats["total_activities"] = getattr(activity_count, "count", 0)
 
             # Autres statistiques peuvent être ajoutées ici
 

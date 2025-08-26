@@ -4,7 +4,6 @@
 # Les noms sont utilisés pour le reverse dans les templates
 # =====================
 
-from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
@@ -45,6 +44,13 @@ urlpatterns = [
         "teletravail/validation/", views.telework_validation, name="telework_validation"
     ),
     path("admin/teletravail/", views.admin_teleworks, name="admin_teleworks"),
+    # Gestion des heures supplémentaires
+    path("heures_supplementaires/", views.overtime_list, name="overtime_list"),
+    path("heures_supplementaires/nouvelle/", views.overtime_create, name="overtime_create"),
+    path("heures_supplementaires/admin/nouvelle/", views.overtime_create_admin, name="overtime_create_admin"),
+    path("heures_supplementaires/<int:overtime_id>/modifier/", views.overtime_edit, name="overtime_edit"),
+    path("heures_supplementaires/<int:overtime_id>/supprimer/", views.overtime_delete, name="overtime_delete"),
+    path("heures_supplementaires/<int:overtime_id>/valider/", views.overtime_validate, name="overtime_validate"),
     # Calendrier de présence
     path("calendrier/", views.calendar_view, name="calendar_view"),
     path(
@@ -55,14 +61,23 @@ urlpatterns = [
     path("compte/", views.account_settings, name="account_settings"),
     # Administration utilisateurs
     path("utilisateurs/", views.user_admin, name="user_admin"),
+    path("utilisateurs/import-csv/", views.import_users_csv, name="import_users_csv"),
     # Validation des demandes
     path("validation/", views.validation, name="validation"),
     # Récapitulatif mensuel admin
     path(
-        "admin/recapitulatif/", views.admin_monthly_report, name="admin_monthly_report"
+        "conges/recapitulatif/", views.admin_monthly_report, name="admin_monthly_report"
     ),
     # Gestion du stock
     path("magasin/stock/", views.stock, name="stock"),
     path("magasin/entree_sortie/", views.entry_exit, name="entry_exit"),
     path("magasin/mouvements/", views.movements_view, name="movements"),
+    # Gestion des documents
+    path("documents/", views.document_list, name="document_list"),
+    path("documents/upload/", views.document_upload, name="document_upload"),
+    path("documents/<int:document_id>/download/", views.document_download, name="document_download"),
+    path("documents/<int:document_id>/edit/", views.document_edit, name="document_edit"),
+    path("documents/<int:document_id>/delete/", views.document_delete, name="document_delete"),
+    path("admin/documents/", views.document_admin, name="document_admin"),
+    path("admin/documents/<int:document_id>/toggle/", views.document_toggle_status, name="document_toggle_status"),
 ]

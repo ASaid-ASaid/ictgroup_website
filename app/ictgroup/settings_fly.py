@@ -4,7 +4,11 @@ Configuration Django pour Fly.io
 
 import os
 
-from .settings import *
+# Database: use Supabase PostgreSQL
+import dj_database_url
+
+from . import settings as base_settings
+from .settings import *  # noqa: F403,F401
 
 # Configuration Fly.io
 DEBUG = False
@@ -31,8 +35,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Base de données - Utiliser Supabase PostgreSQL (URL corrigée)
-import dj_database_url
 
 DATABASES = {
     "default": dj_database_url.config(
@@ -51,10 +53,10 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 STATIC_URL = "/static/"
 STATIC_ROOT = "/code/app/staticfiles"
 
-# Répertoires des fichiers statiques
+# Static files dirs (use base_settings.BASE_DIR)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "extranet", "static"),
-    os.path.join(BASE_DIR, "vitrine", "static"),
+    os.path.join(base_settings.BASE_DIR, "extranet", "static"),
+    os.path.join(base_settings.BASE_DIR, "vitrine", "static"),
 ]
 
 # Configuration pour WhiteNoise (servir les fichiers statiques)

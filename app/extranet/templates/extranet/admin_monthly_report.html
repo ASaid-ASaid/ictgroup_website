@@ -1,4 +1,5 @@
 {% extends 'extranet/base.html' %}
+{% load extranet_filters %}
 {% block title %}Rapport Mensuel RH - ICTGROUP{% endblock %}
 
 {% block content %}
@@ -67,6 +68,27 @@
                 <p id="year-help" class="mt-1 text-sm text-gray-500">Année d'analyse</p>
             </div>
             
+            <div class="form-group">
+                <label for="site" class="block text-sm font-medium text-gray-700 mb-2">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Site
+                </label>
+                <select id="site" 
+                        name="site" 
+                        class="p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        aria-describedby="site-help">
+                    <option value="">Tous les sites</option>
+                    {% for site in available_sites %}
+                        <option value="{{ site }}" {% if selected_site == site %}selected{% endif %}>
+                            {% if site == 'tunisie' %}Tunisie{% elif site == 'france' %}France{% else %}{{ site|title }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p id="site-help" class="mt-1 text-sm text-gray-500">Filtrer par site</p>
+            </div>
+            
             <div class="flex gap-2">
                 <button type="submit" 
                         class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold rounded-lg transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -77,7 +99,7 @@
                     Générer le rapport
                 </button>
                 
-                <a href="?export=csv&month={{ selected_month|slice:'5:' }}&year={{ selected_month|slice:':4' }}" 
+                <a href="?export=csv&month={{ selected_month|slice:'5:' }}&year={{ selected_month|slice:':4' }}{% if selected_site %}&site={{ selected_site }}{% endif %}" 
                     class="inline-flex items-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                     aria-label="Exporter le rapport au format CSV">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,6 +204,14 @@
                             <th scope="col" class="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider">
                                 <div class="flex items-center justify-center">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    ⏰ Heures sup.
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
                                     💰 Solde
@@ -217,8 +247,8 @@
                             
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {% if user.profile.site|lower == 'tunisie' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                                    {% if user.profile.site|lower == 'tunisie' %}🇹🇳 {{ user.profile.site }}{% else %}🇫🇷 {{ user.profile.site }}{% endif %}
+                                    {% if user.profile.site == 'tunisie' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {% if user.profile.site == 'tunisie' %}🇹🇳 Tunisie{% else %}🇫🇷 France{% endif %}
                                 </span>
                             </td>
                             
@@ -229,20 +259,27 @@
                             
                             <td class="px-6 py-4 text-center">
                                 <div class="text-lg font-bold text-purple-600">{{ user.days_telework|default:0 }}</div>
-                                <div class="text-sm text-gray-500">jour{{ user.days_telework|default:0|pluralize }}</div>
+                                <div class="text-sm text-gray-500">{{ user.days_telework|days_display }}</div>
                             </td>
                             
                             <td class="px-6 py-4 text-center">
-                                <div class="text-lg font-bold text-orange-600">{{ user.days_leave|floatformat:1|default:0 }}</div>
-                                <div class="text-sm text-gray-500">jour{{ user.days_leave|floatformat:1|default:0|pluralize }}</div>
+                                <div class="text-lg font-bold text-orange-600">{{ user.days_leave|french_decimal:1 }}</div>
+                                <div class="text-sm text-gray-500">{{ user.days_leave|days_display }}</div>
+                            </td>
+                            
+                            <td class="px-6 py-4 text-center">
+                                <div class="text-lg font-bold text-blue-600">{{ user.overtime_hours|default:0|floatformat:1 }}</div>
+                                <div class="text-sm text-gray-500">
+                                    {% if user.overtime_hours|default:0 == 0 %}—{% elif user.overtime_hours|default:0 == 1 %}heure{% else %}heures{% endif %}
+                                </div>
                             </td>
                             
                             <td class="px-6 py-4 text-center">
                                 <div class="text-lg font-bold 
-                                    {% if user.leave_balance > 20 %}text-green-600{% elif user.leave_balance > 10 %}text-yellow-600{% else %}text-red-600{% endif %}">
-                                    {{ user.leave_balance|default:0 }}
+                                    {% if user.leave_balance_remaining > 20 %}text-green-600{% elif user.leave_balance_remaining > 10 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                    {{ user.leave_balance_remaining|french_decimal:1 }}
                                 </div>
-                                <div class="text-sm text-gray-500">jour{{ user.leave_balance|default:0|pluralize }} restant{{ user.leave_balance|default:0|pluralize }}</div>
+                                <div class="text-sm text-gray-500">{{ user.leave_balance_remaining|days_display }}</div>
                             </td>
                         </tr>
                         {% endfor %}

@@ -9,7 +9,6 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import redirect, render
-from django.utils import timezone
 
 from ..models import UserProfile, get_leave_balance
 

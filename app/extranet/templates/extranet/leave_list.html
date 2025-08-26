@@ -42,7 +42,7 @@
         </div>
     </section>
     
-    {% if leave_requests %}
+    {% if leaves %}
         <section aria-labelledby="requests-section">
             <h2 id="requests-section" class="text-2xl font-bold mb-6 text-primary">
                 Liste des demandes
@@ -60,7 +60,7 @@
                             <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Type</th>
                             <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Raison</th>
                             <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Soumise le</th>
-                            <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Statut</th>
+                            <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Validation</th>
                             {% if user.is_superuser %}
                                 <th scope="col" class="py-4 px-4 text-left font-bold text-primary">Jours</th>
                             {% endif %}
@@ -68,7 +68,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        {% for leave in leave_requests %}
+                        {% for leave in leaves %}
                         <tr class="hover:bg-primary/5 transition-colors duration-200">
                             <td class="py-4 px-4 font-medium text-gray-900">#{{ leave.id }}</td>
                             {% if user.is_superuser %}
@@ -115,18 +115,77 @@
                                 </time>
                             </td>
                             <td class="py-4 px-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                    {% if leave.status == 'pending' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% elif leave.status == 'approved' %}bg-green-100 text-green-800 border border-green-200{% elif leave.status == 'rejected' %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                                <div class="space-y-1">
+                                    <!-- Statut global -->
+                                    <div class="mb-2">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                            {% if leave.status == 'pending' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% elif leave.status == 'approved' %}bg-green-100 text-green-800 border border-green-200{% elif leave.status == 'rejected' %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                                            {% if leave.status == 'pending' %}
+                                                ⏳ En attente
+                                            {% elif leave.status == 'approved' %}
+                                                ✅ Approuvé
+                                            {% elif leave.status == 'rejected' %}
+                                                ❌ Rejeté
+                                            {% else %}
+                                                {{ leave.get_status_display }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Détail des validations -->
                                     {% if leave.status == 'pending' %}
-                                        ⏳ En attente
-                                    {% elif leave.status == 'approved' %}
-                                        ✅ Approuvé
-                                    {% elif leave.status == 'rejected' %}
-                                        ❌ Rejeté
-                                    {% else %}
-                                        {{ leave.get_status_display }}
+                                        <div class="text-xs space-y-1">
+                                            <!-- Validation Manager -->
+                                            {% if leave.user.profile.manager %}
+                                                <div class="flex items-center">
+                                                    {% if leave.manager_validated %}
+                                                        <span class="inline-flex items-center text-green-600">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Manager: Validé
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="inline-flex items-center text-orange-600">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Manager: En attente
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <!-- Validation RH -->
+                                            {% if leave.user.profile.rh %}
+                                                <div class="flex items-center">
+                                                    {% if leave.rh_validated %}
+                                                        <span class="inline-flex items-center text-green-600">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            RH: Validé
+                                                        </span>
+                                                    {% elif leave.manager_validated %}
+                                                        <span class="inline-flex items-center text-orange-600">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            RH: En attente
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="inline-flex items-center text-gray-400">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            RH: En attente du manager
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
                                     {% endif %}
-                                </span>
+                                </div>
                             </td>
                             {% if user.is_superuser %}
                                 <td class="py-4 px-4 font-medium text-gray-900">
@@ -134,7 +193,7 @@
                                 </td>
                             {% endif %}
                             <td class="py-4 px-4">
-                                {% if leave.status == 'pending' %}
+                                {% if leave.status in 'pending,rejected' %}
                                     <form method="post" 
                                           action="" 
                                           class="inline"
@@ -154,7 +213,13 @@
                                         </button>
                                     </form>
                                 {% else %}
-                                    <span class="text-gray-400 italic">Aucune action</span>
+                                    <span class="text-gray-400 italic">
+                                        {% if leave.status == 'approved' %}
+                                            Approuvée - Non supprimable
+                                        {% else %}
+                                            Aucune action
+                                        {% endif %}
+                                    </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -177,7 +242,7 @@
                 {% endif %}
             </p>
             {% if not user.is_superuser %}
-                <a href="{% url 'leave_request' %}" 
+                <a href="{% url 'extranet:new_leave_request' %}" 
                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transform hover:scale-105">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

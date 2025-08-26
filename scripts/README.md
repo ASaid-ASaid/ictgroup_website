@@ -1,151 +1,214 @@
-# 🔧 Scripts d'Automatisation ICTGROUP Website
+# 🛠️ Scripts ICT Group Website
 
-Ce dossier contient les scripts d'automatisation et de maintenance du projet.
+*Collection de scripts pour l'administration et la maintenance*
 
-## 📋 Scripts Disponibles
+## 📁 **Structure des Scripts**
 
-### 🧹 Maintenance et Nettoyage
-- **`clean_cache.sh`** - Nettoyage des caches Python, Django et Docker
-  - Usage: `./manage.sh clean:cache`
-  - Nettoie les fichiers `.pyc`, `__pycache__`, logs anciens
-  - Fonctionne en local et dans les containers Docker
+### 🚀 **Déploiement** (`deployment/`)
+Scripts pour le déploiement et la configuration en production
 
-### 🔍 Diagnostic
-- **`debug_static.sh`** - Diagnostic des fichiers statiques
-  - Usage: `./manage.sh debug:static`
-  - Vérifie les fichiers CSS/JS
-  - Teste collectstatic
-  - Propose des solutions aux problèmes
+- **`deploy_fly.sh`** - Déploiement automatique sur Fly.io
+- **`configure_gandi_domain.sh`** - Configuration DNS chez Gandi
+- **`submit_to_search_engines.sh`** - Soumission aux moteurs de recherche
+- **`setup-github-secrets.sh`** - Configuration des secrets GitHub
 
-### 🚀 Déploiement
-- **`deploy_fly.sh`** - Déploiement sur Fly.io
-  - Usage: `./manage.sh deploy:fly`
-  - Installation automatique de Fly CLI
-  - Configuration des secrets
-  - Création de la base de données PostgreSQL
-
-### 🛠️ Maintenance
-- **`maintain_scripts.sh`** - Maintenance du dossier scripts
-  - Usage: `./manage.sh maintain:scripts`
-  - Vérifie les scripts utilisés/inutilisés
-  - Contrôle des permissions
-  - Vérification de la syntaxe
-
-## 🎯 Utilisation Recommandée
-
-### Via le Script Central
 ```bash
-# Utilisation recommandée (via manage.sh)
-./manage.sh clean:cache      # Nettoyage
-./manage.sh debug:static     # Diagnostic
-./manage.sh deploy:fly       # Déploiement
-./manage.sh maintain:scripts # Maintenance
-```
+# Déploiement complet
+./deployment/deploy_fly.sh
 
-### Exécution Directe
-```bash
-# Exécution directe (non recommandée)
-./scripts/clean_cache.sh
-./scripts/debug_static.sh
-./scripts/deploy_fly.sh
-./scripts/maintain_scripts.sh
-```
-
-## 📝 Standards des Scripts
-
-### Structure Requise
-- **Shebang** : `#!/bin/bash`
-- **Set options** : `set -e` (arrêt sur erreur)
-- **Couleurs** : Utilisation des codes ANSI
-- **Logging** : Fonctions `log_info()`, `log_warn()`, `log_error()`
-- **Documentation** : Header avec description et usage
-
-### Exemple de Template
-```bash
-#!/bin/bash
-
-# =============================================================================
-# Description du script
-# =============================================================================
-# Description: Ce que fait le script
-# Usage: ./scripts/nom_script.sh
-# Auteur: ICTGROUP Development Team
-# =============================================================================
-
-set -e
-
-# Configuration des couleurs
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m'
-
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Logique du script...
-```
-
-## 🚨 Scripts Supprimés/Obsolètes
-
-### Scripts Nettoyés
-- **`deploy_docker.sh`** ❌ **SUPPRIMÉ**
-  - Raison: Obsolète, remplacé par manage.sh
-  - Alternative: `./manage.sh start` pour Docker local
-
-## 🔄 Maintenance Automatique
-
-Le script `maintain_scripts.sh` vérifie automatiquement :
-- ✅ Scripts utilisés vs inutilisés
-- ✅ Permissions d'exécution
-- ✅ Syntaxe bash
-- ✅ Références dans manage.sh
-- ✅ Standards de codage
-
-## 📊 Intégration avec manage.sh
-
-Tous les scripts sont intégrés dans le système central `manage.sh` :
-
-| Script | Commande manage.sh | Description |
-|--------|-------------------|-------------|
-| `clean_cache.sh` | `clean:cache` | Nettoyage caches |
-| `debug_static.sh` | `debug:static` | Diagnostic statiques |
-| `deploy_fly.sh` | `deploy:fly` | Déploiement Fly.io |
-| `maintain_scripts.sh` | `maintain:scripts` | Maintenance scripts |
-
-## 🆘 Dépannage
-
-### Script non exécutable
-```bash
-chmod +x scripts/nom_script.sh
-```
-
-### Erreur de syntaxe
-```bash
-bash -n scripts/nom_script.sh  # Vérification syntaxe
-```
-
-### Script non trouvé
-```bash
-ls -la scripts/                # Lister les scripts
-./manage.sh maintain:scripts   # Vérification complète
+# Configuration DNS
+./deployment/configure_gandi_domain.sh --domain ictgroup.fr
 ```
 
 ---
 
-<div align="center">
+### 🔧 **Maintenance** (`maintenance/`)
+Scripts pour la maintenance et l'optimisation du système
 
-**[🏠 Retour au README](../README.md) • [🛠️ Guide manage.sh](../README.md#-script-central-managesh)**
+- **`optimize_project.sh`** - ⭐ Script d'optimisation global
+- **`clean_cache.sh`** - Nettoyage du cache système
+- **`maintain_scripts.sh`** - Maintenance des scripts
+- **`monitor_certs.sh`** - Surveillance des certificats SSL
 
-*Scripts maintenus et optimisés - ICTGROUP Team*
+```bash
+# Optimisation complète (recommandé hebdomadaire)
+./maintenance/optimize_project.sh all
 
-</div>
+# Nettoyage du cache
+./maintenance/clean_cache.sh
+```
+
+---
+
+### 💻 **Développement** (`development/`)
+Scripts pour l'environnement de développement
+
+- **`install-git-hooks.sh`** - Installation des hooks Git
+- **`prepare_commit.sh`** - Préparation des commits
+- **`run_ci_local.sh`** - Test CI en local
+
+```bash
+# Configuration de l'environnement dev
+./development/install-git-hooks.sh
+
+# Test avant commit
+./development/run_ci_local.sh
+```
+
+---
+
+### 📊 **Import/Export** (`import_export/`)
+Scripts pour la gestion des données
+
+- **`import_new_users.py`** - Import d'utilisateurs depuis CSV
+- **`export_to_csv.py`** - Export des données en CSV
+
+```bash
+# Import d'utilisateurs (préférer la commande Django)
+python manage.py import_update_users --file data.csv --dry-run
+
+# Export des données
+python import_export/export_to_csv.py
+```
+
+---
+
+## 🎯 **Scripts Principaux à Connaître**
+
+### **1. Optimisation Globale** ⭐
+```bash
+./maintenance/optimize_project.sh all
+```
+- Nettoyage complet du système
+- Optimisation de la base de données
+- Réchauffement du cache
+- Analyse des performances
+
+### **2. Import d'Utilisateurs** 👥
+```bash
+# Via la commande Django (recommandé)
+python manage.py import_update_users --file users.csv --dry-run
+python manage.py import_update_users --file users.csv --overwrite
+
+# Format CSV requis :
+# username,nom,prenom,days_acquired,days_taken,days_carry_over,site,mail,password,role,manager,rh
+```
+
+### **3. Déploiement en Production** 🚀
+```bash
+./deployment/deploy_fly.sh
+```
+
+---
+
+## 📋 **Utilisation des Scripts**
+
+### **Permissions**
+```bash
+# Rendre les scripts exécutables
+chmod +x scripts/**/*.sh
+```
+
+### **Variables d'Environnement**
+Certains scripts nécessitent des variables d'environnement :
+```bash
+export FLY_API_TOKEN="your-token"
+export GANDI_API_KEY="your-key"
+```
+
+### **Logs**
+Les scripts génèrent des logs dans `/tmp/` ou `logs/` selon le script.
+
+---
+
+## 🔒 **Sécurité**
+
+### **Scripts Sensibles**
+- `setup-github-secrets.sh` - Contient des secrets
+- `configure_gandi_domain.sh` - Utilise des API keys
+- `deploy_fly.sh` - Accès aux serveurs de production
+
+### **Bonnes Pratiques**
+- ✅ Toujours tester avec `--dry-run` quand disponible
+- ✅ Vérifier les permissions avant exécution
+- ✅ Sauvegarder avant les scripts de modification
+- ✅ Vérifier les logs après exécution
+
+---
+
+## 📈 **Maintenance Recommandée**
+
+### **Quotidienne**
+```bash
+# Vérification rapide (manuel)
+./maintenance/monitor_certs.sh
+```
+
+### **Hebdomadaire**
+```bash
+# Optimisation complète
+./maintenance/optimize_project.sh all
+```
+
+### **Mensuelle**
+```bash
+# Import des nouveaux utilisateurs
+python manage.py import_update_users --file monthly_users.csv --overwrite
+
+# Nettoyage approfondi
+./maintenance/clean_cache.sh --deep
+```
+
+### **Trimestrielle**
+```bash
+# Maintenance des scripts
+./maintenance/maintain_scripts.sh
+
+# Mise à jour des dépendances
+./development/run_ci_local.sh --update
+```
+
+---
+
+## 🆘 **Dépannage**
+
+### **Scripts qui ne s'exécutent pas**
+```bash
+# Vérifier les permissions
+ls -la script_name.sh
+
+# Rendre exécutable
+chmod +x script_name.sh
+```
+
+### **Erreurs de dépendances**
+```bash
+# Vérifier l'environnement Python
+python --version
+pip list
+
+# Activer l'environnement virtuel si nécessaire
+source venv/bin/activate
+```
+
+### **Logs d'erreur**
+```bash
+# Vérifier les logs système
+tail -f /tmp/script_name.log
+
+# Logs Django
+tail -f app/django.log
+```
+
+---
+
+## 📞 **Support**
+
+Pour toute question sur les scripts :
+1. Vérifier cette documentation
+2. Consulter les logs d'erreur
+3. Contacter l'administrateur système
+
+---
+
+*🔄 Scripts mis à jour automatiquement - Dernière révision : 26 août 2025*

@@ -133,8 +133,8 @@
                         id="site" 
                         class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                         aria-describedby="site-help">
-                    <option value="tunisie" {% if user.profile.site|lower == 'tunisie' %}selected{% endif %}>🇹🇳 Tunisie</option>
-                    <option value="france" {% if user.profile.site|lower == 'france' %}selected{% endif %}>🇫🇷 France</option>
+                    <option value="tunisie" {% if user.profile.site == 'tunisie' %}selected{% endif %}>🇹🇳 Tunisie</option>
+                    <option value="france" {% if user.profile.site == 'france' %}selected{% endif %}>🇫🇷 France</option>
                 </select>
                 <p id="site-help" class="mt-1 text-sm text-gray-500">
                     Votre site principal de travail

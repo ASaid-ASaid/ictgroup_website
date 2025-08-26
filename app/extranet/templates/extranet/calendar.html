@@ -227,7 +227,7 @@
         </div>
         {% endif %}
         <div class="mt-2 text-center text-sm text-gray-600">
-            Site: {{ leave_balance.site|title }} • Règle: {% if leave_balance.site == "france" %}2.5 jours ouvrables/mois{% else %}1.8 jours ouvrés/mois{% endif %}
+            Site: {{ selected_user.profile.site|title }} • Règle: {% if selected_user.profile.site == "france" %}2.5 jours ouvrables/mois{% else %}1.8 jours ouvrés/mois{% endif %}
         </div>
     </section>
     {% endif %}

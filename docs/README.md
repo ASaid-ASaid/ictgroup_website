@@ -1,165 +1,68 @@
 # 📚 Documentation ICTGROUP Website
 
-> **Dossier de documentation technique centralisée**
+> **Centre de documentation technique et guides d'utilisation**
 
-## 📋 Vue d'Ensemble
+## 📋 Table des Matières
 
-Ce dossier contient toute la documentation technique du projet ICTGROUP Website, organisée par thématiques pour faciliter la navigation et la maintenance.
+### 🚀 Getting Started
+- [**README Principal**](../README.md) - Guide complet du projet
+- [**Installation Rapide**](../README.md#️-installation) - Démarrage en 5 minutes
+- [**Guide de Migration**](MIGRATION_GUIDE.md) - ⭐ **NOUVEAU** - Transition vers la nouvelle structure
 
-## 🗂️ Structure des Documents
+### 🔧 Configuration et Déploiement
+- [**Configuration Supabase**](SUPABASE_CONFIG.md) - Guide complet Supabase
+- [**Déploiement Fly.io**](FLY_DEPLOYMENT.md) - Production sur Fly.io
+- [**Configuration Docker**](DEPLOYMENT_DOCKER.md) - Environnement Docker
+- [**Configuration Domaine Gandi**](GANDI_DOMAIN_CONFIG.md) - DNS et domaine
 
-### 📖 **Guides Principaux**
-- **[INDEX.md](INDEX.md)** - Table des matières principale
-- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - Guide de migration vers la nouvelle structure
+### 📊 Base de Données et Migration
+- [**Migration Supabase Réussie**](MIGRATION_SUPABASE_SUCCESS.md) - Rapport de migration
+- [**Script SQL Supabase**](../config/supabase_setup.sql) - Tables analytics
 
-### 🔧 **Configuration & Déploiement**
-- **[FLY_DEPLOYMENT.md](FLY_DEPLOYMENT.md)** - Déploiement sur Fly.io
-- **[DEPLOYMENT_DOCKER.md](DEPLOYMENT_DOCKER.md)** - Configuration Docker
-- **[SUPABASE_CONFIG.md](SUPABASE_CONFIG.md)** - Configuration Supabase
-- **[GANDI_DOMAIN_CONFIG.md](GANDI_DOMAIN_CONFIG.md)** - Configuration DNS
+### 📋 Rapports et Maintenance
+- [**Rapport de Nettoyage Documentation**](CLEANUP_REPORT.md) - ⭐ **NOUVEAU** - Audit et optimisation docs
 
-### 📊 **Rapports & Optimisation**
-- **[MIGRATION_SUPABASE_SUCCESS.md](MIGRATION_SUPABASE_SUCCESS.md)** - Rapport migration Supabase
-- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Guide optimisation
+### ⚡ Performance et Optimisation
+- [**Optimisations Performance**](PERFORMANCE_OPTIMIZATION.md) - Guide d'optimisation
+- [**Tests Performance**](../tests/performance_tests.py) - Scripts de test
 
-## 🎯 Navigation Rapide
+### 🛠️ Scripts et Outils
+- [**Script Principal**](../manage.sh) - Gestion centralisée
+- [**Scripts de Déploiement**](../scripts/) - Automatisation
 
-### Pour les Développeurs
-```bash
-# Commencer ici
-cat docs/INDEX.md
+## 🏗️ Architecture du Projet
 
-# Installation rapide
-./manage.sh start
-
-# Documentation complète
-./manage.sh docs:serve
 ```
-
-### Pour les Administrateurs
-```bash
-# Déploiement
-./manage.sh deploy:fly
-
-# Configuration Supabase
-cat docs/SUPABASE_CONFIG.md
-
-# Configuration domaine
-cat docs/GANDI_DOMAIN_CONFIG.md
+ictgroup_website/
+├── 📱 app/                     # Application Django
+│   ├── extranet/              # Module extranet employés
+│   ├── vitrine/               # Module site vitrine
+│   └── ictgroup/              # Configuration Django
+├── 🔧 scripts/                # Scripts d'automatisation
+│   ├── clean_cache.sh         # Nettoyage cache
+│   ├── debug_static.sh        # Debug fichiers statiques
+│   ├── deploy_fly.sh          # Déploiement Fly.io
+│   └── maintain_scripts.sh    # Maintenance scripts
+├── 🧪 tests/                  # Tests automatisés
+│   └── performance_tests.py   # Tests de performance
+├── 📚 docs/                   # Documentation (ce dossier)
+├── 🐳 docker/                 # Configuration Docker
+│   ├── Dockerfile             # Image Docker principale
+│   └── docker-compose-old.yml # Ancienne config
+├── ⚙️ config/                 # Fichiers de configuration
+│   ├── fly.toml               # Configuration Fly.io
+│   ├── Procfile               # Configuration Heroku/Fly
+│   ├── runtime.txt            # Version Python
+│   └── supabase_setup.sql     # Tables Supabase
+└── 🛠️ manage.sh               # Script principal de gestion
 ```
-
-### Pour la Maintenance
-```bash
-# Performance
-cat docs/PERFORMANCE_OPTIMIZATION.md
-
-# Migration/Mise à jour
-cat docs/MIGRATION_GUIDE.md
-```
-
-## 📝 Standards de Documentation
-
-### Format des Documents
-- **Format** : Markdown (.md)
-- **Encodage** : UTF-8
-- **Emojis** : Utilisés pour la catégorisation visuelle
-- **Liens** : Relatifs au projet quand possible
-
-### Structure Type
-```markdown
-# 📚 Titre Principal
-
-> **Résumé du document**
-
-## 📋 Section 1
-## 🔧 Section 2
-## 🚀 Section 3
-
----
-*Footer avec liens de navigation*
-```
-
-### Maintenance
-- **Mise à jour** : Lors des changements majeurs
-- **Validation** : Vérification des liens
-- **Versioning** : Via Git avec le reste du projet
-
-## 🔗 Liens Externes
-
-- **Projet Principal** : [README.md](../README.md)
-- **Scripts** : [scripts/README.md](../scripts/README.md)
-- **Repository** : [GitHub - ictgroup_website](https://github.com/ASaid-ASaid/ictgroup_website)
-
-## 🆘 Support
-
-En cas de problème avec la documentation :
-
-1. **Vérifier** l'[INDEX.md](INDEX.md) pour la navigation
-2. **Consulter** le [guide de migration](MIGRATION_GUIDE.md) pour les changements
-3. **Ouvrir une issue** sur GitHub si nécessaire
 
 ---
 
 <div align="center">
 
-**[🏠 Retour à l'accueil](../README.md) • [📚 Index Documentation](INDEX.md) • [🚀 Démarrage Rapide](../README.md#-démarrage-rapide)**
+**[🏠 Retour au README](../README.md) • [🚀 Démarrage Rapide](../README.md#-démarrage-rapide) • [📞 Support](../README.md#-support)**
 
-*Documentation maintenue et organisée - ICTGROUP Team*
+*Documentation maintenue par l'équipe ICTGROUP*
 
 </div>
-
-1. **Cloner le dépôt**
-2. **Copier le fichier `.env.example` en `.env` et adapter les variables**
-3. **Construire et lancer avec Docker**
-   ```sh
-   docker-compose up --build
-   ```
-4. **Accéder à l'application**
-   - Vitrine : http://localhost:8000/
-   - Extranet : http://localhost:8000/extranet/
-
----
-
-## Variables d'environnement
-Voir `.env.example` pour la configuration.
-
----
-
-## Collecte des fichiers statiques
-En production, les fichiers statiques sont collectés automatiquement dans l'image Docker.
-
----
-
-## Bonnes pratiques
-- Ne jamais commiter de vraies clés secrètes ou mots de passe.
-- Ajouter des tests unitaires dans `tests/`.
-- Utiliser un reverse proxy (Nginx) en production.
-- Ajouter les dossiers `__pycache__/`, `*.pyc`, `logs/`, `.env` au `.gitignore`.
-
----
-
-## Accès à l'interface graphique PostgreSQL (Adminer)
-
-Pour gérer la base de données PostgreSQL via une interface web :
-
-1. **Lancer les services Docker** (si ce n'est pas déjà fait) :
-   ```sh
-   docker-compose up --build
-   ```
-2. **Ouvrir Adminer dans votre navigateur** : [http://localhost:8080](http://localhost:8080)
-3. **Renseigner les informations de connexion** :
-   - **SGBD** : PostgreSQL
-   - **Serveur** : db
-   - **Utilisateur** : (valeur de `DB_USER` dans `.env`)
-   - **Mot de passe** : (valeur de `DB_PASSWORD` dans `.env`)
-   - **Base** : (valeur de `DB_NAME` dans `.env`)
-
-
-/sh source venv/bin/activate
-
-Vous pouvez ainsi visualiser, éditer et administrer vos tables PostgreSQL facilement.
-
----
-
-## Auteur
-ahmed.said@ictgroup.fr

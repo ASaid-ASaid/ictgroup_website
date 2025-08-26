@@ -116,6 +116,37 @@ EOF
 }
 
 # Commandes de développement
+dev_start_python() {
+    log_header "Démarrage en mode développement Python direct"
+    
+    # Vérifier que le virtualenv existe
+    if [ ! -d ".venv" ]; then
+        log_info "Création du virtualenv..."
+        python3 -m venv .venv
+    fi
+    
+    # Activer le virtualenv et installer les dépendances
+    log_info "Installation des dépendances..."
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    
+    # Nettoyer les fichiers avec des problèmes de syntaxe
+    log_info "Nettoyage des fichiers Python..."
+    find app/ -name "*.py" -exec sed -i '/^```python$/d; /^```$/d' {} \; 2>/dev/null || true
+    
+    # Lancer les migrations
+    log_info "Exécution des migrations..."
+    cd app
+    python manage.py migrate --settings=ictgroup.settings
+    
+    log_success "Application démarrée en mode développement Python !"
+    log_info "Application disponible sur: http://localhost:8000"
+    log_info "Démarrage du serveur..."
+    
+    # Lancer le serveur de développement
+    python manage.py runserver 0.0.0.0:8000 --settings=ictgroup.settings
+}
+
 dev_start() {
     log_header "Démarrage de l'environnement de développement"
     
@@ -126,7 +157,17 @@ dev_start() {
     fi
     
     log_info "Construction et démarrage des containers..."
-    docker-compose up --build -d
+    # Essayer docker compose puis docker-compose en fallback
+    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+        docker compose up --build -d
+    elif command -v docker-compose &> /dev/null; then
+        docker-compose up --build -d
+    else
+        log_error "Ni 'docker compose' ni 'docker-compose' n'est disponible."
+        log_info "Tentative de lancement en mode développement Python direct..."
+        dev_start_python
+        return
+    fi
     
     log_info "Attente du démarrage des services..."
     sleep 5
@@ -138,7 +179,13 @@ dev_start() {
 
 dev_stop() {
     log_header "Arrêt de l'environnement de développement"
-    docker-compose down
+    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+        docker compose down
+    elif command -v docker-compose &> /dev/null; then
+        docker-compose down
+    else
+        log_info "Arrêt du serveur Python (Ctrl+C si en cours d'exécution)"
+    fi
     log_success "Environnement arrêté"
 }
 
@@ -425,6 +472,9 @@ main() {
         # Commandes de développement
         "dev:start"|"start")
             dev_start
+            ;;
+        "dev:python"|"python")
+            dev_start_python
             ;;
         "dev:stop"|"stop")
             dev_stop

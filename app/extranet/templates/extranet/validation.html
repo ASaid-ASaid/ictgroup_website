@@ -130,26 +130,54 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="leave_id" value="{{ leave.id }}">
                                         
-                                        {% if not leave.manager_validated and can_validate_as_manager and leave.user.profile.manager == user %}
-                                            <button name="action" value="manager_approve" 
-                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-blue-600"
-                                                    aria-label="Valider en tant que manager">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                ✅ VALIDER (Manager)
-                                            </button>
+                                        <!-- Bouton validation Manager -->
+                                        {% if can_validate_as_manager %}
+                                            {% if leave.user.profile.manager == user or leave.user == user %}
+                                                {% if not leave.manager_validated %}
+                                                <button name="action" value="manager_approve" 
+                                                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-blue-600"
+                                                        aria-label="Valider en tant que manager">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDER (Manager)
+                                                </button>
+                                            {% else %}
+                                                <button type="button" disabled
+                                                        class="flex items-center justify-center gap-2 bg-gray-400 text-gray-600 px-6 py-3 rounded-lg cursor-not-allowed opacity-60 whitespace-nowrap shadow-lg border-2 border-gray-400"
+                                                        aria-label="Déjà validé par le manager">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDÉ (Manager)
+                                                </button>
+                                            {% endif %}
+                                            {% endif %}
                                         {% endif %}
                                         
-                                        {% if leave.manager_validated and not leave.rh_validated and can_validate_as_rh and leave.user.profile.rh == user %}
-                                            <button name="action" value="rh_approve" 
-                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-green-600"
-                                                    aria-label="Valider en tant que RH">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                ✅ VALIDER (RH)
-                                            </button>
+                                        <!-- Bouton validation RH -->
+                                        {% if can_validate_as_rh %}
+                                            {% if leave.user.profile.rh == user or leave.user == user %}
+                                                {% if not leave.rh_validated and leave.manager_validated %}
+                                                <button name="action" value="rh_approve" 
+                                                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap shadow-lg border-2 border-green-600"
+                                                        aria-label="Valider en tant que RH">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDER (RH)
+                                                </button>
+                                            {% else %}
+                                                <button type="button" disabled
+                                                        class="flex items-center justify-center gap-2 bg-gray-400 text-gray-600 px-6 py-3 rounded-lg cursor-not-allowed opacity-60 whitespace-nowrap shadow-lg border-2 border-gray-400"
+                                                        aria-label="Déjà validé par RH">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDÉ (RH)
+                                                </button>
+                                            {% endif %}
+                                            {% endif %}
                                         {% endif %}
                                         
                                         {% if leave.status == 'pending' %}
@@ -161,26 +189,6 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                 </svg>
                                                 ❌ REJETER
-                                            </button>
-                                        {% endif %} 
-                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-success to-green-600 hover:from-success/90 hover:to-green-600/90 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
-                                                    aria-label="Valider en tant que RH">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                Valider (RH)
-                                            </button>
-                                        {% endif %}
-                                        
-                                        {% if leave.status == 'pending' %}
-                                            <button name="action" value="reject" 
-                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
-                                                    onclick="return confirm('Êtes-vous sûr de vouloir rejeter cette demande ?')"
-                                                    aria-label="Rejeter la demande">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                </svg>
-                                                Rejeter
                                             </button>
                                         {% endif %}
                                     </form>
@@ -258,16 +266,55 @@
                                     <form method="post" class="flex flex-col sm:flex-row gap-2 w-full">
                                         {% csrf_token %}
                                         <input type="hidden" name="tw_id" value="{{ tw.id }}">
-                                        {% if not tw.manager_validated and can_validate_as_manager and tw.user.profile.manager == user %}
-                                            <button name="action" value="manager_approve" 
-                                                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-sky-400 hover:from-orange-600 hover:to-sky-500 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
-                                                    aria-label="Valider la demande de télétravail">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                Valider
-                                            </button>
+                                        
+                                        <!-- Bouton validation Manager -->
+                                        {% if can_validate_as_manager %}
+                                            {% if tw.user.profile.manager == user or tw.user == user %}
+                                                {% if not tw.manager_validated %}
+                                                <button name="action" value="manager_approve" 
+                                                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                        aria-label="Valider en tant que manager">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDER (Manager)
+                                                </button>
+                                            {% else %}
+                                                <button type="button" disabled
+                                                        class="flex items-center justify-center gap-2 bg-gray-400 text-gray-600 px-4 py-2.5 rounded-lg cursor-not-allowed opacity-60 whitespace-nowrap text-sm"
+                                                        aria-label="Déjà validé par le manager">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDÉ (Manager)
+                                                </button>
+                                            {% endif %}
+                                            {% endif %}
                                         {% endif %}
+                                        
+                                        <!-- Bouton validation RH -->
+                                        {% if can_validate_as_rh and tw.user.profile.rh == user %}
+                                            {% if not tw.rh_validated %}
+                                                <button name="action" value="rh_approve" 
+                                                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"
+                                                        aria-label="Valider en tant que RH">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDER (RH)
+                                                </button>
+                                            {% else %}
+                                                <button type="button" disabled
+                                                        class="flex items-center justify-center gap-2 bg-gray-400 text-gray-600 px-4 py-2.5 rounded-lg cursor-not-allowed opacity-60 whitespace-nowrap text-sm"
+                                                        aria-label="Déjà validé par RH">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    ✅ VALIDÉ (RH)
+                                                </button>
+                                            {% endif %}
+                                        {% endif %}
+                                        
                                         {% if tw.status == 'pending' %}
                                             <button name="action" value="reject" 
                                                     class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 whitespace-nowrap text-sm"

@@ -67,7 +67,12 @@ class LeaveRequest(models.Model):
 
     def __str__(self):
         # Représentation lisible de la demande
-        return f"Demande de congé de {self.user.username} du {self.start_date} au {self.end_date} ({self.status})"
+        return "Demande de congé de %s du %s au %s (%s)" % (
+            self.user.username,
+            self.start_date,
+            self.end_date,
+            self.status,
+        )
 
     class Meta:
         ordering = ["-submitted_at"]  # Trie par date de soumission décroissante
@@ -75,11 +80,53 @@ class LeaveRequest(models.Model):
     @property
     def get_nb_days(self):
         """
-        Retourne 0.5 si demi-journée (am/pm), sinon le nombre de jours calendaires entre start_date et end_date inclus.
+        Retourne 0.5 pour demi-journée (am/pm), sinon calcule le nombre de jours
+        selon les règles spécifiques au site (France vs Tunisie).
         """
         if self.demi_jour in ["am", "pm"]:
             return 0.5
-        return (self.end_date - self.start_date).days + 1
+        
+        # Calcul selon le site de l'utilisateur
+        if hasattr(self.user, 'profile') and self.user.profile.site == 'france':
+            # France : jours ouvrables avec règle spéciale vendredi-samedi
+            from datetime import timedelta
+            
+            total_days = 0
+            current_date = self.start_date
+            
+            while current_date <= self.end_date:
+                weekday = current_date.weekday()
+                
+                if weekday < 5:  # lundi à vendredi
+                    total_days += 1
+                    
+                    # Règle spéciale : si c'est un vendredi, le samedi suivant est automatiquement congé
+                    if weekday == 4:  # vendredi
+                        saturday = current_date + timedelta(days=1)
+                        # Vérifier si le samedi est dans la période OU le vendredi est le dernier jour de la demande
+                        if saturday <= self.end_date or current_date == self.end_date:
+                            total_days += 1  # ajouter le samedi automatiquement
+                            
+                elif weekday == 5:  # samedi
+                    # Samedi uniquement s'il n'a pas déjà été compté avec un vendredi précédent
+                    previous_day = current_date - timedelta(days=1)
+                    if previous_day < self.start_date or previous_day.weekday() != 4:
+                        total_days += 1
+                        
+                current_date += timedelta(days=1)
+                
+            return total_days
+        else:
+            # Tunisie : jours ouvrés (lundi-vendredi uniquement)
+            from datetime import timedelta
+            
+            total_days = 0
+            current_date = self.start_date
+            while current_date <= self.end_date:
+                if current_date.weekday() < 5:  # lundi à vendredi
+                    total_days += 1
+                current_date += timedelta(days=1)
+            return total_days
 
 
 class TeleworkRequest(models.Model):
@@ -112,16 +159,79 @@ class TeleworkRequest(models.Model):
     manager_validated = models.BooleanField(
         default=False, help_text="Validation du manager"
     )
+    rh_validated = models.BooleanField(default=False, help_text="Validation RH")
 
     def __str__(self):
         if self.start_date == self.end_date:
-            return (
-                f"Télétravail {self.user.username} le {self.start_date} ({self.status})"
+            return "Télétravail %s le %s (%s)" % (
+                self.user.username,
+                self.start_date,
+                self.status,
             )
-        return f"Télétravail {self.user.username} du {self.start_date} au {self.end_date} ({self.status})"
+        return "Télétravail %s du %s au %s (%s)" % (
+            self.user.username,
+            self.start_date,
+            self.end_date,
+            self.status,
+        )
 
     class Meta:
         ordering = ["-start_date"]
+
+
+class OverTimeRequest(models.Model):
+    """
+    Modèle pour les demandes d'heures supplémentaires (weekend en télétravail).
+    - Gère les heures travaillées durant les weekends
+    - Statuts et validation manager/RH
+    """
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="overtime_requests"
+    )
+    work_date = models.DateField(help_text="Date de travail (samedi ou dimanche)")
+    hours = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        help_text="Nombre d'heures travaillées"
+    )
+    description = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Description du travail effectué"
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    
+    STATUS_CHOICES = [
+        ("pending", "En attente"),
+        ("approved", "Approuvée"),
+        ("rejected", "Rejetée"),
+        ("cancelled", "Annulée"),
+    ]
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="pending",
+        help_text="Statut de la demande",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    manager_validated = models.BooleanField(
+        default=False, help_text="Validation du manager"
+    )
+    rh_validated = models.BooleanField(default=False, help_text="Validation RH")
+
+    def clean(self):
+        """Validation : s'assurer que la date est un weekend"""
+        from django.core.exceptions import ValidationError
+        if self.work_date and self.work_date.weekday() not in [5, 6]:  # Samedi=5, Dimanche=6
+            raise ValidationError("Les heures supplémentaires ne peuvent être déclarées que pour les weekends (samedi/dimanche)")
+
+    def __str__(self):
+        return f"Heures supplémentaires {self.user.username} - {self.work_date} ({self.hours}h) - {self.status}"
+
+    class Meta:
+        ordering = ["-work_date"]
+        unique_together = ("user", "work_date")  # Un seul enregistrement par utilisateur/date
 
 
 # Profil utilisateur pour gérer les rôles et rattachements
@@ -156,179 +266,328 @@ class UserProfile(models.Model):
         related_name="rh_users",
     )
     site = models.CharField(max_length=10, choices=SITE_CHOICES, default="tunisie")
-    carry_over = models.DecimalField(
-        max_digits=5,
-        decimal_places=1,
-        default=0.0,
-        help_text="Report manuel de congés de l'année précédente",
-    )
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
 
 
-def get_leave_balance(user):
+class Document(models.Model):
     """
-    Version optimisée avec cache pour le calcul de solde de congés.
-    Utilise le système de cache pour éviter les recalculs répétitifs.
+    Modèle pour la gestion des documents.
+    - Gère l'upload et le téléchargement de documents OU des liens
+    - Permet de définir qui peut accéder aux documents
+    - Gestion des catégories de documents
     """
-    from .cache_managers import OptimizedLeaveManager
+    
+    CATEGORY_CHOICES = [
+        ("payslip", "Fiche de paie"),
+        ("certificate", "Attestation de travail"),
+        ("note", "Note générale"),
+        ("policy", "Politique d'entreprise"),
+        ("form", "Formulaire"),
+        ("link", "Lien externe"),
+        ("other", "Autre"),
+    ]
+    
+    TARGET_CHOICES = [
+        ("all", "Tout le monde"),
+        ("specific", "Personnes spécifiques"),
+        ("role", "Par rôle"),
+    ]
 
-    # Utiliser le gestionnaire optimisé avec cache
-    return OptimizedLeaveManager.get_or_calculate_balance(user)
-
-
-def get_leave_balance_detailed(user):
-    """
-    Calcule le solde de congés pour un utilisateur selon les nouvelles règles :
-    - Période de référence : 1er juin N-1 au 31 mai N
-    - Tunisie : 1.8 jours/mois, jours ouvrés seulement
-    - France : 2.5 jours/mois, jours ouvrables (vendredi seul = vendredi + samedi)
-    Version détaillée sans cache pour les besoins spécifiques.
-    """
-    today = date.today()
-
-    # Période de référence : 1er juin de l'année précédente au 31 mai de l'année en cours
-    if today.month >= 6:  # juin à décembre
-        period_start = date(today.year, 6, 1)
-        period_end = date(today.year + 1, 5, 31)
-        current_period_year = today.year
-    else:  # janvier à mai
-        period_start = date(today.year - 1, 6, 1)
-        period_end = date(today.year, 5, 31)
-        current_period_year = today.year - 1
-
-    # Date d'embauche
-    date_joined = (
-        user.date_joined.date() if hasattr(user, "date_joined") else period_start
+    TYPE_CHOICES = [
+        ("file", "Fichier"),
+        ("link", "Lien"),
+    ]
+    
+    title = models.CharField(max_length=200, help_text="Titre du document")
+    description = models.TextField(blank=True, null=True, help_text="Description du document")
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default="other",
+        help_text="Catégorie du document"
     )
+    
+    # Type de document : fichier ou lien
+    document_type = models.CharField(
+        max_length=10,
+        choices=TYPE_CHOICES,
+        default="file",
+        help_text="Type de document : fichier ou lien"
+    )
+    
+    # Fichier (optionnel si c'est un lien)
+    file = models.FileField(
+        upload_to="documents/%Y/%m/",
+        blank=True,
+        null=True,
+        help_text="Fichier du document (requis si type=fichier)"
+    )
+    
+    # Lien (optionnel si c'est un fichier)
+    link_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="URL du lien (requis si type=lien)"
+    )
+    
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="uploaded_documents",
+        help_text="Utilisateur qui a uploadé le document"
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Gestion des accès
+    target_type = models.CharField(
+        max_length=10,
+        choices=TARGET_CHOICES,
+        default="all",
+        help_text="Type de ciblage"
+    )
+    target_users = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="accessible_documents",
+        help_text="Utilisateurs spécifiques ayant accès"
+    )
+    target_roles = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Rôles ayant accès (séparés par des virgules)"
+    )
+    
+    # Métadonnées
+    is_active = models.BooleanField(default=True, help_text="Document actif")
+    download_count = models.PositiveIntegerField(default=0, help_text="Nombre de téléchargements/clics")
+    
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = "Document"
+        verbose_name_plural = "Documents"
+    
+    def clean(self):
+        """Validation des champs"""
+        from django.core.exceptions import ValidationError
+        
+        if self.document_type == "file" and not self.file:
+            raise ValidationError("Un fichier est requis si le type est 'fichier'")
+        elif self.document_type == "link" and not self.link_url:
+            raise ValidationError("Une URL est requise si le type est 'lien'")
+        elif self.document_type == "file" and self.link_url:
+            raise ValidationError("Ne peut pas avoir à la fois un fichier ET un lien")
+        elif self.document_type == "link" and self.file:
+            raise ValidationError("Ne peut pas avoir à la fois un lien ET un fichier")
+    
+    def save(self, *args, **kwargs):
+        """Override save pour validation"""
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        type_label = "📎" if self.document_type == "file" else "🔗"
+        return f"{type_label} {self.title} ({self.category})"
+    
+    def can_user_access(self, user):
+        """Vérifie si un utilisateur peut accéder à ce document"""
+        if not self.is_active:
+            return False
+            
+        # L'uploader peut toujours accéder
+        if self.uploaded_by == user:
+            return True
+            
+        # Si c'est pour tout le monde
+        if self.target_type == "all":
+            return True
+            
+        # Si c'est pour des utilisateurs spécifiques
+        if self.target_type == "specific":
+            return self.target_users.filter(id=user.id).exists()
+            
+        # Si c'est par rôle
+        if self.target_type == "role" and hasattr(user, "profile"):
+            if self.target_roles:
+                roles = [role.strip() for role in self.target_roles.split(",")]
+                return user.profile.role in roles
+                
+        return False
+    
+    def increment_download_count(self):
+        """Incrémente le compteur de téléchargements"""
+        self.download_count += 1
+        self.save(update_fields=["download_count"])
 
-    # Début effectif de travail dans la période
+
+class DocumentDownload(models.Model):
+    """
+    Modèle pour tracer les téléchargements de documents
+    """
+    document = models.ForeignKey(
+        Document,
+        on_delete=models.CASCADE,
+        related_name="downloads"
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="document_downloads"
+    )
+    downloaded_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ["-downloaded_at"]
+        verbose_name = "Téléchargement de document"
+        verbose_name_plural = "Téléchargements de documents"
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.document.title} - {self.downloaded_at}"
+
+
+def get_leave_balance(user, period_start=None):
+    """
+    Récupère le solde de congés depuis la nouvelle table UserLeaveBalance.
+    Si le solde n'existe pas, le crée avec les règles de calcul.
+    
+    Args:
+        user: L'utilisateur
+        period_start: Date de début de période spécifique (optionnel)
+    """
+    from datetime import date
+    
+    if period_start is None:
+        today = date.today()
+        
+        # Déterminer les dates de période de référence
+        if today.month >= 6:  # juin à décembre
+            period_start = date(today.year, 6, 1)
+            period_end = date(today.year + 1, 5, 31)
+        else:  # janvier à mai
+            period_start = date(today.year - 1, 6, 1)
+            period_end = date(today.year, 5, 31)
+    else:
+        # Calculer period_end basé sur period_start
+        period_end = date(period_start.year + 1, 5, 31)
+    
+    # Récupérer le solde existant
+    try:
+        balance = UserLeaveBalance.objects.get(
+            user=user,
+            period_start=period_start
+        )
+        # Mettre à jour les jours pris au cas où il y aurait eu des changements
+        balance.update_taken_days()
+        created = False
+    except UserLeaveBalance.DoesNotExist:
+        # Créer un nouveau solde avec calcul automatique initial
+        balance, created = UserLeaveBalance.objects.get_or_create(
+            user=user,
+            period_start=period_start,
+            defaults={
+                'period_end': period_end,
+                'days_acquired': _calculate_acquired_days_new(user, period_start, period_end),
+                'days_taken': 0,
+                'days_carry_over': _get_carry_over_new(user, period_start),
+            }
+        )
+        
+        # Si créé, recalculer les jours pris depuis le début de la période
+        if created:
+            balance.update_taken_days()
+    
+    return {
+        'remaining': balance.days_remaining,
+        'acquired': balance.days_acquired,
+        'taken': balance.days_taken,
+        'carry_over': balance.days_carry_over,
+        'total': balance.total_available,
+        'period_start': balance.period_start,
+        'period_end': balance.period_end,
+        'balance': balance.days_remaining,  # alias pour compatibilité
+        'report': balance.days_carry_over,  # alias pour compatibilité
+    }
+
+
+def _calculate_acquired_days_new(user, period_start, period_end):
+    """Calcule les jours acquis pour une période donnée avec les nouvelles dates"""
+    if not hasattr(user, 'profile'):
+        return 0
+    
+    site = user.profile.site
+    today = date.today()
+    
+    # Date d'embauche effective
+    date_joined = user.date_joined.date() if hasattr(user, 'date_joined') else period_start
     work_start = max(period_start, date_joined)
     work_end = min(period_end, today)
+    
+    if work_start > work_end:
+        return 0
+    
+    # Calcul des mois travaillés
+    months_worked = 0
+    current_date = work_start.replace(day=1)  # Premier du mois de début
+    
+    while current_date <= work_end:
+        # Si on a travaillé au moins 15 jours dans le mois, on compte le mois entier
+        month_start = current_date
+        if current_date.month == 12:
+            month_end = current_date.replace(year=current_date.year + 1, month=1, day=1) - timedelta(days=1)
+        else:
+            month_end = current_date.replace(month=current_date.month + 1, day=1) - timedelta(days=1)
+        
+        actual_work_start = max(work_start, month_start)
+        actual_work_end = min(work_end, month_end)
+        
+        days_in_month = (actual_work_end - actual_work_start).days + 1
+        
+        if days_in_month >= 15:
+            months_worked += 1
+        elif days_in_month >= 1:  # Calcul proportionnel pour les mois partiels
+            days_in_full_month = (month_end - month_start).days + 1
+            months_worked += days_in_month / days_in_full_month
+        
+        # Passer au mois suivant
+        if current_date.month == 12:
+            current_date = current_date.replace(year=current_date.year + 1, month=1)
+        else:
+            current_date = current_date.replace(month=current_date.month + 1)
+    
+    # Règles de calcul par site
+    if site == 'tunisie':
+        # Tunisie : 1.8 jours par mois travaillé (21.6 jours/an)
+        acquired_days = months_worked * 1.8
+    else:  # france
+        # France : 2.5 jours par mois travaillé (30 jours/an)
+        acquired_days = months_worked * 2.5
+    
+    from decimal import Decimal
+    return Decimal(str(round(acquired_days, 1)))
 
-    # Récupère le site (Tunisie/France)
-    site = (
-        getattr(user.profile, "site", "tunisie").lower()
-        if hasattr(user, "profile")
-        else "tunisie"
-    )
 
-    # Calcul des mois travaillés dans la période de référence
-    if work_start <= work_end:
-        months_worked = (
-            (work_end.year - work_start.year) * 12
-            + work_end.month
-            - work_start.month
-            + 1
+def _get_carry_over_new(user, period_start):
+    """Calcule le report de congés de la période précédente"""
+    # Période précédente
+    prev_period_start = date(period_start.year - 1, 6, 1)
+    
+    try:
+        prev_balance = UserLeaveBalance.objects.get(
+            user=user,
+            period_start=prev_period_start
         )
-    else:
-        months_worked = 0
-
-    # Jours acquis selon le site
-    days_per_month = 2.5 if site == "france" else 1.8
-    days_acquired = round(max(0, months_worked * days_per_month), 1)
-
-    # Fonction pour calculer les jours de congé selon les règles du site
-    def calculate_leave_days(leave):
-        if leave.demi_jour != "full" and leave.start_date == leave.end_date:
-            return 0.5
-
-        # Pour la France : règle des jours ouvrables
-        if site == "france":
-            leave_dates = []
-            current_date = leave.start_date
-            while current_date <= leave.end_date:
-                leave_dates.append(current_date)
-                current_date += timedelta(days=1)
-
-            # Calcul spécial pour la France
-            total_days = 0
-            cal_fr = France()
-            holidays = set(dt for dt, _ in cal_fr.holidays(leave.start_date.year))
-
-            for leave_date in leave_dates:
-                total_days += 1
-                # Si c'est un vendredi et que le samedi n'est pas déjà dans la période de congé
-                if (
-                    leave_date.weekday() == 4  # vendredi
-                    and leave_date + timedelta(days=1) not in leave_dates
-                ):
-                    total_days += 1  # ajouter le samedi
-                # Si c'est un jeudi et que le vendredi est férié et samedi pas dans congé
-                elif (
-                    leave_date.weekday() == 3  # jeudi
-                    and leave_date + timedelta(days=1) in holidays  # vendredi férié
-                    and leave_date + timedelta(days=2) not in leave_dates
-                ):  # samedi pas en congé
-                    total_days += 1  # ajouter le samedi
-
-            return total_days
-        else:
-            # Pour la Tunisie : jours ouvrés seulement (lundi-vendredi)
-            total_days = 0
-            current_date = leave.start_date
-            while current_date <= leave.end_date:
-                if current_date.weekday() < 5:  # lundi à vendredi seulement
-                    total_days += 1
-                current_date += timedelta(days=1)
-            return total_days
-
-    # Jours pris dans la période de référence actuelle
-    leaves_current = user.leave_requests.filter(
-        status="approved", start_date__gte=period_start, start_date__lte=period_end
-    )
-    days_taken = sum([calculate_leave_days(leave) for leave in leaves_current])
-
-    # Report de la période précédente (manuel si défini, sinon calculé)
-    if hasattr(user, "profile") and user.profile.carry_over > 0:
-        report = float(user.profile.carry_over)
-    else:
-        prev_period_start = date(current_period_year - 1, 6, 1)
-        prev_period_end = date(current_period_year, 5, 31)
-
-        # Calcul des congés de la période précédente
-        prev_work_start = max(prev_period_start, date_joined)
-        prev_work_end = min(prev_period_end, date(current_period_year, 5, 31))
-
-        if prev_work_start <= prev_work_end:
-            prev_months_worked = (
-                (prev_work_end.year - prev_work_start.year) * 12
-                + prev_work_end.month
-                - prev_work_start.month
-                + 1
-            )
-            prev_days_acquired = round(max(0, prev_months_worked * days_per_month), 1)
-
-            # Congés pris dans la période précédente
-            prev_leaves = user.leave_requests.filter(
-                status="approved",
-                start_date__gte=prev_period_start,
-                start_date__lte=prev_period_end,
-            )
-            prev_days_taken = sum(
-                [calculate_leave_days(leave) for leave in prev_leaves]
-            )
-            report = max(0, round(prev_days_acquired - prev_days_taken, 1))
-        else:
-            report = 0
-
-    # Jours à prendre avant le 30 avril (fin de période de report)
-    must_take_before_april = report if today <= date(today.year, 4, 30) else 0
-
-    # Solde restant
-    balance = round(days_acquired + report - days_taken, 1)
-
-    return {
-        "acquired": days_acquired,
-        "taken": days_taken,
-        "balance": balance,
-        "report": report,
-        "must_take_before_april": must_take_before_april,
-        "site": site,
-        "period_start": period_start,
-        "period_end": period_end,
-    }
+        # Report limité à 5 jours maximum
+        carry_over = min(5.0, max(0, float(prev_balance.days_remaining)))
+        from decimal import Decimal
+        return Decimal(str(carry_over))
+    except UserLeaveBalance.DoesNotExist:
+        # Pas de période précédente, pas de report
+        from decimal import Decimal
+        return Decimal('0')
 
 
 class StockItem(models.Model):
@@ -362,82 +621,370 @@ class StockMovement(models.Model):
 # =====================
 
 
-class UserLeaveBalanceCache(models.Model):
-    """
-    Cache des soldes de congés par utilisateur et par année.
-    Évite les recalculs répétitifs des soldes (acquis, pris, report, restant).
-    """
+# =====================
+# Nouveaux modèles pour remplacer le système de cache
+# =====================
 
+
+class MonthlyUserStats(models.Model):
+    """
+    Table pour stocker les statistiques mensuelles de chaque utilisateur.
+    Remplace le système de cache pour les rapports mensuels.
+    """
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="leave_balance_cache"
+        User,
+        on_delete=models.CASCADE,
+        related_name="monthly_stats",
+        help_text="Utilisateur concerné"
     )
-    year = models.IntegerField()
-    acquired_days = models.DecimalField(
-        max_digits=4, decimal_places=1, default=0, help_text="Jours acquis dans l'année"
+    
+    year = models.IntegerField(help_text="Année")
+    month = models.IntegerField(help_text="Mois (1-12)")
+    
+    # Statistiques de présence
+    days_at_office = models.IntegerField(
+        default=0,
+        help_text="Nombre de jours travaillés au bureau"
     )
-    taken_days = models.DecimalField(
-        max_digits=4, decimal_places=1, default=0, help_text="Jours pris dans l'année"
+    days_telework = models.IntegerField(
+        default=0,
+        help_text="Nombre de jours en télétravail"
     )
-    carry_over_days = models.DecimalField(
+    days_leave = models.DecimalField(
         max_digits=4,
         decimal_places=1,
         default=0,
-        help_text="Report de l'année précédente",
+        help_text="Nombre de jours de congés pris"
     )
-    remaining_days = models.DecimalField(
-        max_digits=4, decimal_places=1, default=0, help_text="Solde restant"
+    
+    # Heures supplémentaires (télétravail weekend)
+    overtime_hours = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        default=0,
+        help_text="Heures supplémentaires travaillées (weekend, télétravail)"
     )
-    last_updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ("user", "year")
-        indexes = [
-            models.Index(fields=["user", "year"], name="idx_balance_user_year"),
-            models.Index(fields=["last_updated"], name="idx_balance_updated"),
-        ]
-        verbose_name = "Cache solde congés"
-        verbose_name_plural = "Cache soldes congés"
-
-    def __str__(self):
-        return f"{self.user.username} - {self.year} (Restant: {self.remaining_days}j)"
-
-
-class UserMonthlyReportCache(models.Model):
-    """
-    Cache des rapports mensuels par utilisateur.
-    Stocke les calculs de jours au bureau, télétravail, congés pour éviter les recalculs.
-    """
-
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="monthly_report_cache"
-    )
-    year = models.IntegerField()
-    month = models.IntegerField()
-    days_at_office = models.IntegerField(
-        default=0, help_text="Jours travaillés au bureau"
-    )
-    days_telework = models.IntegerField(default=0, help_text="Jours en télétravail")
-    days_leave = models.DecimalField(
-        max_digits=4, decimal_places=1, default=0, help_text="Jours de congés pris"
-    )
+    
+    # Informations complémentaires
     total_workdays = models.IntegerField(
-        default=0, help_text="Total jours ouvrés du mois"
+        default=0,
+        help_text="Total des jours ouvrés dans le mois"
     )
+    holidays_count = models.IntegerField(
+        default=0,
+        help_text="Nombre de jours fériés dans le mois"
+    )
+    
+    # Métadonnées
     last_updated = models.DateTimeField(auto_now=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
         unique_together = ("user", "year", "month")
         indexes = [
-            models.Index(
-                fields=["user", "year", "month"], name="idx_monthly_user_period"
-            ),
-            models.Index(fields=["last_updated"], name="idx_monthly_updated"),
+            models.Index(fields=["user", "year", "month"], name="idx_stats_user_period"),
+            models.Index(fields=["year", "month"], name="idx_stats_period"),
+            models.Index(fields=["last_updated"], name="idx_stats_updated"),
         ]
-        verbose_name = "Cache rapport mensuel"
-        verbose_name_plural = "Cache rapports mensuels"
-
+        verbose_name = "Statistiques mensuelles utilisateur"
+        verbose_name_plural = "Statistiques mensuelles utilisateurs"
+        ordering = ["-year", "-month", "user__last_name", "user__first_name"]
+    
+    @property
+    def total_working_days(self):
+        """Total des jours travaillés (bureau + télétravail)"""
+        return self.days_at_office + self.days_telework
+    
+    @property
+    def attendance_rate(self):
+        """Taux de présence (%)"""
+        if self.total_workdays == 0:
+            return 0
+        return round((self.total_working_days / self.total_workdays) * 100, 1)
+    
     def __str__(self):
         return f"{self.user.username} - {self.year}/{self.month:02d} (Bureau: {self.days_at_office}j, TT: {self.days_telework}j)"
+    
+    def add_office_day(self):
+        """Ajoute un jour de bureau"""
+        self.days_at_office += 1
+        self.save()
+    
+    def add_telework_day(self):
+        """Ajoute un jour de télétravail"""
+        self.days_telework += 1
+        self.save()
+    
+    def add_leave_days(self, days):
+        """Ajoute des jours de congés"""
+        self.days_leave += days
+        self.save()
+    
+    def add_overtime_hours(self, hours):
+        """Ajoute des heures supplémentaires"""
+        self.overtime_hours += hours
+        self.save()
+    
+    def update_from_requests(self):
+        """Met à jour les statistiques basées sur les demandes approuvées du mois"""
+        from datetime import date
+        from decimal import Decimal
+        from workalendar.europe import France
+        
+        # Dates du mois
+        start_date = date(self.year, self.month, 1)
+        if self.month == 12:
+            end_date = date(self.year + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(self.year, self.month + 1, 1) - timedelta(days=1)
+        
+        # Jours fériés du mois
+        france_calendar = France()
+        holidays = set()
+        current_date = start_date
+        while current_date <= end_date:
+            if france_calendar.is_holiday(current_date):
+                holidays.add(current_date)
+            current_date += timedelta(days=1)
+        
+        # Congés approuvés du mois
+        LeaveRequestModel = self.__class__._meta.apps.get_model('extranet', 'LeaveRequest')
+        leaves = LeaveRequestModel.objects.filter(
+            user=self.user,
+            status='approved',
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+        
+        total_leave_days = Decimal('0')
+        demi_jour_days = set()
+        leave_days = set()
+        
+        for leave in leaves:
+            # Intersection avec le mois
+            leave_start = max(leave.start_date, start_date)
+            leave_end = min(leave.end_date, end_date)
+            
+            if leave.demi_jour in ['am', 'pm']:
+                if leave_start == leave_end:  # Demi-journée dans le mois
+                    total_leave_days += Decimal('0.5')
+                    demi_jour_days.add(leave_start)
+            else:
+                # Jours complets
+                current_date = leave_start
+                while current_date <= leave_end:
+                    if current_date.weekday() < 5:  # jours ouvrés
+                        total_leave_days += Decimal('1')
+                        leave_days.add(current_date)
+                    current_date += timedelta(days=1)
+        
+        # Télétravail approuvé du mois
+        TeleworkRequestModel = self.__class__._meta.apps.get_model('extranet', 'TeleworkRequest')
+        teleworks = TeleworkRequestModel.objects.filter(
+            user=self.user,
+            status='approved',
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+        
+        total_telework_days = 0
+        telework_days = set()
+        
+        for telework in teleworks:
+            # Intersection avec le mois
+            telework_start = max(telework.start_date, start_date)
+            telework_end = min(telework.end_date, end_date)
+            
+            # Compter les jours ouvrés
+            current_date = telework_start
+            while current_date <= telework_end:
+                if current_date.weekday() < 5:  # lundi à vendredi
+                    total_telework_days += 1
+                    telework_days.add(current_date)
+                current_date += timedelta(days=1)
+        
+        # Heures supplémentaires approuvées du mois
+        OverTimeRequestModel = self.__class__._meta.apps.get_model('extranet', 'OverTimeRequest')
+        overtimes = OverTimeRequestModel.objects.filter(
+            user=self.user,
+            status='approved',
+            work_date__gte=start_date,
+            work_date__lte=end_date
+        )
+        
+        total_overtime_hours = sum(overtime.hours for overtime in overtimes)
+        
+        # Calculer les jours au bureau (jours ouvrés - congés - télétravail - fériés)
+        total_workdays_month = 0
+        office_days = 0
+        today = date.today()
+        
+        current_date = start_date
+        while current_date <= end_date:
+            if current_date.weekday() < 5:  # lundi à vendredi
+                total_workdays_month += 1
+                
+                # Seuls les jours passés ou actuels comptent pour les jours au bureau
+                if current_date <= today:
+                    # Exclure les jours fériés, congés (complets et demi-journées) et télétravail
+                    if (current_date not in holidays and 
+                        current_date not in leave_days and 
+                        current_date not in demi_jour_days and 
+                        current_date not in telework_days):
+                        office_days += 1
+                        
+            current_date += timedelta(days=1)
+        
+        # Mettre à jour les champs
+        self.days_leave = total_leave_days
+        self.days_telework = total_telework_days
+        self.days_at_office = office_days
+        self.total_workdays = total_workdays_month
+        self.holidays_count = len([d for d in holidays if d.month == self.month])
+        self.overtime_hours = total_overtime_hours
+        self.save()
+    
+    def remove_leave_days(self, days):
+        """Retire des jours de congés"""
+        self.days_leave = max(0, self.days_leave - days)
+        self.save()
+
+
+# =====================
+# Nouveaux modèles pour la gestion des congés et statistiques
+# =====================
+
+class UserLeaveBalance(models.Model):
+    """
+    Modèle pour gérer les soldes de congés par utilisateur.
+    Remplace le système de cache et gère les acquis/pris/à prendre.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="leave_balances",
+        help_text="Utilisateur associé à ce solde"
+    )
+    
+    # Période de référence
+    period_start = models.DateField(
+        help_text="Date de début de la période de référence (01/06)"
+    )
+    period_end = models.DateField(
+        help_text="Date de fin de la période de référence (31/05)"
+    )
+    
+    # Congés
+    days_acquired = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        default=0,
+        help_text="Jours de congés acquis dans la période"
+    )
+    days_taken = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        default=0,
+        help_text="Jours de congés pris dans la période"
+    )
+    days_carry_over = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        default=0,
+        help_text="Report de la période précédente"
+    )
+    
+    # Métadonnées
+    last_updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Solde de congés utilisateur"
+        verbose_name_plural = "Soldes de congés utilisateurs"
+        ordering = ['-period_start', 'user__last_name', 'user__first_name']
+        unique_together = ['user', 'period_start']
+    
+    @property
+    def days_remaining(self):
+        """Calcule les jours de congés restants"""
+        from decimal import Decimal
+        
+        # S'assurer que toutes les valeurs sont des Decimal ou 0
+        acquired = self.days_acquired or Decimal('0')
+        carry_over = self.days_carry_over or Decimal('0')
+        taken = self.days_taken or Decimal('0')
+        
+        return acquired + carry_over - taken
+    
+    @property
+    def total_available(self):
+        """Total des jours disponibles (acquis + report)"""
+        from decimal import Decimal
+        
+        # S'assurer que toutes les valeurs sont des Decimal ou 0
+        acquired = self.days_acquired or Decimal('0')
+        carry_over = self.days_carry_over or Decimal('0')
+        
+        return acquired + carry_over
+    
+    def update_taken_days(self):
+        """Met à jour le nombre de jours pris basé sur les demandes approuvées"""
+        from decimal import Decimal
+        
+        approved_leaves = self.user.leave_requests.filter(
+            status='approved',
+            start_date__gte=self.period_start,
+            start_date__lte=self.period_end
+        )
+        
+        total_taken = Decimal('0')
+        for leave in approved_leaves:
+            if leave.demi_jour in ['am', 'pm']:
+                total_taken += Decimal('0.5')
+            else:
+                # Calcul selon le site
+                if hasattr(self.user, 'profile') and self.user.profile.site == 'france':
+                    # France : jours ouvrables avec règle spéciale vendredi-samedi
+                    total_days = 0
+                    current_date = leave.start_date
+                    
+                    while current_date <= leave.end_date:
+                        weekday = current_date.weekday()
+                        
+                        if weekday < 5:  # lundi à vendredi
+                            total_days += 1
+                            
+                            # Règle spéciale : si c'est un vendredi, le samedi suivant est automatiquement congé
+                            if weekday == 4:  # vendredi
+                                saturday = current_date + timedelta(days=1)
+                                # Vérifier si le samedi est dans la période OU le vendredi est le dernier jour de la demande
+                                if saturday <= leave.end_date or current_date == leave.end_date:
+                                    total_days += 1  # ajouter le samedi automatiquement
+                                    
+                        elif weekday == 5:  # samedi
+                            # Samedi uniquement s'il n'a pas déjà été compté avec un vendredi précédent
+                            previous_day = current_date - timedelta(days=1)
+                            if previous_day < leave.start_date or previous_day.weekday() != 4:
+                                total_days += 1
+                                
+                        current_date += timedelta(days=1)
+                        
+                    total_taken += Decimal(str(total_days))
+                else:
+                    # Tunisie : jours ouvrés (lundi-vendredi)
+                    total_days = 0
+                    current_date = leave.start_date
+                    while current_date <= leave.end_date:
+                        if current_date.weekday() < 5:
+                            total_days += 1
+                        current_date += timedelta(days=1)
+                    total_taken += Decimal(str(total_days))
+        
+        self.days_taken = total_taken
+        self.save()
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.period_start.year}/{self.period_start.year+1} (Restant: {self.days_remaining}j)"
 
 
 register = template.Library()
@@ -446,7 +993,8 @@ register = template.Library()
 @register.filter
 def get_nb_days(leave):
     """
-    Retourne 0.5 si demi-journée (am/pm), sinon le nombre de jours calendaires entre start_date et end_date inclus.
+    Retourne 0.5 si demi-journée (am/pm), sinon le nombre de jours calendaires
+    entre start_date et end_date inclus.
     """
     if leave.demi_jour in ["am", "pm"]:
         return 0.5

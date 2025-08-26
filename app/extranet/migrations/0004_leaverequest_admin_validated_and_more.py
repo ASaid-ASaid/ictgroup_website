@@ -16,30 +16,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="leaverequest",
             name="admin_validated",
-            field=models.BooleanField(
-                default=False, help_text="Validation admin"
-            ),
+            field=models.BooleanField(default=False, help_text="Validation admin"),
         ),
         migrations.AddField(
             model_name="leaverequest",
             name="manager_validated",
-            field=models.BooleanField(
-                default=False, help_text="Validation du manager"
-            ),
+            field=models.BooleanField(default=False, help_text="Validation du manager"),
         ),
         migrations.AddField(
             model_name="leaverequest",
             name="rh_validated",
-            field=models.BooleanField(
-                default=False, help_text="Validation RH"
-            ),
+            field=models.BooleanField(default=False, help_text="Validation RH"),
         ),
         migrations.AddField(
             model_name="teleworkrequest",
             name="manager_validated",
-            field=models.BooleanField(
-                default=False, help_text="Validation du manager"
-            ),
+            field=models.BooleanField(default=False, help_text="Validation du manager"),
         ),
         migrations.AlterField(
             model_name="leaverequest",

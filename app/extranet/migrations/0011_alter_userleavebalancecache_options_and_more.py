@@ -8,77 +8,121 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0010_performance_optimizations'),
+        ("extranet", "0010_performance_optimizations"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='userleavebalancecache',
-            options={'verbose_name': 'Cache solde congés', 'verbose_name_plural': 'Cache soldes congés'},
+            name="userleavebalancecache",
+            options={
+                "verbose_name": "Cache solde congés",
+                "verbose_name_plural": "Cache soldes congés",
+            },
         ),
         migrations.AlterModelOptions(
-            name='usermonthlyreportcache',
-            options={'verbose_name': 'Cache rapport mensuel', 'verbose_name_plural': 'Cache rapports mensuels'},
+            name="usermonthlyreportcache",
+            options={
+                "verbose_name": "Cache rapport mensuel",
+                "verbose_name_plural": "Cache rapports mensuels",
+            },
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='acquired_days',
-            field=models.DecimalField(decimal_places=1, default=0, help_text="Jours acquis dans l'année", max_digits=4),
+            model_name="userleavebalancecache",
+            name="acquired_days",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=0,
+                help_text="Jours acquis dans l'année",
+                max_digits=4,
+            ),
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='carry_over_days',
-            field=models.DecimalField(decimal_places=1, default=0, help_text="Report de l'année précédente", max_digits=4),
+            model_name="userleavebalancecache",
+            name="carry_over_days",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=0,
+                help_text="Report de l'année précédente",
+                max_digits=4,
+            ),
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="userleavebalancecache",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='remaining_days',
-            field=models.DecimalField(decimal_places=1, default=0, help_text='Solde restant', max_digits=4),
+            model_name="userleavebalancecache",
+            name="remaining_days",
+            field=models.DecimalField(
+                decimal_places=1, default=0, help_text="Solde restant", max_digits=4
+            ),
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='taken_days',
-            field=models.DecimalField(decimal_places=1, default=0, help_text="Jours pris dans l'année", max_digits=4),
+            model_name="userleavebalancecache",
+            name="taken_days",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=0,
+                help_text="Jours pris dans l'année",
+                max_digits=4,
+            ),
         ),
         migrations.AlterField(
-            model_name='userleavebalancecache',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='leave_balance_cache', to=settings.AUTH_USER_MODEL),
+            model_name="userleavebalancecache",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="leave_balance_cache",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='days_at_office',
-            field=models.IntegerField(default=0, help_text='Jours travaillés au bureau'),
+            model_name="usermonthlyreportcache",
+            name="days_at_office",
+            field=models.IntegerField(
+                default=0, help_text="Jours travaillés au bureau"
+            ),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='days_leave',
-            field=models.DecimalField(decimal_places=1, default=0, help_text='Jours de congés pris', max_digits=4),
+            model_name="usermonthlyreportcache",
+            name="days_leave",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=0,
+                help_text="Jours de congés pris",
+                max_digits=4,
+            ),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='days_telework',
-            field=models.IntegerField(default=0, help_text='Jours en télétravail'),
+            model_name="usermonthlyreportcache",
+            name="days_telework",
+            field=models.IntegerField(default=0, help_text="Jours en télétravail"),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="usermonthlyreportcache",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='total_workdays',
-            field=models.IntegerField(default=0, help_text='Total jours ouvrés du mois'),
+            model_name="usermonthlyreportcache",
+            name="total_workdays",
+            field=models.IntegerField(
+                default=0, help_text="Total jours ouvrés du mois"
+            ),
         ),
         migrations.AlterField(
-            model_name='usermonthlyreportcache',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='monthly_report_cache', to=settings.AUTH_USER_MODEL),
+            model_name="usermonthlyreportcache",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="monthly_report_cache",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

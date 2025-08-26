@@ -93,3 +93,4 @@ Desktop.ini
 agent/
 temp/
 tmp/.venv
+.venv

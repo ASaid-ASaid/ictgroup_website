@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('extranet', '0008_stockitem_stockmovement'),
+        ("extranet", "0008_stockitem_stockmovement"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='carry_over',
-            field=models.DecimalField(decimal_places=1, default=0.0, help_text="Report manuel de congés de l'année précédente", max_digits=5),
+            model_name="userprofile",
+            name="carry_over",
+            field=models.DecimalField(
+                decimal_places=1,
+                default=0.0,
+                help_text="Report manuel de congés de l'année précédente",
+                max_digits=5,
+            ),
         ),
     ]

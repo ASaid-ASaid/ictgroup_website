@@ -1,0 +1,4 @@
+username,email,first_name,last_name,annual_leave_days,used_leave_days,year,month
+jdupont,j.dupont@ictgroup.fr,Jean,Dupont,25,5,2025,8
+mmartin,m.martin@ictgroup.fr,Marie,Martin,25,10,2025,8
+lbernard,l.bernard@ictgroup.fr,Luc,Bernard,25,2,2025,8

@@ -1,0 +1,285 @@
+{% extends 'extranet/base.html' %}
+
+{% block title %}Administration des Documents - ICTGROUP{% endblock %}
+
+{% block content %}
+<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold text-primary mb-2 tracking-tight">
+                📄 Administration des Documents
+            </h1>
+            <p class="text-gray-600">
+                Gérez tous les documents de l'entreprise
+            </p>
+        </div>
+        
+        <a href="{% url 'extranet:document_upload' %}" 
+           class="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transform hover:scale-105 shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nouveau document
+        </a>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-600 text-sm font-medium">Total Documents</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ stats.total_documents }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">📁</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-600 text-sm font-medium">Documents Actifs</p>
+                    <p class="text-2xl font-bold text-green-900">{{ stats.active_documents }}</p>
+                </div>
+                <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">✅</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-orange-600 text-sm font-medium">Total Téléchargements</p>
+                    <p class="text-2xl font-bold text-orange-900">{{ stats.total_downloads }}</p>
+                </div>
+                <div class="w-12 h-12 bg-orange-200 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">📥</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="bg-gray-50 p-6 rounded-xl mb-6">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search_query|default:'' }}" 
+                       placeholder="Rechercher un document..."
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+            </div>
+            <div class="md:w-48">
+                <select name="category" class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+                    <option value="">Toutes les catégories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="md:w-48">
+                <select name="status" class="w-full p-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+                    <option value="">Tous les statuts</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Actifs</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactifs</option>
+                </select>
+            </div>
+            <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium">
+                🔍 Filtrer
+            </button>
+        </form>
+    </div>
+
+    {% if documents %}
+        <!-- Tableau des documents -->
+        <div class="overflow-x-auto rounded-lg shadow-md">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploadé par</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accès</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléchargements</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for document in documents %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                                    {% if document.category == 'payslip' %}
+                                        <span class="text-xl">💰</span>
+                                    {% elif document.category == 'certificate' %}
+                                        <span class="text-xl">📋</span>
+                                    {% elif document.category == 'note' %}
+                                        <span class="text-xl">📝</span>
+                                    {% elif document.category == 'policy' %}
+                                        <span class="text-xl">📖</span>
+                                    {% elif document.category == 'form' %}
+                                        <span class="text-xl">📄</span>
+                                    {% else %}
+                                        <span class="text-xl">📁</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">{{ document.title }}</div>
+                                    {% if document.description %}
+                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ document.description }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if document.category == 'payslip' %}bg-green-100 text-green-800
+                                {% elif document.category == 'certificate' %}bg-blue-100 text-blue-800
+                                {% elif document.category == 'note' %}bg-yellow-100 text-yellow-800
+                                {% elif document.category == 'policy' %}bg-purple-100 text-purple-800
+                                {% elif document.category == 'form' %}bg-orange-100 text-orange-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ document.get_category_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ document.uploaded_by.get_full_name|default:document.uploaded_by.username }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if document.target_type == 'all' %}bg-green-100 text-green-800
+                                {% elif document.target_type == 'specific' %}bg-blue-100 text-blue-800
+                                {% else %}bg-orange-100 text-orange-800{% endif %}">
+                                {% if document.target_type == 'all' %}🌍 Public
+                                {% elif document.target_type == 'specific' %}👥 Privé
+                                {% else %}🏢 Par rôle{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ document.download_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if document.is_active %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✅ Actif
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    ❌ Inactif
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ document.uploaded_at|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'extranet:document_download' document.id %}" 
+                                   class="text-primary hover:text-primary/80 transition-colors"
+                                   title="Télécharger">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </a>
+                                
+                                <a href="{% url 'extranet:document_edit' document.id %}" 
+                                   class="text-blue-600 hover:text-blue-800 transition-colors"
+                                   title="Modifier">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </a>
+                                
+                                <form method="post" action="{% url 'extranet:document_toggle_status' document.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="{% if document.is_active %}text-yellow-600 hover:text-yellow-800{% else %}text-green-600 hover:text-green-800{% endif %} transition-colors"
+                                            title="{% if document.is_active %}Désactiver{% else %}Activer{% endif %}"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir {% if document.is_active %}désactiver{% else %}activer{% endif %} ce document ?')">
+                                        {% if document.is_active %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                                            </svg>
+                                        {% else %}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                                
+                                <form method="post" action="{% url 'extranet:document_delete' document.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="text-red-600 hover:text-red-800 transition-colors"
+                                            title="Supprimer"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if documents.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center gap-2">
+                {% if documents.has_previous %}
+                    <a href="?page={{ documents.previous_page_number }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                       class="px-3 py-2 text-gray-500 hover:text-primary transition-colors">Précédent</a>
+                {% endif %}
+
+                {% for num in documents.paginator.page_range %}
+                    {% if documents.number == num %}
+                        <span class="px-4 py-2 bg-primary text-white rounded-lg">{{ num }}</span>
+                    {% else %}
+                        <a href="?page={{ num }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                           class="px-4 py-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition-all">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if documents.has_next %}
+                    <a href="?page={{ documents.next_page_number }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                       class="px-3 py-2 text-gray-500 hover:text-primary transition-colors">Suivant</a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Aucun document -->
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="text-4xl">📁</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun document trouvé</h3>
+            <p class="text-gray-600 mb-6">
+                {% if search_query or category_filter or status_filter %}
+                    Aucun document ne correspond à vos critères de recherche.
+                {% else %}
+                    Il n'y a pas encore de documents dans le système.
+                {% endif %}
+            </p>
+            <a href="{% url 'extranet:document_upload' %}" 
+               class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Uploader le premier document
+            </a>
+        </div>
+    {% endif %}
+</main>
+{% endblock %}

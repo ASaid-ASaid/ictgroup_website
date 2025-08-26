@@ -1,0 +1,170 @@
+{% extends "extranet/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if overtime_request %}Modifier heures supplémentaires{% else %}Nouvelle demande d'heures supplémentaires{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center mb-6">
+        <a href="{% url 'extranet:overtime_list' %}" 
+           class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl font-semibold text-gray-900">
+            <i class="fas fa-clock mr-2 text-blue-600"></i>
+            {% if overtime_request %}
+                Modifier heures supplémentaires
+            {% else %}
+                Nouvelle demande d'heures supplémentaires
+            {% endif %}
+        </h1>
+    </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Informations générales -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h3 class="text-sm font-medium text-blue-800 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>Information importante
+            </h3>
+            <p class="text-sm text-blue-700">
+                Les heures supplémentaires ne peuvent être déclarées que pour les weekends (samedi/dimanche) 
+                travaillés en télétravail. Décrivez précisément le travail effectué.
+                {% if can_create_for_others %}
+                <br><strong>En tant que validateur, vos demandes sont automatiquement approuvées.</strong>
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 {% if can_create_for_others %}md:grid-cols-3{% else %}md:grid-cols-2{% endif %} gap-6">
+            <!-- Sélection utilisateur (seulement pour les validateurs) -->
+            {% if can_create_for_others %}
+            <div>
+                <label for="{{ form.user.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.user.label }}
+                    <span class="text-red-500">*</span>
+                </label>
+                {{ form.user }}
+                {% if form.user.errors %}
+                    <div class="mt-1">
+                        {% for error in form.user.errors %}
+                            <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">
+                    Sélectionnez l'utilisateur concerné
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Date de travail -->
+            <div>
+                <label for="{{ form.work_date.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.work_date.label }}
+                    <span class="text-red-500">*</span>
+                </label>
+                {{ form.work_date }}
+                {% if form.work_date.errors %}
+                    <div class="mt-1">
+                        {% for error in form.work_date.errors %}
+                            <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">
+                    Seuls les weekends (samedi/dimanche) sont autorisés
+                </p>
+            </div>
+
+            <!-- Nombre d'heures -->
+            <div>
+                <label for="{{ form.hours.id_for_label }}" 
+                       class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.hours.label }}
+                    <span class="text-red-500">*</span>
+                </label>
+                {{ form.hours }}
+                {% if form.hours.errors %}
+                    <div class="mt-1">
+                        {% for error in form.hours.errors %}
+                            <p class="text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">
+                    Entre 0.5 et 12 heures (par demi-heure)
+                </p>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label for="{{ form.description.id_for_label }}" 
+                   class="block text-sm font-medium text-gray-700 mb-2">
+                {{ form.description.label }}
+                <span class="text-red-500">*</span>
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="mt-1">
+                    {% for error in form.description.errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-xs text-gray-500">
+                Décrivez précisément le travail effectué (projet, tâches, objectifs, etc.)
+            </p>
+        </div>
+
+        <!-- Messages d'erreur généraux -->
+        {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                {% for error in form.non_field_errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Boutons d'action -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t">
+            <a href="{% url 'extranet:overtime_list' %}" 
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                Annuler
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                {% if overtime_request %}
+                    <i class="fas fa-save mr-2"></i>Modifier
+                {% else %}
+                    <i class="fas fa-paper-plane mr-2"></i>Soumettre
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation côté client pour la date de weekend
+    const dateInput = document.querySelector('input[type="date"]');
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            const date = new Date(this.value);
+            const dayOfWeek = date.getDay(); // 0=Dimanche, 6=Samedi
+            
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                alert('Vous ne pouvez sélectionner que les weekends (samedi/dimanche)');
+                this.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

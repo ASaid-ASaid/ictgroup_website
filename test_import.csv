@@ -1,0 +1,2 @@
+username,nom,prenom,days_acquired,days_taken,days_carry_over,site,mail,password,role,manager,rh
+tuser,Test,User,25,5,2,France,test@ictgroup.com,password123,user,,ASaid

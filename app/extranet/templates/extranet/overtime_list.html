@@ -1,0 +1,197 @@
+{% extends "extranet/base.html" %}
+{% load static %}
+
+{% block title %}Heures supplémentaires{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900">
+            <i class="fas fa-clock mr-2 text-blue-600"></i>
+            Heures supplémentaires
+        </h1>
+        <div class="flex space-x-3">
+            <a href="{% url 'extranet:overtime_create' %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Nouvelle demande
+            </a>
+            {% if can_see_all %}
+            <a href="{% url 'extranet:overtime_create_admin' %}" 
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-check-circle mr-2"></i>Créer & Approuver
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mes demandes -->
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Mes demandes</h2>
+        {% if overtime_requests %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Heures
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Description
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Statut
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for overtime in overtime_requests %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ overtime.work_date|date:"d/m/Y" }}
+                                <span class="text-xs text-gray-500 block">
+                                    {% if overtime.work_date.weekday == 5 %}Samedi{% elif overtime.work_date.weekday == 6 %}Dimanche{% endif %}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ overtime.hours }}h
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div class="max-w-xs truncate" title="{{ overtime.description }}">
+                                    {{ overtime.description|default:"—" }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if overtime.status == "pending" %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        En attente
+                                    </span>
+                                {% elif overtime.status == "approved" %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Approuvée
+                                    </span>
+                                {% elif overtime.status == "rejected" %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Rejetée
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if overtime.status == "pending" %}
+                                    <a href="{% url 'extranet:overtime_edit' overtime.id %}" 
+                                       class="text-blue-600 hover:text-blue-900 mr-3">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'extranet:overtime_delete' overtime.id %}" 
+                                       class="text-red-600 hover:text-red-900"
+                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-clock text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500">Aucune demande d'heures supplémentaires</p>
+                <a href="{% url 'extranet:overtime_create' %}" 
+                   class="text-blue-600 hover:text-blue-700 mt-2 inline-block">
+                    Créer ma première demande
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Toutes les demandes (manager/RH/admin) -->
+    {% if can_see_all and all_requests %}
+    <div class="border-t pt-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Toutes les demandes</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Utilisateur
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Heures
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Statut
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for overtime in all_requests %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ overtime.user.get_full_name|default:overtime.user.username }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ overtime.work_date|date:"d/m/Y" }}
+                            <span class="text-xs text-gray-500 block">
+                                {% if overtime.work_date.weekday == 5 %}Samedi{% elif overtime.work_date.weekday == 6 %}Dimanche{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ overtime.hours }}h
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <div class="max-w-xs truncate" title="{{ overtime.description }}">
+                                {{ overtime.description|default:"—" }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if overtime.status == "pending" %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    En attente
+                                </span>
+                            {% elif overtime.status == "approved" %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Approuvée
+                                </span>
+                            {% elif overtime.status == "rejected" %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Rejetée
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {% if overtime.status == "pending" %}
+                                <a href="{% url 'extranet:overtime_validate' overtime.id %}" 
+                                   class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-check-circle mr-1"></i>Valider
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

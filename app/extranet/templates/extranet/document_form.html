@@ -1,0 +1,258 @@
+{% extends 'extranet/base.html' %}
+
+{% block title %}{{ title }} - ICTGROUP{% endblock %}
+
+{% block content %}
+<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{% url 'extranet:document_list' %}" 
+           class="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Retour aux documents
+        </a>
+    </div>
+
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-extrabold text-primary mb-2 tracking-tight">
+            📄 {{ title }}
+        </h1>
+        <p class="text-gray-600 mb-8">
+            {% if document %}
+                Modifier les informations de ce document
+            {% else %}
+                Ajoutez un nouveau document à partager
+            {% endif %}
+        </p>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Titre -->
+            <div>
+                <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.title.label }}
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.title.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.description.label }}
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.description.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Catégorie -->
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.category.label }}
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.category.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Type de document -->
+            <div>
+                <label for="{{ form.document_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.document_type.label }}
+                </label>
+                {{ form.document_type }}
+                {% if form.document_type.help_text %}
+                    <div class="mt-1 text-sm text-gray-500">
+                        {{ form.document_type.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.document_type.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.document_type.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Fichier (conditionnel) -->
+            <div id="file-field" style="display: none;">
+                <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    📎 {{ form.file.label }}
+                </label>
+                {% if document and document.file %}
+                    <div class="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="text-sm text-gray-600">Fichier actuel: {{ document.file.name|default:"Non défini" }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+                {{ form.file }}
+                {% if form.file.help_text %}
+                    <div class="mt-1 text-sm text-gray-500">
+                        {{ form.file.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.file.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.file.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- URL du lien (conditionnel) -->
+            <div id="link-field" style="display: none;">
+                <label for="{{ form.link_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    🔗 {{ form.link_url.label }}
+                </label>
+                {% if document and document.link_url %}
+                    <div class="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                            <span class="text-sm text-blue-600">Lien actuel: {{ document.link_url }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+                {{ form.link_url }}
+                {% if form.link_url.help_text %}
+                    <div class="mt-1 text-sm text-gray-500">
+                        {{ form.link_url.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.link_url.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.link_url.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Qui peut accéder -->
+            <div>
+                <label for="{{ form.target_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.target_type.label }}
+                </label>
+                {{ form.target_type }}
+                {% if form.target_type.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.target_type.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Utilisateurs spécifiques -->
+            <div id="specific-users" style="display: none;">
+                <label for="{{ form.target_users.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.target_users.label }}
+                </label>
+                {{ form.target_users }}
+                <div class="mt-1 text-sm text-gray-500">
+                    Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs utilisateurs
+                </div>
+                {% if form.target_users.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.target_users.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Rôles -->
+            <div id="role-access" style="display: none;">
+                <label for="{{ form.target_roles.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.target_roles.label }}
+                </label>
+                {{ form.target_roles }}
+                {% if form.target_roles.help_text %}
+                    <div class="mt-1 text-sm text-gray-500">
+                        {{ form.target_roles.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.target_roles.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {{ form.target_roles.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex gap-4 pt-6">
+                <button type="submit" 
+                        class="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transform hover:scale-105 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    {% if document %}Modifier{% else %}Ajouter{% endif %}
+                </button>
+                
+                <a href="{% url 'extranet:document_list' %}" 
+                   class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const targetTypeSelect = document.getElementById('id_target_type');
+    const specificUsersDiv = document.getElementById('specific-users');
+    const roleAccessDiv = document.getElementById('role-access');
+    
+    const documentTypeSelect = document.getElementById('id_document_type');
+    const fileField = document.getElementById('file-field');
+    const linkField = document.getElementById('link-field');
+    
+    function toggleAccessFields() {
+        const selectedValue = targetTypeSelect.value;
+        
+        specificUsersDiv.style.display = selectedValue === 'specific' ? 'block' : 'none';
+        roleAccessDiv.style.display = selectedValue === 'role' ? 'block' : 'none';
+    }
+    
+    function toggleDocumentFields() {
+        const selectedType = documentTypeSelect.value;
+        
+        if (selectedType === 'file') {
+            fileField.style.display = 'block';
+            linkField.style.display = 'none';
+            // Vider le champ lien si on choisit fichier
+            const linkInput = document.getElementById('id_link_url');
+            if (linkInput) linkInput.value = '';
+        } else if (selectedType === 'link') {
+            fileField.style.display = 'none';
+            linkField.style.display = 'block';
+            // Vider le champ fichier si on choisit lien
+            const fileInput = document.getElementById('id_file');
+            if (fileInput) fileInput.value = '';
+        }
+    }
+    
+    // Initial setup
+    toggleAccessFields();
+    toggleDocumentFields();
+    
+    // Listen for changes
+    targetTypeSelect.addEventListener('change', toggleAccessFields);
+    documentTypeSelect.addEventListener('change', toggleDocumentFields);
+});
+</script>
+{% endblock %}

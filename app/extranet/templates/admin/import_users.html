@@ -1,0 +1,114 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Importer des utilisateurs | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Accueil</a>
+    &rsaquo; <a href="{% url 'admin:auth_user_changelist' %}">Utilisateurs</a>
+    &rsaquo; Import CSV
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>📂 Importer des utilisateurs depuis un fichier CSV</h1>
+
+<div class="module aligned">
+    <form method="post" enctype="multipart/form-data" style="background: #f8f8f8; padding: 20px; border-radius: 8px;">
+        {% csrf_token %}
+        
+        <fieldset class="module aligned">
+            <h2>Fichier CSV</h2>
+            <div class="form-row">
+                <div>
+                    <label for="csv_file" class="required">Fichier CSV :</label>
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required style="margin-left: 10px;">
+                    <p class="help">Taille maximum : 5MB. Format accepté : CSV uniquement.</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="module aligned">
+            <h2>Options d'import</h2>
+            <div class="form-row">
+                <div>
+                    <label for="dry_run">
+                        <input type="checkbox" name="dry_run" id="dry_run" checked>
+                        Mode simulation (recommandé pour le premier test)
+                    </label>
+                    <p class="help">Vérifie le fichier sans créer/modifier les utilisateurs.</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="overwrite">
+                        <input type="checkbox" name="overwrite" id="overwrite">
+                        Écraser les utilisateurs existants
+                    </label>
+                    <p class="help">Met à jour les utilisateurs existants avec les nouvelles données.</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <div style="margin-top: 20px;">
+            <input type="submit" value="🚀 Traiter le fichier" class="default" style="background: #417690; color: white; padding: 10px 20px; border: none; border-radius: 4px;">
+            <a href="{% url 'admin:auth_user_changelist' %}" style="margin-left: 10px; padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 4px;">↩️ Retour</a>
+        </div>
+    </form>
+</div>
+
+<div class="module" style="margin-top: 30px;">
+    <h2>📋 Format CSV requis</h2>
+    <div style="background: #e8f4f8; padding: 15px; border-radius: 5px;">
+        <h3>Colonnes obligatoires :</h3>
+        <ul style="columns: 2; margin: 10px 0;">
+            {% for column in required_columns %}
+            <li><code>{{ column }}</code></li>
+            {% endfor %}
+        </ul>
+
+        <h3>Valeurs acceptées :</h3>
+        <ul>
+            <li><strong>site :</strong> france, tunisie</li>
+            <li><strong>role :</strong> admin, manager, rh, user, employee, consultant, designer, qa, devops, etc.</li>
+            <li><strong>manager/rh :</strong> nom d'utilisateur existant (ex: ASaid, NBenz)</li>
+            <li><strong>days_* :</strong> nombres décimaux (ex: 25.0, 12.5)</li>
+        </ul>
+
+        <h3>Exemple de fichier CSV :</h3>
+        <pre style="background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px;">{{ csv_format_example }}</pre>
+    </div>
+</div>
+
+<div class="module" style="margin-top: 20px;">
+    <h2>⚠️ Instructions importantes</h2>
+    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+        <ol>
+            <li><strong>Testez toujours en mode simulation d'abord</strong></li>
+            <li>Vérifiez que les utilisateurs manager/rh existent déjà</li>
+            <li>Utilisez des mots de passe sécurisés (ex: Password123!)</li>
+            <li>Les adresses email doivent être uniques</li>
+            <li>Les usernames doivent être uniques</li>
+            <li>Sauvegardez votre base de données avant un gros import</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+// Auto-décocher la simulation si on coche l'écrasement
+document.getElementById('overwrite').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('dry_run').checked = false;
+    }
+});
+
+// Auto-cocher la simulation si on décoche l'écrasement  
+document.getElementById('dry_run').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('overwrite').checked = false;
+    }
+});
+</script>
+
+{% endblock %}

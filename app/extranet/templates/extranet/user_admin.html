@@ -17,64 +17,16 @@
         Gérez les comptes utilisateurs, rôles et permissions de l'extranet
     </p>
 
-    <!-- Recherche améliorée et filtres -->
-    <section class="mb-6">
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl shadow-md border border-blue-200">
-            <div class="flex flex-col md:flex-row gap-4 items-center">
-                <!-- Recherche universelle -->
-                <div class="flex-1">
-                    <div class="relative">
-                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <input type="text" 
-                               id="universal-search" 
-                               placeholder="Rechercher par nom, prénom, email, login..." 
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
-                    </div>
-                </div>
-                
-                <!-- Filtres rapides -->
-                <div class="flex gap-2 flex-wrap">
-                    <select id="site-filter" class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
-                        <option value="">Tous les sites</option>
-                        <option value="tunisie">🇹🇳 TN</option>
-                        <option value="france">🇫🇷 FR</option>
-                    </select>
-                    
-                    <select id="role-filter" class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
-                        <option value="">Tous les rôles</option>
-                        <option value="admin">Admin</option>
-                        <option value="manager">Manager</option>
-                        <option value="rh">RH</option>
-                        <option value="user">Utilisateur</option>
-                    </select>
-                    
-                    <button onclick="clearFilters()" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 hover:border-gray-400 rounded-lg transition-all duration-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Compteurs -->
-            <div class="mt-3 flex gap-4 text-sm">
-                <span class="text-gray-600">Total: <span id="total-count" class="font-bold text-blue-600">{{ users|length }}</span></span>
-                <span class="text-gray-600">Visibles: <span id="visible-count" class="font-bold text-green-600">{{ users|length }}</span></span>
-            </div>
-        </div>
-    </section>
-
     <!-- Actions rapides -->
     <section class="mb-6 flex flex-wrap justify-center gap-4">
         <!-- Bouton Import CSV -->
-        <button onclick="document.getElementById('import-form').classList.toggle('hidden'); document.getElementById('import-form').scrollIntoView({behavior: 'smooth', block: 'center'});" 
+        <button type="button" 
+                onclick="toggleImportForm()" 
                 class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
             </svg>
-            Importer CSV
+            <span id="import-btn-text">Afficher Import CSV</span>
         </button>
         
         <!-- Bouton Export CSV -->
@@ -88,7 +40,7 @@
     </section>
 
     <!-- Formulaire d'import CSV (masqué par défaut) -->
-    <section id="import-form" class="mb-8 hidden" aria-labelledby="import-csv">
+    <section id="import-form" class="mb-8 bg-green-50 border border-green-200 rounded-xl p-6 hidden" aria-labelledby="import-csv">
         <div class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl shadow-md border border-green-200">
             <h2 id="import-csv" class="text-xl font-bold text-green-700 mb-4 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,10 +108,6 @@
                     </button>
                     
                     <button type="button" 
-                            onclick="document.getElementById('import-form').classList.add('hidden');" 
-                            class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200">
-                        Annuler
-                    </button>
                 </div>
             </form>
         </div>
@@ -481,13 +429,9 @@
 {% endblock %}
 
 {% block extra_css %}
+<!-- Styles optimisés - Migration vers Tailwind -->
 <style>
-/* Classe utilitaire hidden */
-.hidden {
-    display: none !important;
-}
-
-/* Animations d'apparition */
+/* Animation custom (garde car spécifique) */
 @keyframes fade-in {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -496,8 +440,6 @@
 .animate-fade-in {
     animation: fade-in 0.6s ease-out;
 }
-
-/* Focus visible amélioré */
 :focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
@@ -540,320 +482,9 @@ tbody tr:hover {
 
 {% block extra_js %}
 <script>
-// Fonction de recherche d'utilisateurs
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('user-search');
+    // Animation d'apparition pour les lignes du tableau
     const userRows = document.querySelectorAll('[data-user-row]');
-
-    if (searchInput && userRows.length > 0) {
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            userRows.forEach(row => {
-                const username = row.querySelector('code').textContent.toLowerCase();
-                const lastName = row.querySelector('input[name="last_name"]').value.toLowerCase();
-                const firstName = row.querySelector('input[name="first_name"]').value.toLowerCase();
-                const email = row.querySelector('input[name="email"]').value.toLowerCase();
-                
-                const searchText = `${username} ${lastName} ${firstName} ${email}`;
-                
-                if (searchText.includes(searchTerm)) {
-                    row.style.display = '';
-                    row.style.opacity = '1';
-                } else {
-                    row.style.display = 'none';
-                    row.style.opacity = '0';
-                }
-            });
-        });
-    }
-
-    // Animation d'apparition pour les lignes du tableau
-    userRows.forEach((row, index) => {
-        row.style.opacity = '0';
-        row.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            row.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-            row.style.opacity = '1';
-            row.style.transform = 'translateY(0)';
-        }, index * 50);
-    });
-});
-
-// Validation du formulaire
-function validateForm(form) {
-    const requiredFields = form.querySelectorAll('[required]');
-    let isValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            field.classList.add('border-red-500');
-            isValid = false;
-        } else {
-            field.classList.remove('border-red-500');
-        }
-    });
-    
-    return isValid;
-}
-
-// Confirmation pour les actions importantes
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        if (this.querySelector('[name="delete_user"]')) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        
-        if (!validateForm(this)) {
-            e.preventDefault();
-            alert('Veuillez remplir tous les champs obligatoires.');
-            return false;
-        }
-    });
-});
-
-// Recherche en temps réel
-    </section>
-
-    <!-- Messages de statut -->
-    {% if messages %}
-        <section class="fixed bottom-6 right-6 z-50 space-y-2" aria-label="Messages de statut">
-            {% for message in messages %}
-                <div class="max-w-sm p-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300 transform hover:scale-105
-                    {% if 'success' in message.tags %}bg-green-500{% elif 'error' in message.tags %}bg-red-500{% elif 'warning' in message.tags %}bg-yellow-500{% else %}bg-blue-500{% endif %}"
-                     role="alert"
-                     aria-live="polite">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            {% if 'success' in message.tags %}
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            {% elif 'error' in message.tags %}
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            {% else %}
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                            {% endif %}
-                        </svg>
-                        {{ message }}
-                    </div>
-                </div>
-            {% endfor %}
-        </section>
-    {% endif %}
-</div>
-
-<style>
-/* Animation d'apparition */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-/* Styles pour le focus visible */
-:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-
-/* Transitions pour les éléments interactifs */
-.transition-all {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Auto-hide pour les messages toast */
-@keyframes toast-fade-out {
-    0% { opacity: 1; transform: translateX(0); }
-    100% { opacity: 0; transform: translateX(100%); }
-}
-
-[role="alert"] {
-    animation: toast-fade-out 5s forwards 3s;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Éléments DOM
-    const searchInput = document.getElementById('universal-search');
-    const siteFilter = document.getElementById('site-filter');
-    const roleFilter = document.getElementById('role-filter');
-    const userRows = document.querySelectorAll('[data-user-row]');
-    const totalCount = document.getElementById('total-count');
-    const visibleCount = document.getElementById('visible-count');
-    
-    // Fonction de filtrage avancé
-    function filterUsers() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const selectedSite = siteFilter.value;
-        const selectedRole = roleFilter.value;
-        
-        let visibleUsers = 0;
-        
-        userRows.forEach(row => {
-            const searchText = row.getAttribute('data-search-text') || '';
-            const userSite = row.getAttribute('data-site') || '';
-            const userRole = row.getAttribute('data-role') || '';
-            
-            let isVisible = true;
-            
-            // Filtre recherche texte
-            if (searchTerm && !searchText.includes(searchTerm)) {
-                isVisible = false;
-            }
-            
-            // Filtre site
-            if (selectedSite && userSite !== selectedSite) {
-                isVisible = false;
-            }
-            
-            // Filtre rôle
-            if (selectedRole && userRole !== selectedRole) {
-                isVisible = false;
-            }
-            
-            // Affichage avec animation
-            if (isVisible) {
-                row.style.display = '';
-                row.style.opacity = '1';
-                row.style.transform = 'translateY(0)';
-                visibleUsers++;
-            } else {
-                row.style.opacity = '0';
-                row.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    if (row.style.opacity === '0') {
-                        row.style.display = 'none';
-                    }
-                }, 200);
-            }
-        });
-        
-        // Mise à jour des compteurs
-        visibleCount.textContent = visibleUsers;
-        
-        // Message si aucun résultat
-        updateNoResultsMessage(visibleUsers);
-    }
-    
-    // Fonction pour afficher un message "Aucun résultat"
-    function updateNoResultsMessage(count) {
-        let noResultsRow = document.getElementById('no-results-row');
-        
-        if (count === 0) {
-            if (!noResultsRow) {
-                noResultsRow = document.createElement('tr');
-                noResultsRow.id = 'no-results-row';
-                noResultsRow.innerHTML = `
-                    <td colspan="9" class="py-8 px-4 text-center text-gray-500">
-                        <div class="flex flex-col items-center space-y-3">
-                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                            <div class="text-lg font-medium">Aucun utilisateur trouvé</div>
-                            <div class="text-sm">Essayez de modifier vos critères de recherche</div>
-                        </div>
-                    </td>
-                `;
-                document.querySelector('tbody[data-user-list]').appendChild(noResultsRow);
-            }
-            noResultsRow.style.display = '';
-        } else {
-            if (noResultsRow) {
-                noResultsRow.style.display = 'none';
-            }
-        }
-    }
-    
-    // Fonction pour effacer tous les filtres
-    window.clearFilters = function() {
-        searchInput.value = '';
-        siteFilter.value = '';
-        roleFilter.value = '';
-        filterUsers();
-    };
-    
-    // Écouteurs d'événements
-    if (searchInput) {
-        searchInput.addEventListener('input', filterUsers);
-    }
-    
-    if (siteFilter) {
-        siteFilter.addEventListener('change', filterUsers);
-    }
-    
-    if (roleFilter) {
-        roleFilter.addEventListener('change', filterUsers);
-    }
-    
-    // Animation d'apparition pour les lignes du tableau
-    userRows.forEach((row, index) => {
-        row.style.opacity = '0';
-        row.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            row.style.transition = 'all 0.3s ease-out';
-            row.style.opacity = '1';
-            row.style.transform = 'translateY(0)';
-        }, index * 50);
-    });
-    
-    // Raccourcis clavier
-    document.addEventListener('keydown', function(e) {
-        // Ctrl+F ou Cmd+F pour focus sur la recherche
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            searchInput.focus();
-        }
-        
-        // Échap pour effacer les filtres
-        if (e.key === 'Escape') {
-            clearFilters();
-        }
-    });
-    
-    // Indicateur de modifications non sauvegardées
-    const forms = document.querySelectorAll('form');
-    let hasUnsavedChanges = false;
-    
-    forms.forEach(form => {
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.addEventListener('change', function() {
-                hasUnsavedChanges = true;
-                this.style.backgroundColor = '#fef3c7'; // Jaune léger pour indiquer un changement
-            });
-        });
-        
-        form.addEventListener('submit', function() {
-            hasUnsavedChanges = false;
-        });
-    });
-    
-    // Avertissement avant de quitter la page
-    window.addEventListener('beforeunload', function(e) {
-        if (hasUnsavedChanges) {
-            e.preventDefault();
-            e.returnValue = 'Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir quitter ?';
-        }
-    });
-});
-        });
-    }
-
-    // Animation d'apparition pour les lignes du tableau
     userRows.forEach((row, index) => {
         row.style.opacity = '0';
         row.style.transform = 'translateY(20px)';
@@ -909,8 +540,47 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Version simplifiée des fonctions d'import CSV
     console.log('JavaScript chargé');
 });
+
+// Fonction pour basculer l'affichage du formulaire d'import
+function toggleImportForm() {
+    const importForm = document.getElementById('import-form');
+    const btnText = document.getElementById('import-btn-text');
+    
+    if (importForm.classList.contains('hidden')) {
+        importForm.classList.remove('hidden');
+        importForm.style.opacity = '0';
+        importForm.style.maxHeight = '0';
+        
+        // Animation d'ouverture
+        requestAnimationFrame(() => {
+            importForm.style.transition = 'opacity 0.3s ease-out, max-height 0.3s ease-out';
+            importForm.style.opacity = '1';
+            importForm.style.maxHeight = '1000px';
+        });
+        
+        btnText.textContent = 'Masquer Import CSV';
+        
+        // Scroll vers le formulaire
+        setTimeout(() => {
+            importForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
+    } else {
+        // Animation de fermeture
+        importForm.style.transition = 'opacity 0.3s ease-out, max-height 0.3s ease-out';
+        importForm.style.opacity = '0';
+        importForm.style.maxHeight = '0';
+        
+        setTimeout(() => {
+            importForm.classList.add('hidden');
+            importForm.style.maxHeight = '';
+            importForm.style.opacity = '';
+            importForm.style.transition = '';
+        }, 300);
+        
+        btnText.textContent = 'Afficher Import CSV';
+    }
+}
 </script>
 {% endblock %}

@@ -304,8 +304,20 @@ def auto_monthly_leave_accrual_on_login(sender, request, user, **kwargs):
     """
     Lance automatiquement l'accrual mensuel de congés à la première connexion du mois.
     Utilise le cache pour éviter les exécutions multiples.
+    PROTECTION: Ne se lance que lors de connexions web réelles (pas lors du démarrage Docker).
     """
     try:
+        # PROTECTION: Vérifier qu'il s'agit d'une vraie connexion web
+        if not request or not hasattr(request, 'META'):
+            logger.debug("Signal accrual ignoré - pas de requête web valide (démarrage système?)")
+            return
+            
+        # PROTECTION: Vérifier que la requête a un user-agent (navigateur)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        if not user_agent or 'Mozilla' not in user_agent:
+            logger.debug(f"Signal accrual ignoré - user-agent suspect: {user_agent}")
+            return
+        
         today = date.today()
         cache_key = f"monthly_accrual_{today.year}_{today.month:02d}"
         
@@ -314,7 +326,8 @@ def auto_monthly_leave_accrual_on_login(sender, request, user, **kwargs):
             logger.debug(f"Accrual déjà fait ce mois {today.month}/{today.year} - Connexion ignorée")
             return
         
-        logger.info(f"🚀 Première connexion du mois {today.month}/{today.year} - Lancement accrual automatique")
+        logger.info(f"🚀 VRAIE première connexion web du mois {today.month}/{today.year} - Lancement accrual automatique")
+        logger.info(f"👤 Utilisateur déclencheur: {user.username} - IP: {request.META.get('REMOTE_ADDR', 'unknown')}")
         
         # Marquer immédiatement pour éviter les exécutions simultanées
         cache.set(cache_key, True, timeout=30*24*3600)  # 30 jours

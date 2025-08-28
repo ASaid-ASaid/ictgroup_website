@@ -715,8 +715,8 @@ def import_users_csv(request):
 
 
 @login_required
-def account_settings(request):
-    """Paramètres du compte utilisateur."""
+def account_settings_admin(request):
+    """Paramètres du compte utilisateur (version admin - obsolète, utiliser auth_views)."""
     user = request.user
     
     if request.method == 'POST':

@@ -67,8 +67,9 @@ class LeaveRequest(models.Model):
 
     def __str__(self):
         # Représentation lisible de la demande
+        username = self.user.username if self.user else "Utilisateur non défini"
         return "Demande de congé de %s du %s au %s (%s)" % (
-            self.user.username,
+            username,
             self.start_date,
             self.end_date,
             self.status,
@@ -128,6 +129,42 @@ class LeaveRequest(models.Model):
                 current_date += timedelta(days=1)
             return total_days
 
+    def clean(self):
+        """Validation : empêcher les conflits avec les télétravails approuvés"""
+        from django.core.exceptions import ValidationError
+        
+        # Si l'utilisateur n'est pas encore défini (nouveau formulaire), on passe la validation
+        # La validation sera faite dans le formulaire
+        if not hasattr(self, 'user') or self.user is None:
+            return
+        
+        # Vérifier les conflits avec les télétravails approuvés
+        # NOTE: Les congés ont priorité sur le télétravail
+        # La gestion de l'annulation automatique se fait dans la vue
+        overlapping_telework = TeleworkRequest.objects.filter(
+            user=self.user,
+            status='approved',
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        )
+        
+        if self.pk:  # Si on modifie une demande existante
+            overlapping_telework = overlapping_telework.exclude(pk=self.pk)
+        
+        # Les congés ont priorité - pas de ValidationError
+        # Le télétravail sera automatiquement annulé dans la vue
+        if overlapping_telework.exists():
+            # Log pour information mais pas d'erreur
+            import logging
+            logger = logging.getLogger(__name__)
+            telework_count = overlapping_telework.count()
+            logger.info(f"[LeaveRequest.clean] Congé #{self.pk or 'nouveau'} va prendre priorité sur {telework_count} télétravail(s) approuvé(s)")
+
+    def save(self, *args, **kwargs):
+        """Override save pour validation"""
+        self.clean()
+        super().save(*args, **kwargs)
+
 
 class TeleworkRequest(models.Model):
     """
@@ -161,15 +198,49 @@ class TeleworkRequest(models.Model):
     )
     rh_validated = models.BooleanField(default=False, help_text="Validation RH")
 
+    def clean(self):
+        """Validation : empêcher les conflits avec les congés"""
+        from django.core.exceptions import ValidationError
+        
+        # Si l'utilisateur n'est pas encore défini (nouveau formulaire), on passe la validation
+        # La validation sera faite dans le formulaire
+        if not hasattr(self, 'user') or self.user is None:
+            return
+        
+        # Vérifier les conflits avec les congés approuvés
+        overlapping_leaves = LeaveRequest.objects.filter(
+            user=self.user,
+            status='approved',
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        )
+        
+        if self.pk:  # Si on modifie une demande existante
+            overlapping_leaves = overlapping_leaves.exclude(pk=self.pk)
+        
+        if overlapping_leaves.exists():
+            leave = overlapping_leaves.first()
+            raise ValidationError(
+                f"Conflit détecté : vous avez déjà un congé approuvé "
+                f"du {leave.start_date} au {leave.end_date}. "
+                f"Le télétravail n'est pas autorisé pendant les congés."
+            )
+
+    def save(self, *args, **kwargs):
+        """Override save pour validation"""
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
+        username = self.user.username if self.user else "Utilisateur non défini"
         if self.start_date == self.end_date:
             return "Télétravail %s le %s (%s)" % (
-                self.user.username,
+                username,
                 self.start_date,
                 self.status,
             )
         return "Télétravail %s du %s au %s (%s)" % (
-            self.user.username,
+            username,
             self.start_date,
             self.end_date,
             self.status,
@@ -227,7 +298,8 @@ class OverTimeRequest(models.Model):
             raise ValidationError("Les heures supplémentaires ne peuvent être déclarées que pour les weekends (samedi/dimanche)")
 
     def __str__(self):
-        return f"Heures supplémentaires {self.user.username} - {self.work_date} ({self.hours}h) - {self.status}"
+        username = self.user.username if self.user else "Utilisateur non défini"
+        return f"Heures supplémentaires {username} - {self.work_date} ({self.hours}h) - {self.status}"
 
     class Meta:
         ordering = ["-work_date"]
@@ -268,7 +340,36 @@ class UserProfile(models.Model):
     site = models.CharField(max_length=10, choices=SITE_CHOICES, default="tunisie")
 
     def __str__(self):
-        return f"{self.user.username} ({self.role})"
+        username = self.user.username if self.user else "Utilisateur non défini"
+        return f"{username} ({self.role})"
+    
+    def is_manager(self):
+        """Vérifie si l'utilisateur a un rôle de manager"""
+        return self.role in ['manager', 'admin']
+    
+    def is_rh(self):
+        """Vérifie si l'utilisateur a un rôle RH"""
+        return self.role in ['rh', 'admin']
+    
+    def can_validate_leaves(self):
+        """Vérifie si l'utilisateur peut valider des demandes de congé"""
+        return self.role in ['manager', 'rh', 'admin']
+    
+    def can_validate_telework(self):
+        """Vérifie si l'utilisateur peut valider des demandes de télétravail"""
+        return self.role in ['manager', 'rh', 'admin']
+    
+    def is_rh_for_user(self, target_user):
+        """Vérifie si cet utilisateur est RH pour l'utilisateur cible"""
+        if not hasattr(target_user, 'profile'):
+            return False
+        return target_user.profile.rh == self.user
+    
+    def is_manager_for_user(self, target_user):
+        """Vérifie si cet utilisateur est manager pour l'utilisateur cible"""
+        if not hasattr(target_user, 'profile'):
+            return False
+        return target_user.profile.manager == self.user
 
 
 class Document(models.Model):
@@ -421,6 +522,36 @@ class Document(models.Model):
         """Incrémente le compteur de téléchargements"""
         self.download_count += 1
         self.save(update_fields=["download_count"])
+    
+    @property
+    def file_type(self):
+        """Retourne le type de fichier basé sur l'extension"""
+        if self.document_type == "link":
+            return "link"
+        
+        if not self.file:
+            return "unknown"
+            
+        # Extraire l'extension du fichier
+        import os
+        filename = os.path.basename(self.file.name)
+        extension = os.path.splitext(filename)[1].lower()
+        
+        # Mapper les extensions aux types
+        if extension in ['.pdf']:
+            return 'pdf'
+        elif extension in ['.doc', '.docx']:
+            return 'doc'
+        elif extension in ['.xls', '.xlsx']:
+            return 'excel'
+        elif extension in ['.ppt', '.pptx']:
+            return 'powerpoint'
+        elif extension in ['.jpg', '.jpeg', '.png', '.gif']:
+            return 'image'
+        elif extension in ['.txt']:
+            return 'text'
+        else:
+            return 'document'
 
 
 class DocumentDownload(models.Model):
@@ -446,7 +577,8 @@ class DocumentDownload(models.Model):
         verbose_name_plural = "Téléchargements de documents"
     
     def __str__(self):
-        return f"{self.user.username} - {self.document.title} - {self.downloaded_at}"
+        username = self.user.username if self.user else "Utilisateur non défini"
+        return f"{username} - {self.document.title} - {self.downloaded_at}"
 
 
 def get_leave_balance(user, period_start=None):
@@ -500,6 +632,17 @@ def get_leave_balance(user, period_start=None):
         if created:
             balance.update_taken_days()
     
+    # Récupérer les informations de site et calcul
+    site = getattr(user.profile, 'site', 'france') if hasattr(user, 'profile') else 'france'
+    
+    # Calcul des jours restants à prendre avant le 30 avril si applicable
+    must_take_before_april = 0
+    if balance.days_carry_over > 0:
+        from datetime import date
+        april_deadline = date(period_end.year, 4, 30)
+        if date.today() < april_deadline:
+            must_take_before_april = float(balance.days_carry_over)
+    
     return {
         'remaining': balance.days_remaining,
         'acquired': balance.days_acquired,
@@ -510,6 +653,8 @@ def get_leave_balance(user, period_start=None):
         'period_end': balance.period_end,
         'balance': balance.days_remaining,  # alias pour compatibilité
         'report': balance.days_carry_over,  # alias pour compatibilité
+        'site': site,
+        'must_take_before_april': must_take_before_april,
     }
 
 
@@ -613,7 +758,8 @@ class StockMovement(models.Model):
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.movement_type} - {self.stock_item.code} by {self.user.username}"
+        username = self.user.username if self.user else "Utilisateur non défini"
+        return f"{self.movement_type} - {self.stock_item.code} by {username}"
 
 
 # =====================
@@ -703,7 +849,8 @@ class MonthlyUserStats(models.Model):
         return round((self.total_working_days / self.total_workdays) * 100, 1)
     
     def __str__(self):
-        return f"{self.user.username} - {self.year}/{self.month:02d} (Bureau: {self.days_at_office}j, TT: {self.days_telework}j)"
+        username = self.user.username if self.user else "Utilisateur non défini"
+        return f"{username} - {self.year}/{self.month:02d} (Bureau: {self.days_at_office}j, TT: {self.days_telework}j)"
     
     def add_office_day(self):
         """Ajoute un jour de bureau"""
@@ -926,6 +1073,10 @@ class UserLeaveBalance(models.Model):
         carry_over = self.days_carry_over or Decimal('0')
         
         return acquired + carry_over
+    
+    def get_balance(self):
+        """Méthode pour obtenir le solde restant (alias pour days_remaining)"""
+        return self.days_remaining
     
     def update_taken_days(self):
         """Met à jour le nombre de jours pris basé sur les demandes approuvées"""

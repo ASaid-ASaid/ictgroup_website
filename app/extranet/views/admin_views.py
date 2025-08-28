@@ -178,81 +178,6 @@ def admin_teleworks(request):
     return render(request, "extranet/admin_teleworks.html", context)
 
 
-@login_required
-@user_passes_test(is_admin_rh_or_manager)
-def admin_monthly_report(request):
-    """Rapport mensuel pour les RH/Admin - Utilise les nouveaux modèles UserLeaveBalance et MonthlyUserStats."""
-
-    # Paramètres de période
-    year = int(request.GET.get("year", date.today().year))
-    month = int(request.GET.get("month", date.today().month))
-    site_filter = request.GET.get("site", "")  # Nouveau filtre par site
-
-    # Calcul des dates
-    start_date = date(year, month, 1)
-    if month == 12:
-        end_date = date(year + 1, 1, 1) - timedelta(days=1)
-    else:
-        end_date = date(year, month + 1, 1) - timedelta(days=1)
-
-    # Génération des données utilisateur avec nouveaux modèles
-    users_data = []
-    users = User.objects.filter(is_active=True).select_related("profile")
-    
-    # Filtrage par site si spécifié
-    if site_filter:
-        users = users.filter(profile__site=site_filter)
-    
-    users = users.all()
-
-    for user in users:
-        # Récupération ou création des statistiques mensuelles
-        stats, created = MonthlyUserStats.objects.get_or_create(
-            user=user,
-            year=year,
-            month=month
-        )
-        
-        # Si créé, mettre à jour depuis les demandes
-        if created:
-            stats.update_from_requests()
-
-        # Calcul solde congés avec get_leave_balance optimisé
-        balance_info = get_leave_balance(user)
-
-        # Ajouter les données calculées à l'utilisateur
-        user.days_leave = float(stats.days_leave)
-        user.days_telework = stats.days_telework
-        user.days_at_office = stats.days_at_office
-        user.overtime_hours = float(stats.overtime_hours)
-        user.leave_balance_remaining = float(balance_info.get("remaining", 0))
-        user.total_workdays = stats.total_workdays
-
-        users_data.append(user)
-
-    # Données générales du rapport
-    report_data = _generate_monthly_report_data(start_date, end_date)
-
-    # Liste des sites disponibles pour le filtre
-    available_sites = UserProfile.objects.filter(user__is_active=True).values_list('site', flat=True).distinct().order_by('site')
-
-    context = {
-        "users": users_data,
-        "year": year,
-        "month": month,
-        "selected_month": f"{year}-{month:02d}",
-        "month_range": range(1, 13),
-        "year_range": range(2020, date.today().year + 2),
-        "start_date": start_date,
-        "end_date": end_date,
-        "report_data": report_data,
-        "available_sites": available_sites,
-        "selected_site": site_filter,
-    }
-
-    return render(request, "extranet/admin_monthly_report.html", context)
-
-
 def _handle_user_creation(request):
     """Traite la création d'un nouvel utilisateur."""
     try:
@@ -476,39 +401,6 @@ def _calculate_telework_stats(teleworks):
         "pending": pending,
         "rejected": rejected,
         "approval_rate": (approved / total * 100) if total > 0 else 0,
-    }
-
-
-def _generate_monthly_report_data(start_date, end_date):
-    """Génère les données du rapport mensuel."""
-    # Congés de la période
-    leaves = LeaveRequest.objects.filter(
-        start_date__lte=end_date, end_date__gte=start_date
-    )
-
-    # Télétravail de la période
-    teleworks = TeleworkRequest.objects.filter(
-        start_date__lte=end_date, end_date__gte=start_date
-    )
-
-    # Statistiques générales
-    total_users = User.objects.filter(is_active=True).count()
-
-    return {
-        "total_users": total_users,
-        "leaves": {
-            "total": leaves.count(),
-            "approved": leaves.filter(status="approved").count(),
-            "pending": leaves.filter(status="pending").count(),
-            "rejected": leaves.filter(status="rejected").count(),
-        },
-        "teleworks": {
-            "total": teleworks.count(),
-            "approved": teleworks.filter(status="approved").count(),
-            "pending": teleworks.filter(status="pending").count(),
-            "rejected": teleworks.filter(status="rejected").count(),
-        },
-        "period": f"{start_date.strftime('%B %Y')}",
     }
 
 
@@ -820,3 +712,36 @@ def import_users_csv(request):
             messages.error(request, f"Erreur lors du traitement du fichier : {str(e)}")
     
     return redirect("extranet:user_admin")
+
+
+@login_required
+def account_settings(request):
+    """Paramètres du compte utilisateur."""
+    user = request.user
+    
+    if request.method == 'POST':
+        # Traitement de la mise à jour des paramètres
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        email = request.POST.get('email', '')
+        
+        # Mise à jour des informations de base
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+        
+        # Mise à jour du profil si il existe
+        if hasattr(user, 'profile'):
+            phone = request.POST.get('phone', '')
+            user.profile.phone = phone
+            user.profile.save()
+        
+        messages.success(request, "Vos paramètres ont été mis à jour avec succès.")
+        return redirect('extranet:account_settings')
+    
+    context = {
+        'user': user,
+    }
+    
+    return render(request, 'extranet/account_settings.html', context)

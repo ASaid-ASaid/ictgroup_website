@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("extranet", "0021_performance_indexes"),
+        ("extranet", "0020_alter_usermonthlyreportcache_unique_together_and_more"),
     ]
 
     operations = [

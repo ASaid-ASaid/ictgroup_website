@@ -128,7 +128,7 @@ class LeaveViewsTest(TestCase):
     def test_leave_request_form_loads(self):
         """Test que le formulaire de demande de congé se charge"""
         self.client.login(username='leave_user', password='testpass123')
-        response = self.client.get(reverse('extranet:leave_request'))
+        response = self.client.get(reverse('extranet:new_leave_request'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Demande de congé')
     
@@ -139,7 +139,7 @@ class LeaveViewsTest(TestCase):
         start_date = date.today() + timedelta(days=30)
         end_date = start_date + timedelta(days=5)
         
-        response = self.client.post(reverse('extranet:leave_request'), {
+        response = self.client.post(reverse('extranet:new_leave_request'), {
             'leave_type': 'annual',
             'start_date': start_date.strftime('%Y-%m-%d'),
             'end_date': end_date.strftime('%Y-%m-%d'),

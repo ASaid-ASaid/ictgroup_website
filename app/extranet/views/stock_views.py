@@ -393,3 +393,17 @@ def _calculate_movement_stats(movements):
         'unique_items': unique_items,
         'net_movement': entries_quantity - exits_quantity,
     }
+
+
+@login_required
+def entry_exit(request):
+    """Entrées/sorties du stock."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def movements_view(request):
+    """Mouvements du stock."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')

@@ -25,6 +25,11 @@ def update_leave_balances_on_save(sender, instance, **kwargs):
     quand une demande de congé est créée ou modifiée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("LeaveRequest sans utilisateur, skip mise à jour soldes")
+            return
+            
         # Mettre à jour le solde de congés de l'utilisateur
         today = date.today()
         
@@ -41,7 +46,8 @@ def update_leave_balances_on_save(sender, instance, **kwargs):
             )
             balance.update_taken_days()
         except UserLeaveBalance.DoesNotExist:
-            logger.warning(f"Aucun solde trouvé pour {instance.user.username} période {period_start}")
+            username = instance.user.username if instance.user else "Utilisateur non défini"
+            logger.warning(f"Aucun solde trouvé pour {username} période {period_start}")
 
         # Mettre à jour les statistiques mensuelles pour les mois concernés
         start_month = instance.start_date.month
@@ -68,8 +74,9 @@ def update_leave_balances_on_save(sender, instance, **kwargs):
                 current_month = 1
                 current_year += 1
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Soldes et statistiques mis à jour pour {instance.user.username} suite à modification congé {instance.id}"
+            f"Soldes et statistiques mis à jour pour {username} suite à modification congé {instance.id}"
         )
 
     except Exception as e:
@@ -82,6 +89,11 @@ def update_leave_balances_on_delete(sender, instance, **kwargs):
     Met à jour les soldes et statistiques quand une demande de congé est supprimée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("LeaveRequest sans utilisateur à la suppression, skip mise à jour")
+            return
+            
         # Mettre à jour le solde de congés de l'utilisateur
         today = date.today()
         
@@ -98,7 +110,8 @@ def update_leave_balances_on_delete(sender, instance, **kwargs):
             )
             balance.update_taken_days()
         except UserLeaveBalance.DoesNotExist:
-            logger.warning(f"Aucun solde trouvé pour {instance.user.username} période {period_start}")
+            username = instance.user.username if instance.user else "Utilisateur non défini"
+            logger.warning(f"Aucun solde trouvé pour {username} période {period_start}")
 
         # Mettre à jour les statistiques mensuelles
         start_month = instance.start_date.month
@@ -127,8 +140,9 @@ def update_leave_balances_on_delete(sender, instance, **kwargs):
                 current_month = 1
                 current_year += 1
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Soldes et statistiques mis à jour pour {instance.user.username} suite à suppression congé {instance.id}"
+            f"Soldes et statistiques mis à jour pour {username} suite à suppression congé {instance.id}"
         )
 
     except Exception as e:
@@ -141,6 +155,11 @@ def update_stats_on_telework_save(sender, instance, **kwargs):
     Met à jour les statistiques mensuelles quand une demande de télétravail est créée ou modifiée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("TeleworkRequest sans utilisateur, skip mise à jour statistiques")
+            return
+            
         # Mettre à jour les statistiques mensuelles pour les mois concernés
         start_month = instance.start_date.month
         start_year = instance.start_date.year
@@ -165,8 +184,9 @@ def update_stats_on_telework_save(sender, instance, **kwargs):
                 current_month = 1
                 current_year += 1
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Statistiques mises à jour pour {instance.user.username} suite à modification télétravail {instance.id}"
+            f"Statistiques mises à jour pour {username} suite à modification télétravail {instance.id}"
         )
 
     except Exception as e:
@@ -179,6 +199,11 @@ def update_stats_on_telework_delete(sender, instance, **kwargs):
     Met à jour les statistiques quand une demande de télétravail est supprimée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("TeleworkRequest sans utilisateur à la suppression, skip mise à jour")
+            return
+            
         # Mettre à jour les statistiques mensuelles
         start_month = instance.start_date.month
         start_year = instance.start_date.year
@@ -206,8 +231,9 @@ def update_stats_on_telework_delete(sender, instance, **kwargs):
                 current_month = 1
                 current_year += 1
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Statistiques mises à jour pour {instance.user.username} suite à suppression télétravail {instance.id}"
+            f"Statistiques mises à jour pour {username} suite à suppression télétravail {instance.id}"
         )
 
     except Exception as e:
@@ -220,6 +246,11 @@ def update_stats_on_overtime_save(sender, instance, **kwargs):
     Met à jour les statistiques mensuelles quand une demande d'heures supplémentaires est créée ou modifiée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("OverTimeRequest sans utilisateur, skip mise à jour statistiques")
+            return
+            
         # Mettre à jour les statistiques mensuelles pour le mois de la demande
         stats, created = MonthlyUserStats.objects.get_or_create(
             user=instance.user,
@@ -228,8 +259,9 @@ def update_stats_on_overtime_save(sender, instance, **kwargs):
         )
         stats.update_from_requests()
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Statistiques mises à jour pour {instance.user.username} suite à modification heures supplémentaires {instance.id}"
+            f"Statistiques mises à jour pour {username} suite à modification heures supplémentaires {instance.id}"
         )
 
     except Exception as e:
@@ -242,6 +274,11 @@ def update_stats_on_overtime_delete(sender, instance, **kwargs):
     Met à jour les statistiques quand une demande d'heures supplémentaires est supprimée.
     """
     try:
+        # Vérifier que l'instance a un utilisateur
+        if not instance.user:
+            logger.warning("OverTimeRequest sans utilisateur à la suppression, skip mise à jour")
+            return
+            
         # Mettre à jour les statistiques mensuelles
         try:
             stats = MonthlyUserStats.objects.get(
@@ -253,8 +290,9 @@ def update_stats_on_overtime_delete(sender, instance, **kwargs):
         except MonthlyUserStats.DoesNotExist:
             pass
 
+        username = instance.user.username if instance.user else "Utilisateur non défini"
         logger.info(
-            f"Statistiques mises à jour pour {instance.user.username} suite à suppression heures supplémentaires {instance.id}"
+            f"Statistiques mises à jour pour {username} suite à suppression heures supplémentaires {instance.id}"
         )
 
     except Exception as e:

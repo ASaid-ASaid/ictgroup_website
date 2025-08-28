@@ -10,7 +10,7 @@ from datetime import date, timedelta
 import logging
 
 try:
-    from ..models import LeaveRequest, TeleworkRequest, UserProfile, get_leave_balance
+    from ..models import LeaveRequest, TeleworkRequest, UserProfile, get_leave_balance, Document
 except ImportError:
     # Fallback pour la compatibilité pendant la migration
     from django.contrib.auth.models import User
@@ -36,6 +36,11 @@ def home(request):
     # Demandes en attente de validation (si l'utilisateur a un rôle de validation)
     pending_validations = _get_pending_validations_count(user)
     
+    # Documents récents accessibles à l'utilisateur
+    recent_documents = Document.objects.filter(
+        is_active=True
+    ).order_by('-uploaded_at')[:5]
+    
     # Statistiques pour le dashboard
     stats = _get_user_statistics(user)
     
@@ -45,10 +50,15 @@ def home(request):
         'recent_leaves': recent_leaves,
         'recent_teleworks': recent_teleworks,
         'pending_validations': pending_validations,
+        'recent_documents': recent_documents,
         'stats': stats,
     }
     
     return render(request, 'extranet/home.html', context)
+
+
+# Alias pour compatibilité : dashboard pointe vers home
+dashboard = home
 
 
 @login_required

@@ -33,6 +33,10 @@ class LeaveRequestForm(forms.ModelForm):
         required=False,
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = LeaveRequest
         fields = ["start_date", "end_date", "reason", "demi_jour"]
@@ -80,11 +84,41 @@ class LeaveRequestForm(forms.ModelForm):
                     "La date de fin doit être postérieure à la date de début."
                 )
 
+        # Validation des conflits avec les télétravails approuvés si l'utilisateur est fourni
+        if self.user and start_date and end_date:
+            from .models import TeleworkRequest
+            overlapping_telework = TeleworkRequest.objects.filter(
+                user=self.user,
+                status='approved',
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            
+            # Les congés ont priorité sur le télétravail
+            # On informe l'utilisateur mais on permet la création
+            if overlapping_telework.exists():
+                # Stocker les télétravails qui seront annulés pour information
+                self.conflicting_teleworks = list(overlapping_telework)
+                
+                # Ajouter un message d'avertissement (mais pas d'erreur)
+                from django.contrib import messages
+                telework_list = ", ".join([
+                    f"#{tw.id} ({tw.start_date.strftime('%d/%m/%Y')} - {tw.end_date.strftime('%d/%m/%Y')})"
+                    for tw in overlapping_telework
+                ])
+                
+                # Note : ce message sera affiché après la validation réussie
+                # Il sera ajouté dans la vue lors de la sauvegarde
+
         return cleaned_data
 
 
 class TeleworkRequestForm(forms.ModelForm):
     """Formulaire pour les demandes de télétravail."""
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = TeleworkRequest
@@ -127,40 +161,68 @@ class TeleworkRequestForm(forms.ModelForm):
         if start_date and end_date:
             if end_date < start_date:
                 raise forms.ValidationError(
-                    "La date de fin doit être postérieure à la date de début."
+                    "❌ La date de fin doit être postérieure à la date de début."
+                )
+
+        # Validation des conflits avec les congés approuvés si l'utilisateur est fourni
+        if self.user and start_date and end_date:
+            from .models import LeaveRequest, TeleworkRequest
+            
+            # 1. Vérification des conflits avec les congés approuvés
+            overlapping_leaves = LeaveRequest.objects.filter(
+                user=self.user,
+                status='approved',
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            
+            if overlapping_leaves.exists():
+                leave = overlapping_leaves.first()
+                raise forms.ValidationError(
+                    f"🚫 Conflit avec congé approuvé : Vous avez déjà un congé approuvé "
+                    f"du {leave.start_date.strftime('%d/%m/%Y')} au {leave.end_date.strftime('%d/%m/%Y')}. "
+                    f"Le télétravail n'est pas autorisé pendant les congés."
                 )
             
-            # Vérifier s'il y a des congés pendant cette période
-            if hasattr(self, 'instance') and hasattr(self.instance, 'user'):
-                user = self.instance.user
-            else:
-                # Pour un nouveau formulaire, nous devrons vérifier dans la vue
-                user = None
-                
-            if user:
-                from datetime import timedelta
-                from .models import LeaveRequest
-                
-                # Vérifier les conflits avec les congés approuvés ou en attente
-                conflicting_leaves = LeaveRequest.objects.filter(
-                    user=user,
-                    status__in=['pending', 'approved'],
-                    start_date__lte=end_date,
-                    end_date__gte=start_date
+            # 2. Vérification des conflits avec d'autres demandes de télétravail approuvées
+            overlapping_telework = TeleworkRequest.objects.filter(
+                user=self.user,
+                status='approved',
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            
+            # Exclure la demande actuelle si on est en édition
+            if self.instance and self.instance.pk:
+                overlapping_telework = overlapping_telework.exclude(pk=self.instance.pk)
+            
+            if overlapping_telework.exists():
+                telework = overlapping_telework.first()
+                raise forms.ValidationError(
+                    f"🔄 Conflit avec télétravail existant : Vous avez déjà une demande de télétravail approuvée "
+                    f"du {telework.start_date.strftime('%d/%m/%Y')} au {telework.end_date.strftime('%d/%m/%Y')}. "
+                    f"Les périodes de télétravail ne peuvent pas se chevaucher."
                 )
-                
-                if conflicting_leaves.exists():
-                    leave_dates = []
-                    for leave in conflicting_leaves:
-                        if leave.start_date == leave.end_date:
-                            leave_dates.append(f"{leave.start_date.strftime('%d/%m/%Y')}")
-                        else:
-                            leave_dates.append(f"{leave.start_date.strftime('%d/%m/%Y')} - {leave.end_date.strftime('%d/%m/%Y')}")
-                    
-                    raise forms.ValidationError(
-                        f"Impossible de planifier du télétravail pendant une période de congé. "
-                        f"Congés en conflit : {', '.join(leave_dates)}"
-                    )
+            
+            # 3. Vérification des conflits avec des demandes en attente
+            pending_telework = TeleworkRequest.objects.filter(
+                user=self.user,
+                status='pending',
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            
+            # Exclure la demande actuelle si on est en édition
+            if self.instance and self.instance.pk:
+                pending_telework = pending_telework.exclude(pk=self.instance.pk)
+            
+            if pending_telework.exists():
+                telework = pending_telework.first()
+                raise forms.ValidationError(
+                    f"⏳ Conflit avec demande en attente : Vous avez déjà une demande de télétravail en attente "
+                    f"du {telework.start_date.strftime('%d/%m/%Y')} au {telework.end_date.strftime('%d/%m/%Y')}. "
+                    f"Veuillez attendre la validation de cette demande ou la modifier."
+                )
 
         return cleaned_data
 

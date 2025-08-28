@@ -3,7 +3,7 @@
 {% block title %}Gestion des Utilisateurs - ICTGROUP{% endblock %}
 
 {% block content %}
-<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
+<div class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in">
     <h1 class="text-3xl font-extrabold text-primary mb-4 text-center tracking-tight flex items-center justify-center gap-3">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
@@ -477,8 +477,10 @@
             </table>
         </div>
     </section>
-</main>
+</div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
 /* Classe utilitaire hidden */
 .hidden {
@@ -534,7 +536,9 @@ tbody tr:hover {
     transform: translateX(2px);
 }
 </style>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 // Fonction de recherche d'utilisateurs
 document.addEventListener('DOMContentLoaded', function() {
@@ -638,7 +642,7 @@ document.querySelectorAll('form').forEach(form => {
             {% endfor %}
         </section>
     {% endif %}
-</main>
+</div>
 
 <style>
 /* Animation d'apparition */

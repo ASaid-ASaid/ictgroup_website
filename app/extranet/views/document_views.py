@@ -270,3 +270,33 @@ def document_toggle_status(request, document_id):
     messages.success(request, f"Document '{document.title}' {status}.")
     
     return redirect("extranet:document_admin")
+
+
+@login_required
+def documents_count_api(request):
+    """API pour récupérer le nombre de documents"""
+    from django.http import JsonResponse
+    
+    count = Document.objects.filter(is_active=True).count()
+    return JsonResponse({"count": count})
+
+
+@login_required
+def document_edit(request, document_id):
+    """Édition de document."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def document_toggle_status(request, document_id):
+    """Basculer le statut d'un document."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def document_admin(request):
+    """Administration des documents."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')

@@ -29,46 +29,45 @@ class OptimizedLeaveManager:
         if year is None:
             year = date.today().year
             
-        from .models import UserLeaveBalanceCache, LeaveRequest
+        from .models import UserLeaveBalance, LeaveRequest
+        from datetime import date
         
-        # Essayer de récupérer depuis le cache
+        # Utiliser le nouveau système UserLeaveBalance au lieu du cache
+        if year is None:
+            year = date.today().year
+            
+        # Calculer les dates de période pour l'année donnée
+        if date.today().month >= 6:  # juin à décembre
+            period_start = date(year, 6, 1)
+        else:  # janvier à mai
+            period_start = date(year - 1, 6, 1)
+            
         try:
-            cache_entry = UserLeaveBalanceCache.objects.get(user=user, year=year)
-            # Vérifier si le cache est récent (moins de 1 heure)
-            if (timezone.now() - cache_entry.last_updated).total_seconds() < 3600:
-                return {
-                    'acquired': float(cache_entry.acquired_days),
-                    'taken': float(cache_entry.taken_days),
-                    'carry_over': float(cache_entry.carry_over_days),
-                    'balance': float(cache_entry.remaining_days),
-                    'from_cache': True
-                }
-        except UserLeaveBalanceCache.DoesNotExist:
-            cache_entry = None
-        
-        # Recalculer si pas de cache ou cache obsolète
-        balance = OptimizedLeaveManager._calculate_balance(user, year)
-        
-        # Mettre à jour ou créer le cache
-        if cache_entry:
-            cache_entry.acquired_days = Decimal(str(balance['acquired']))
-            cache_entry.taken_days = Decimal(str(balance['taken']))
-            cache_entry.carry_over_days = Decimal(str(balance['carry_over']))
-            cache_entry.remaining_days = Decimal(str(balance['balance']))
-            cache_entry.save()
-        else:
-            UserLeaveBalanceCache.objects.create(
+            balance = UserLeaveBalance.objects.get(
                 user=user,
-                year=year,
-                acquired_days=Decimal(str(balance['acquired'])),
-                taken_days=Decimal(str(balance['taken'])),
-                carry_over_days=Decimal(str(balance['carry_over'])),
-                remaining_days=Decimal(str(balance['balance']))
+                period_start=period_start
             )
-        
-        balance['from_cache'] = False
-        return balance
-    
+            balance.update_taken_days()  # Mettre à jour si nécessaire
+            
+            return {
+                'acquired': float(balance.days_acquired),
+                'taken': float(balance.days_taken),
+                'carry_over': float(balance.days_carry_over),
+                'balance': float(balance.days_remaining),
+                'from_cache': False  # Plus de cache, calcul direct
+            }
+        except UserLeaveBalance.DoesNotExist:
+            # Fallback sur la fonction get_leave_balance
+            from .models import get_leave_balance
+            result = get_leave_balance(user)
+            return {
+                'acquired': float(result.get('acquired', 0)),
+                'taken': float(result.get('taken', 0)),
+                'carry_over': float(result.get('carry_over', 0)),
+                'balance': float(result.get('balance', 0)),
+                'from_cache': False
+            }
+
     @staticmethod
     def _calculate_balance(user, year):
         """
@@ -111,15 +110,30 @@ class OptimizedLeaveManager:
     @staticmethod
     def invalidate_cache(user, year=None):
         """
-        Invalide le cache de solde pour un utilisateur.
-        À appeler quand une demande de congé est modifiée.
+        Invalide les données de solde pour un utilisateur.
+        Maintenant utilise le système UserLeaveBalance, pas de cache à invalider.
         """
-        from .models import UserLeaveBalanceCache
+        # Avec le nouveau système UserLeaveBalance, on n'a plus besoin d'invalider un cache
+        # On peut juste mettre à jour les jours pris si nécessaire
+        from .models import UserLeaveBalance
+        from datetime import date
         
         if year:
-            UserLeaveBalanceCache.objects.filter(user=user, year=year).delete()
+            # Calculer les dates de période pour l'année spécifiée
+            if date.today().month >= 6 and date.today().year == year:
+                period_start = date(year, 6, 1)
+            else:
+                period_start = date(year - 1, 6, 1)
+            
+            try:
+                balance = UserLeaveBalance.objects.get(user=user, period_start=period_start)
+                balance.update_taken_days()
+            except UserLeaveBalance.DoesNotExist:
+                pass  # Pas de balance à mettre à jour
         else:
-            UserLeaveBalanceCache.objects.filter(user=user).delete()
+            # Mettre à jour toutes les balances de l'utilisateur
+            for balance in UserLeaveBalance.objects.filter(user=user):
+                balance.update_taken_days()
 
 
 class OptimizedMonthlyReportManager:

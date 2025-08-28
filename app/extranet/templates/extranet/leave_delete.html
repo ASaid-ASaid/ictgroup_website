@@ -1,0 +1,74 @@
+{% extends 'extranet/base.html' %}
+{% block title %}Supprimer une demande de congé - ICTGROUP{% endblock %}
+
+{% block content %}
+<main role="main" class="bg-white p-8 rounded-2xl shadow-2xl animate-fade-in max-w-2xl mx-auto">
+    <h1 class="text-3xl font-extrabold text-red-600 mb-4 text-center tracking-tight">
+        Supprimer une demande de congé
+    </h1>
+    <p class="text-gray-600 text-center mb-6">
+        Confirmez-vous la suppression de cette demande ?
+    </p>
+
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700">
+                    <strong>Cette action est irréversible.</strong> La demande sera définitivement supprimée.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Détails de la demande</h3>
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+            <dt class="text-sm font-medium text-gray-500">Période :</dt>
+            <dd class="text-sm text-gray-900">
+                {% if leave_request.start_date == leave_request.end_date %}
+                    {{ leave_request.start_date }}
+                {% else %}
+                    Du {{ leave_request.start_date }} au {{ leave_request.end_date }}
+                {% endif %}
+            </dd>
+            <dt class="text-sm font-medium text-gray-500">Type :</dt>
+            <dd class="text-sm text-gray-900">{{ leave_request.get_demi_jour_display }}</dd>
+            <dt class="text-sm font-medium text-gray-500">Nombre de jours :</dt>
+            <dd class="text-sm text-gray-900">{{ leave_request.get_nb_days|floatformat:1 }}</dd>
+            <dt class="text-sm font-medium text-gray-500">Statut :</dt>
+            <dd class="text-sm text-gray-900">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if leave_request.status == 'pending' %}bg-yellow-100 text-yellow-800
+                    {% elif leave_request.status == 'approved' %}bg-green-100 text-green-800
+                    {% elif leave_request.status == 'rejected' %}bg-red-100 text-red-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ leave_request.get_status_display }}
+                </span>
+            </dd>
+            {% if leave_request.reason %}
+            <dt class="text-sm font-medium text-gray-500">Raison :</dt>
+            <dd class="text-sm text-gray-900">{{ leave_request.reason }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'extranet:leave_list' %}" 
+               class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200">
+                Annuler
+            </a>
+            <button type="submit" 
+                    class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">
+                Confirmer la suppression
+            </button>
+        </div>
+    </form>
+</main>
+{% endblock %}

@@ -18,9 +18,7 @@ class SupabaseConfig:
         self.service_role_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
         
         if not self.url or not self.key:
-            raise ValueError(
-                "Les variables d'environnement SUPABASE_URL et SUPABASE_ANON_KEY sont requises"
-            )
+            raise ValueError("Les variables d'environnement SUPABASE_URL et SUPABASE_ANON_KEY sont requises")
     
     def get_client(self) -> Client:
         """Retourne un client Supabase configuré"""

@@ -21,7 +21,7 @@ def telework_request(request):
     logger.info(f"[telework_request] Demande par {request.user.username} (méthode: {request.method})")
     
     if request.method == "POST":
-        form = TeleworkRequestForm(request.POST)
+        form = TeleworkRequestForm(request.POST, user=request.user)
         if form.is_valid():
             telework_request = form.save(commit=False)
             telework_request.user = request.user
@@ -34,7 +34,7 @@ def telework_request(request):
             logger.warning(f"[telework_request] Erreurs de validation pour {request.user.username}: {form.errors}")
             messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
     else:
-        form = TeleworkRequestForm()
+        form = TeleworkRequestForm(user=request.user)
     
     context = {
         'form': form,
@@ -58,6 +58,7 @@ def telework_list(request):
     
     context = {
         'teleworks': teleworks,
+        'telework_requests': teleworks,  # Pour compatibilité avec le template
         'status_filter': status_filter,
         'status_choices': TeleworkRequest.STATUS_CHOICES,
     }
@@ -117,15 +118,22 @@ def _can_user_validate_telework(user, telework_request):
     
     if role == 'admin':
         return True
-    elif role == 'manager':
-        return (telework_request.user.profile.manager == user and 
-                not telework_request.manager_validated)
-    elif role == 'rh':
-        return (telework_request.user.profile.rh == user and 
-                telework_request.manager_validated and 
-                not telework_request.rh_validated)
     
-    return False
+    # Vérifier les permissions selon les rôles multiples
+    can_validate_as_manager = (
+        user.profile.is_manager() and 
+        (telework_request.user.profile.manager == user or telework_request.user == user) and
+        not telework_request.manager_validated
+    )
+    
+    can_validate_as_rh = (
+        user.profile.is_rh() and
+        telework_request.user.profile.rh == user and 
+        telework_request.manager_validated and 
+        not telework_request.rh_validated
+    )
+    
+    return can_validate_as_manager or can_validate_as_rh
 
 
 def _process_telework_validation(user, telework_request, action):
@@ -134,21 +142,33 @@ def _process_telework_validation(user, telework_request, action):
         role = user.profile.role
         
         if action == 'approve':
-            if role == 'manager':
+            # Déterminer dans quel rôle l'utilisateur valide cette demande
+            if (user.profile.is_manager() and 
+                (telework_request.user.profile.manager == user or telework_request.user == user) and
+                not telework_request.manager_validated):
+                # Validation en tant que Manager
                 telework_request.manager_validated = True
                 telework_request.manager_validated_at = timezone.now()
                 telework_request.manager_comment = ""
                 
-                # Si pas de RH assigné, approuver directement
-                if not telework_request.user.profile.rh:
+                # Si c'est sa propre demande de télétravail, approuver directement (auto-validation)
+                if telework_request.user == user:
+                    telework_request.status = 'approved'
+                # Si pas de RH assigné pour le subordonné, approuver directement
+                elif not telework_request.user.profile.rh:
                     telework_request.status = 'approved'
                     
-            elif role == 'rh':
+            elif (user.profile.is_rh() and
+                  telework_request.user.profile.rh == user and
+                  telework_request.manager_validated and
+                  not telework_request.rh_validated):
+                # Validation en tant que RH
                 telework_request.rh_validated = True
                 telework_request.rh_validated_at = timezone.now()
                 telework_request.status = 'approved'
                 
             elif role == 'admin':
+                # Admin peut tout valider directement
                 telework_request.admin_validated = True
                 telework_request.admin_validated_at = timezone.now()
                 telework_request.status = 'approved'
@@ -156,9 +176,13 @@ def _process_telework_validation(user, telework_request, action):
         elif action == 'reject':
             telework_request.status = 'rejected'
             
-            if role == 'manager':
+            # Déterminer le type de commentaire selon le rôle de validation
+            if (user.profile.is_manager() and 
+                (telework_request.user.profile.manager == user or telework_request.user == user) and
+                not telework_request.manager_validated):
                 telework_request.manager_comment = "Rejetée par le manager"
-            elif role == 'rh':
+            elif (user.profile.is_rh() and
+                  telework_request.user.profile.rh == user):
                 telework_request.rh_comment = "Rejetée par les RH"
                 
         telework_request.save()
@@ -180,21 +204,30 @@ def _get_teleworks_to_validate(user):
     
     if role == 'admin':
         return TeleworkRequest.objects.filter(status='pending').order_by('-submitted_at')
-    elif role == 'manager':
-        return TeleworkRequest.objects.filter(
+    
+    # Récupérer toutes les demandes potentielles selon les rôles multiples
+    queryset = TeleworkRequest.objects.none()
+    
+    # En tant que Manager : demandes des subordonnés ET ses propres demandes
+    if user.profile.is_manager():
+        manager_requests = TeleworkRequest.objects.filter(
+            Q(user__profile__manager=user) | Q(user=user),
             status='pending',
-            user__profile__manager=user,
             manager_validated=False
-        ).order_by('-submitted_at')
-    elif role == 'rh':
-        return TeleworkRequest.objects.filter(
+        )
+        queryset = queryset | manager_requests
+    
+    # En tant que RH : demandes où validation manager faite et RH pas encore faite
+    if user.profile.is_rh():
+        rh_requests = TeleworkRequest.objects.filter(
             status='pending',
             user__profile__rh=user,
             manager_validated=True,
             rh_validated=False
-        ).order_by('-submitted_at')
+        )
+        queryset = queryset | rh_requests
     
-    return TeleworkRequest.objects.none()
+    return queryset.distinct().order_by('-submitted_at')
 
 
 @login_required
@@ -244,3 +277,84 @@ def telework_validation(request):
         "extranet/telework_validation.html",
         {"telework_requests": telework_requests},
     )
+
+
+@login_required
+def telework_edit(request, telework_id):
+    """Permet de modifier une demande de télétravail."""
+    telework_request = get_object_or_404(TeleworkRequest, id=telework_id)
+    
+    # Vérifier les permissions : propriétaire ou validateur
+    if (telework_request.user != request.user and 
+        not (hasattr(request.user, 'profile') and 
+             request.user.profile.role in ['admin', 'manager', 'rh'])):
+        messages.error(request, "Vous n'avez pas l'autorisation de modifier cette demande.")
+        return redirect('extranet:telework_list')
+    
+    # Ne peut être modifiée que si elle est en attente (sauf pour les validateurs)
+    if (telework_request.status != 'pending' and 
+        not (hasattr(request.user, 'profile') and 
+             request.user.profile.role in ['admin', 'manager', 'rh'])):
+        messages.error(request, "Cette demande ne peut plus être modifiée.")
+        return redirect('extranet:telework_list')
+    
+    if request.method == 'POST':
+        form = TeleworkRequestForm(request.POST, instance=telework_request, user=telework_request.user)
+        if form.is_valid():
+            # Réinitialiser les validations si la demande est modifiée
+            if telework_request.user == request.user:  # Si c'est le propriétaire qui modifie
+                telework_request.manager_validated = False
+                telework_request.rh_validated = False
+                telework_request.status = 'pending'
+            
+            form.save()
+            messages.success(request, "Demande de télétravail modifiée avec succès.")
+            return redirect('extranet:telework_list')
+    else:
+        form = TeleworkRequestForm(instance=telework_request, user=telework_request.user)
+    
+    return render(request, 'extranet/telework_edit.html', {
+        'form': form,
+        'telework_request': telework_request,
+    })
+
+
+@login_required
+def telework_delete(request, telework_id):
+    """Permet de supprimer une demande de télétravail."""
+    telework_request = get_object_or_404(TeleworkRequest, id=telework_id)
+    
+    # Vérifier les permissions : propriétaire ou validateur
+    if (telework_request.user != request.user and 
+        not (hasattr(request.user, 'profile') and 
+             request.user.profile.role in ['admin', 'manager', 'rh'])):
+        messages.error(request, "Vous n'avez pas l'autorisation de supprimer cette demande.")
+        return redirect('extranet:telework_list')
+    
+    # Ne peut être supprimée que si elle est en attente ou rejetée
+    if telework_request.status == 'approved':
+        messages.error(request, "Une demande approuvée ne peut pas être supprimée.")
+        return redirect('extranet:telework_list')
+    
+    if request.method == 'POST':
+        telework_request.delete()
+        messages.success(request, "Demande de télétravail supprimée avec succès.")
+        return redirect('extranet:telework_list')
+    
+    return render(request, 'extranet/telework_delete.html', {
+        'telework_request': telework_request,
+    })
+
+
+@login_required
+def telework_validation(request):
+    """Validation des télétravails."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def admin_teleworks(request):
+    """Administration des télétravails."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')

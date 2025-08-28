@@ -38,3 +38,11 @@ def get_user_balance(user_balances, user_id):
     Récupère le solde de congés pour un utilisateur donné.
     """
     return user_balances.get(user_id, {})
+
+@register.filter
+def dict_get(dictionary, key):
+    """
+    Récupère un élément d'un dictionnaire par sa clé.
+    Alias pour get_item pour compatibilité.
+    """
+    return dictionary.get(key)

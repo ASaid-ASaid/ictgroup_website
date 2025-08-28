@@ -9,102 +9,178 @@
     <title>{% block title %}Extranet ICTGROUP{% endblock %}</title>
     
     <!-- Preload critical resources -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="{% static 'img/logo_ictgroup.png' %}" as="image">
     
-    <!-- Critical CSS inline -->
+    <!-- Tailwind CSS loaded first -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004080',
+                        secondary: '#0090FF',
+                        success: '#10B981',
+                        dark: '#1F2937'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Critical CSS optimized -->
     <style>
-        /* Critical CSS - Above the fold */
+        /* Performance optimized critical CSS */
         html { scroll-behavior: smooth; }
         body { 
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             margin: 0;
             padding: 0;
             color: #1f2937;
+            /* Prevent layout shift */
+            min-height: 100vh;
         }
         
-        /* Header critical styles */
+        /* Header optimized styles */
         header {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(30, 64, 175, 0.2);
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            /* Ensure header is always visible */
+            display: block !important;
+            visibility: visible !important;
         }
+        
         .logo-ictgroup {
             height: 2.5rem !important;
             width: auto;
             filter: brightness(1.1) drop-shadow(0 2px 8px #0ea5e9) !important;
             border-radius: 0.5rem;
-            transition: transform 0.2s !important;
+            transition: transform 0.2s ease !important;
         }
         .logo-ictgroup:hover {
-            transform: scale(1.05) rotate(-2deg) !important;
+            transform: scale(1.05) !important;
         }
         
-        /* Navigation critical styles */
+        /* Navigation optimized */
         header nav a {
             color: #ffffff !important;
-            transition: all 0.3s ease;
+            transition: color 0.2s ease;
             text-decoration: none;
         }
         header nav a:hover {
             color: #fbbf24 !important;
-            transform: translateY(-1px);
         }
         
         header h1 a {
             color: #ffffff !important;
+            transition: color 0.2s ease;
         }
         header h1 a:hover {
             color: #fbbf24 !important;
         }
         
-        /* Fix button logout visibility */
+        /* Button styles */
         header form button {
             color: #374151 !important;
             background-color: #ffffff;
+            transition: all 0.2s ease;
         }
         header form button:hover {
             color: #ffffff !important;
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
         
-        /* Footer critical styles */
-        footer {
-            background: linear-gradient(135deg, #004080 0%, #0090FF 100%) !important;
-        }
-        
-        /* Layout critical */
+        /* Layout optimization */
         main {
             min-height: calc(100vh - 200px);
-            animation: fadeIn 0.6s ease-in-out;
+            will-change: contents;
         }
         
-        /* Header mobile optimization */
+        /* Mobile menu fixed */
         @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex !important;
+            }
+            
+            .desktop-nav {
+                display: none !important;
+            }
+            
             main {
-                min-height: calc(100vh - 150px); /* Moins d'espace réservé pour le header */
-                margin-top: 0.5rem;
-                margin-bottom: 0.5rem;
-                padding: 1rem !important; /* Padding réduit sur mobile */
+                min-height: calc(100vh - 150px);
+                padding: 1rem !important;
             }
         }
         
-        @media (max-width: 480px) {
-            main {
-                min-height: calc(100vh - 120px);
-                padding: 0.75rem !important;
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+            
+            #mobile-menu {
+                display: none !important;
+            }
+            
+            .desktop-nav {
+                display: flex !important;
             }
         }
         
-        /* Animations */
+        /* Animations optimized */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Force menu visibility fixes */
+        .mobile-hidden {
+            display: none !important;
+        }
+        
+        .mobile-visible {
+            display: block !important;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        /* Performance optimization */
+        * {
+            box-sizing: border-box;
+        }
+        
+        img {
+            loading: lazy;
+        }
+        
+        /* Prevent flash of unstyled content */
+        .loading {
+            opacity: 0;
+        }
+        
+        .loaded {
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
     </style>
     
@@ -138,6 +214,7 @@
     <!-- Custom CSS loaded immediately after Tailwind -->
         <!-- Custom CSS loaded immediately after Tailwind -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
     
     <!-- Non-critical CSS loaded asynchronously -->
     <style id="non-critical-styles">
@@ -228,6 +305,8 @@
             #main-nav {
                 width: 100%;
                 order: 3; /* Place la nav en bas */
+                position: relative;
+                z-index: 1000;
             }
             
             #main-nav.mobile-hidden {
@@ -236,18 +315,23 @@
             
             #main-nav.mobile-visible {
                 display: block !important;
+                background: rgba(30, 64, 175, 0.95) !important;
+                backdrop-filter: blur(10px);
+                border-radius: 0.75rem;
+                margin-top: 1rem;
+                padding: 1rem;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
             
-            #main-nav.mobile-visible ul {
+            #main-nav.mobile-visible > ul {
                 display: flex !important;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 0.25rem;
+                gap: 0.5rem;
                 width: 100%;
-                padding: 0.5rem 0;
-                margin-top: 0.5rem;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 0.5rem;
+                padding: 0;
+                margin: 0;
             }
             
             /* Override default hidden class on mobile */
@@ -257,28 +341,65 @@
             
             nav[aria-label="Menu principal"] li {
                 width: 100%;
+                position: relative;
             }
             
-            nav[aria-label="Menu principal"] a {
-                font-size: 0.875rem !important; /* Texte plus petit */
-                padding: 0.5rem 0.75rem; /* Padding réduit */
-                display: block;
-                width: 100%;
-            }
-            
-            nav[aria-label="Menu principal"] .relative.group > a {
+            nav[aria-label="Menu principal"] > ul > li > a {
+                font-size: 1rem !important;
+                font-weight: 500;
+                padding: 0.75rem 1rem;
+                display: flex;
+                align-items: center;
                 justify-content: space-between;
+                width: 100%;
+                color: #ffffff !important;
                 background: rgba(255, 255, 255, 0.1);
-                border-radius: 0.375rem;
+                border-radius: 0.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
             }
             
-            nav[aria-label="Menu principal"] ul ul {
-                position: static;
-                box-shadow: none;
-                width: 100%;
-                margin-top: 0.25rem;
-                border-radius: 0.375rem;
+            nav[aria-label="Menu principal"] > ul > li > a:hover,
+            nav[aria-label="Menu principal"] > ul > li > a:focus {
+                background: rgba(255, 255, 255, 0.2) !important;
+                transform: translateX(4px);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            /* Sous-menus mobiles */
+            nav[aria-label="Menu principal"] .submenu-mobile {
+                display: none;
+                flex-direction: column;
+                gap: 0.25rem;
+                margin-top: 0.5rem;
+                padding: 0.5rem;
                 background: rgba(255, 255, 255, 0.05);
+                border-radius: 0.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            nav[aria-label="Menu principal"] .submenu-mobile.show {
+                display: flex !important;
+            }
+            
+            nav[aria-label="Menu principal"] .submenu-mobile a {
+                font-size: 0.875rem !important;
+                padding: 0.5rem 0.75rem !important;
+                color: rgba(255, 255, 255, 0.9) !important;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 0.375rem;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+                display: block !important;
+                width: 100% !important;
+                text-decoration: none;
+            }
+            
+            nav[aria-label="Menu principal"] .submenu-mobile a:hover,
+            nav[aria-label="Menu principal"] .submenu-mobile a:focus {
+                background: rgba(255, 255, 255, 0.15) !important;
+                border-color: rgba(255, 255, 255, 0.2);
+                color: #ffffff !important;
             }
             
             /* Badges plus petits sur mobile */
@@ -299,6 +420,28 @@
             #mobile-menu-toggle {
                 order: 2;
                 flex-shrink: 0;
+                background: rgba(255, 255, 255, 0.1) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+            
+            #mobile-menu-toggle:hover {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-color: rgba(255, 255, 255, 0.3);
+                transform: scale(1.05);
+            }
+            
+            /* Animation des chevrons */
+            .chevron-icon {
+                transition: transform 0.3s ease;
+            }
+            
+            /* Badges en mobile */
+            .animate-pulse {
+                font-size: 0.625rem !important;
+                padding: 0.125rem 0.375rem !important;
+                min-width: 1rem;
+                height: 1rem;
             }
         }
         
@@ -338,118 +481,443 @@
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-inter" role="document">
     <!-- Header with semantic structure -->
-    <header class="text-white p-6 shadow-2xl sticky top-0 z-50" role="banner">
-        <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-4">
-                <img src="{% static 'img/logo_ictgroup.png' %}" 
-                     alt="Logo ICT Group" 
-                     class="logo-ictgroup"
-                     width="40" 
-                     height="40" />
-                <h1 class="text-2xl font-bold">
-                    <a href="/" 
-                       class="hover:text-secondary transition-colors duration-300"
-                       aria-label="Retour à l'accueil">ICTGROUP</a>
-                </h1>
-            </div>
-            
-            <!-- Bouton menu mobile -->
-            <button id="mobile-menu-toggle" class="md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors" aria-label="Toggle menu">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            
-            <nav aria-label="Menu principal" id="main-nav" class="w-full md:w-auto mobile-hidden">
-                <ul class="flex flex-wrap space-x-4 md:space-x-6 items-center text-sm md:text-base"
-                    <li><a href="{% url 'extranet:home' %}" class="hover:text-secondary font-medium rounded-md transition-all duration-300">Dashboard</a></li>
-                    {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.profile and user.profile.role == 'admin' %}
-                    <li class="relative group">
-                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Admin
-                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </a>
-                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:user_admin' %}" class="block px-4 py-3">Utilisateurs</a></li>
-                            <li><a href="{% url 'extranet:admin_leaves' %}" class="block px-4 py-3">Congés (admin)</a></li>
-                            <li><a href="{% url 'extranet:admin_teleworks' %}" class="block px-4 py-3">Télétravail (admin)</a></li>
-                            <li><a href="{% url 'extranet:admin_monthly_report' %}" class="block px-4 py-3">Récapitulatif mensuel</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li><a href="{% url 'extranet:validation' %}" class="hover:text-secondary font-medium rounded-md flex items-center gap-1 transition-all duration-300">
-                        Validation
-                        {% if user.is_authenticated and user.profile.role in 'manager rh admin' %}
-                            <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
-                                {% if validation_count %}{{ validation_count }}{% endif %}
-                            </span>
-                        {% endif %}
-                    </a></li>
-                    <li class="relative group">
-                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Congés
-                            {% if user.is_authenticated and user.profile.role in 'manager rh admin' and leave_validation_count %}
-                                <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
-                                    {{ leave_validation_count }}
-                                </span>
-                            {% endif %}
-                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </a>
-                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:new_leave_request' %}" class="block px-4 py-3">Nouvelle demande</a></li>
-                            <li><a href="{% url 'extranet:leave_list' %}" class="block px-4 py-3">Mes demandes</a></li>
-                        </ul>
-                    </li>
-                    <li class="relative group">
-                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Télétravail
-                            {% if user.is_authenticated and user.profile.role in 'manager rh admin' and telework_validation_count %}
-                                <span class="inline-flex items-center justify-center bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1">
-                                    {{ telework_validation_count }}
-                                </span>
-                            {% endif %}
-                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </a>
-                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:new_telework_request' %}" class="block px-4 py-3">Nouvelle demande</a></li>
-                            <li><a href="{% url 'extranet:telework_list' %}" class="block px-4 py-3">Mes demandes</a></li>
-                        </ul>
-                    </li>
-                    {% if user.is_authenticated and user.profile.site|lower == 'france' %}
-                    <li class="relative group">
-                        <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">Magasin
-                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </a>
-                        <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
-                            <li><a href="{% url 'extranet:stock' %}" class="block px-4 py-3">Stock</a></li>
-                            <li><a href="{% url 'extranet:entry_exit' %}" class="block px-4 py-3">Entrée - Sortie</a></li>
-                            <li><a href="{% url 'extranet:movements' %}" class="block px-4 py-3">Mouvements</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li><a href="{% url 'extranet:presence_calendar' %}" class="hover:text-secondary font-medium rounded-md transition-all duration-300">Calendrier</a></li>
-                    {% if user.is_authenticated %}
-                        <li><span class="font-medium">Bienvenue</span></li>
+    <header class="text-white shadow-2xl sticky top-0 z-50 min-h-[4rem] flex items-center" role="banner">
+        <div class="container mx-auto px-4 py-3 w-full">
+            <div class="flex justify-between items-center w-full">
+                <!-- Logo et titre -->
+                <div class="flex items-center space-x-3 flex-1">
+                    <img src="{% static 'img/logo_ictgroup.png' %}" 
+                         alt="Logo ICT Group" 
+                         class="logo-ictgroup transition-transform duration-300 hover:scale-105"
+                         width="40" 
+                         height="40" />
+                    <h1 class="text-xl md:text-2xl font-bold">
+                        <a href="{% url 'extranet:home' %}" 
+                           class="hover:text-secondary transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50 rounded-md"
+                           aria-label="Retour au dashboard">ICTGROUP</a>
+                    </h1>
+                </div>
+                
+                <!-- Navigation desktop (cachée sur mobile) -->
+                <nav class="hidden md:flex" aria-label="Menu principal">
+                    <ul class="flex space-x-6 items-center">
+                        <li>
+                            <a href="{% url 'extranet:home' %}" 
+                               class="hover:text-secondary font-medium rounded-md transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="menuitem">Dashboard</a>
+                        </li>
+                        
+                        {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.profile and user.profile.role == 'admin' %}
                         <li class="relative group">
-                            <a href="#" class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300">{{ user.username }}
-                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            <a href="#" 
+                               class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="button"
+                               aria-expanded="false"
+                               aria-haspopup="true">Admin
+                                <svg class="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" 
+                                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
                             </a>
-                            <ul class="absolute left-0 mt-2 w-56 dropdown-menu rounded-xl z-50 hidden group-hover:block">
-                                <li><a href="{% url 'extranet:account_settings' %}" class="block px-4 py-3">Mon profil</a></li>
-                                <li>
-                                    <form method="post" action="{% url 'extranet:logout' %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-800 transition-all duration-300 rounded-md font-medium border-0 bg-transparent">
-                                            <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                            </svg>
-                                            Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
+                            <ul class="absolute left-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
+                                role="menu">
+                                <li><a href="{% url 'extranet:user_admin' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-t-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Utilisateurs</a></li>
+                                <li><a href="{% url 'extranet:admin_leaves' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Congés (admin)</a></li>
+                                <li><a href="{% url 'extranet:admin_teleworks' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-b-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Télétravail (admin)</a></li>
                             </ul>
                         </li>
-                    {% else %}
-                        <li><a href="{% url 'extranet:login' %}" class="bg-secondary hover:bg-blue-500 text-white px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl font-medium">Connexion Extranet</a></li>
+                        {% endif %}
+                        
+                        <li>
+                            <a href="{% url 'extranet:validation' %}" 
+                               class="hover:text-secondary font-medium rounded-md flex items-center gap-1 transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="menuitem">
+                                Validation
+                                {% if user.is_authenticated and user.profile.role in 'manager rh admin' %}
+                                    {% if leave_validation_count or telework_validation_count %}
+                                        <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1 min-w-[1.25rem]"
+                                              aria-label="{{ leave_validation_count|add:telework_validation_count }} demandes en attente">
+                                            {{ leave_validation_count|add:telework_validation_count }}
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </a>
+                        </li>
+                        
+                        <li class="relative group">
+                            <a href="#" 
+                               class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="button"
+                               aria-expanded="false"
+                               aria-haspopup="true">Congés
+                                {% if user.is_authenticated and user.profile.role in 'manager rh admin' and leave_validation_count %}
+                                    <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1 min-w-[1.25rem]"
+                                          aria-label="{{ leave_validation_count }} demandes de congés en attente">
+                                        {{ leave_validation_count }}
+                                    </span>
+                                {% endif %}
+                                <svg class="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" 
+                                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </a>
+                            <ul class="absolute left-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
+                                role="menu">
+                                <li><a href="{% url 'extranet:new_leave_request' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-t-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Nouvelle demande</a></li>
+                                <li><a href="{% url 'extranet:leave_list' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Mes demandes</a></li>
+                                <li><a href="{% url 'extranet:monthly_leave_report' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-b-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Rapport mensuel</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li class="relative group">
+                            <a href="#" 
+                               class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="button"
+                               aria-expanded="false"
+                               aria-haspopup="true">Télétravail
+                                {% if user.is_authenticated and user.profile.role in 'manager rh admin' and telework_validation_count %}
+                                    <span class="inline-flex items-center justify-center bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse ml-1 min-w-[1.25rem]"
+                                          aria-label="{{ telework_validation_count }} demandes de télétravail en attente">
+                                    </span>
+                                {% endif %}
+                                <svg class="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" 
+                                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </a>
+                            <ul class="absolute left-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
+                                role="menu">
+                                <li><a href="{% url 'extranet:new_telework_request' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-t-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Nouvelle demande</a></li>
+                                <li><a href="{% url 'extranet:telework_list' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Mes demandes</a></li>
+                                <li><a href="{% url 'extranet:overtime_list' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-b-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">⏰ Heures supplémentaires</a></li>
+                            </ul>
+                        </li>
+                        
+                        {% if user.is_authenticated and user.profile.site|lower == 'france' %}
+                        <li class="relative group">
+                            <a href="#" 
+                               class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="button"
+                               aria-expanded="false"
+                               aria-haspopup="true">Magasin
+                                <svg class="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" 
+                                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </a>
+                            <ul class="absolute left-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
+                                role="menu">
+                                <li><a href="{% url 'extranet:stock' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-t-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Stock</a></li>
+                                <li><a href="{% url 'extranet:entry_exit' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Entrée - Sortie</a></li>
+                                <li><a href="{% url 'extranet:movements' %}" 
+                                       class="block px-4 py-3 hover:bg-gray-100 rounded-b-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                       role="menuitem">Mouvements</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                        
+                        <li>
+                            <a href="{% url 'extranet:presence_calendar' %}" 
+                               class="hover:text-secondary font-medium rounded-md transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                               role="menuitem">Calendrier</a>
+                        </li>
+                        
+                        {% if user.is_authenticated %}
+                            <li class="relative group">
+                                <a href="#" 
+                                   class="hover:text-secondary font-medium rounded-md flex items-center transition-all duration-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                                   role="button"
+                                   aria-expanded="false"
+                                   aria-haspopup="true">{{ user.username }}
+                                    <svg class="ml-1 w-4 h-4 transition-transform duration-300 group-hover:rotate-180" 
+                                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                         aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </a>
+                                <ul class="absolute right-0 mt-2 w-56 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
+                                    role="menu">
+                                    <li>
+                                        <a href="{% url 'extranet:account_settings' %}" 
+                                           class="block px-4 py-3 hover:bg-gray-100 rounded-t-xl transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                           role="menuitem">
+                                            <svg class="inline w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            Mon profil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'extranet:document_list' %}" 
+                                           class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:bg-gray-100"
+                                           role="menuitem">
+                                            <svg class="inline w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            📚 Documentation
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="post" action="{% url 'extranet:logout' %}" class="w-full">
+                                            {% csrf_token %}
+                                            <button type="submit" 
+                                                    class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-800 transition-all duration-300 rounded-b-xl font-medium border-0 bg-transparent focus:outline-none focus:bg-red-50"
+                                                    role="menuitem">
+                                                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                                </svg>
+                                                Déconnexion
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="{% url 'extranet:login' %}" 
+                                   class="bg-secondary hover:bg-blue-500 text-white px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-opacity-50"
+                                   role="menuitem">Connexion Extranet</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                
+                <!-- Bouton hamburger pour mobile amélioré -->
+                <button id="mobile-menu-btn" 
+                        class="md:hidden flex flex-col items-center justify-center w-10 h-10 text-white bg-white/10 backdrop-blur-sm rounded-lg transition-all duration-300 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50" 
+                        aria-label="Ouvrir le menu" 
+                        aria-expanded="false"
+                        type="button">
+                    <span class="hamburger-line block w-5 h-0.5 bg-white mb-1 transition-all duration-300 transform origin-center"></span>
+                    <span class="hamburger-line block w-5 h-0.5 bg-white mb-1 transition-all duration-300"></span>
+                    <span class="hamburger-line block w-5 h-0.5 bg-white transition-all duration-300 transform origin-center"></span>
+                </button>
+            </div>
+            
+            <!-- Menu mobile optimisé -->
+            <nav id="mobile-menu" 
+                 class="md:hidden hidden mt-4 pb-4 transform transition-all duration-300 ease-in-out" 
+                 aria-label="Menu mobile"
+                 style="max-height: 0; opacity: 0; overflow: hidden;">
+                <div class="bg-white/10 backdrop-blur-lg rounded-xl p-4 space-y-1 border border-white/20">
+                    <a href="{% url 'extranet:home' %}" 
+                       class="mobile-menu-item block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex items-center gap-3"
+                       role="menuitem">
+                        <span class="text-lg">🏠</span>
+                        Dashboard
+                    </a>
+                    
+                    {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.profile and user.profile.role == 'admin' %}
+                    <div class="mobile-submenu">
+                        <button class="mobile-submenu-btn w-full text-left px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex justify-between items-center gap-3"
+                                type="button"
+                                aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">👨‍💼</span>
+                                Admin
+                            </div>
+                            <svg class="w-4 h-4 mobile-chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="mobile-submenu-content hidden pl-4 space-y-1 mt-1">
+                            <a href="{% url 'extranet:user_admin' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Utilisateurs</a>
+                            <a href="{% url 'extranet:admin_leaves' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Congés (admin)</a>
+                            <a href="{% url 'extranet:admin_teleworks' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Télétravail (admin)</a>
+                        </div>
+                    </div>
                     {% endif %}
-                </ul>
+                    
+                    <a href="{% url 'extranet:validation' %}" 
+                       class="mobile-menu-item block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex items-center justify-between"
+                       role="menuitem">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">✅</span>
+                            Validation
+                        </div>
+                        {% if user.is_authenticated and user.profile.role in 'manager rh admin' %}
+                            {% if leave_validation_count or telework_validation_count %}
+                                <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[1.25rem]"
+                                      aria-label="{{ leave_validation_count|add:telework_validation_count }} demandes en attente">
+                                    {{ leave_validation_count|add:telework_validation_count }}
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </a>
+                    
+                    <div class="mobile-submenu">
+                        <button class="mobile-submenu-btn w-full text-left px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex justify-between items-center gap-3"
+                                type="button"
+                                aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🏖️</span>
+                                Congés
+                                {% if user.is_authenticated and user.profile.role in 'manager rh admin' and leave_validation_count %}
+                                    <span class="inline-flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[1.25rem]"
+                                          aria-label="{{ leave_validation_count }} demandes de congés en attente">
+                                        {{ leave_validation_count }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <svg class="w-4 h-4 mobile-chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="mobile-submenu-content hidden pl-4 space-y-1 mt-1">
+                            <a href="{% url 'extranet:new_leave_request' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Nouvelle demande</a>
+                            <a href="{% url 'extranet:leave_list' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Mes demandes</a>
+                            <a href="{% url 'extranet:monthly_leave_report' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Rapport mensuel</a>
+                        </div>
+                    </div>
+                    
+                    <div class="mobile-submenu">
+                        <button class="mobile-submenu-btn w-full text-left px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex justify-between items-center gap-3"
+                                type="button"
+                                aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🏠</span>
+                                Télétravail
+                                {% if user.is_authenticated and user.profile.role in 'manager rh admin' and telework_validation_count %}
+                                    <span class="inline-flex items-center justify-center bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[1.25rem]"
+                                          aria-label="{{ telework_validation_count }} demandes de télétravail en attente">
+                                        {{ telework_validation_count }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <svg class="w-4 h-4 mobile-chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="mobile-submenu-content hidden pl-4 space-y-1 mt-1">
+                            <a href="{% url 'extranet:new_telework_request' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Nouvelle demande</a>
+                            <a href="{% url 'extranet:telework_list' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Mes demandes</a>
+                            <a href="{% url 'extranet:overtime_list' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">⏰ Heures supplémentaires</a>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated and user.profile.site|lower == 'france' %}
+                    <div class="mobile-submenu">
+                        <button class="mobile-submenu-btn w-full text-left px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex justify-between items-center gap-3"
+                                type="button"
+                                aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg">🏪</span>
+                                Magasin
+                            </div>
+                            <svg class="w-4 h-4 mobile-chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="mobile-submenu-content hidden pl-4 space-y-1 mt-1">
+                            <a href="{% url 'extranet:stock' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Stock</a>
+                            <a href="{% url 'extranet:entry_exit' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Entrée - Sortie</a>
+                            <a href="{% url 'extranet:movements' %}" 
+                               class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200"
+                               role="menuitem">Mouvements</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'extranet:presence_calendar' %}" 
+                       class="mobile-menu-item block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex items-center gap-3"
+                       role="menuitem">
+                        <span class="text-lg">📅</span>
+                        Calendrier
+                    </a>
+                    
+                    {% if user.is_authenticated %}
+                        <div class="mobile-submenu">
+                            <button class="mobile-submenu-btn w-full text-left px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium flex justify-between items-center gap-3"
+                                    type="button"
+                                    aria-expanded="false">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg">👤</span>
+                                    {{ user.username }}
+                                </div>
+                                <svg class="w-4 h-4 mobile-chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="mobile-submenu-content hidden pl-4 space-y-1 mt-1">
+                                <a href="{% url 'extranet:account_settings' %}" 
+                                   class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200 flex items-center gap-2"
+                                   role="menuitem">
+                                    <span class="text-sm">👤</span>
+                                    Mon profil
+                                </a>
+                                <a href="{% url 'extranet:document_list' %}" 
+                                   class="block px-4 py-2 text-white/90 hover:bg-white/15 rounded-lg transition-all duration-200 flex items-center gap-2"
+                                   role="menuitem">
+                                    <span class="text-sm">📚</span>
+                                    Documentation
+                                </a>
+                                <form method="post" action="{% url 'extranet:logout' %}" class="w-full">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="w-full text-left px-4 py-2 text-red-300 hover:bg-red-600/20 hover:text-red-200 rounded-lg transition-all duration-200 flex items-center gap-2 border-0 bg-transparent font-medium focus:outline-none focus:bg-red-600/20"
+                                            role="menuitem">
+                                        <span class="text-sm">🚪</span>
+                                        Déconnexion
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'extranet:login' %}" 
+                           class="mobile-menu-item block px-4 py-3 bg-secondary hover:bg-blue-500 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+                           role="menuitem">
+                            🔐 Connexion Extranet
+                        </a>
+                    {% endif %}
+                </div>
             </nav>
         </div>
     </header>
@@ -498,117 +966,229 @@
     </footer>
     {% block extra_js %}{% endblock %}
     <script src="{% static 'js/user_admin.js' %}"></script>
+    
+    <!-- Menu Mobile JavaScript Optimisé -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gestion du menu mobile
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mainNav = document.getElementById('main-nav');
+        console.log('🔍 Initialisation du menu mobile...');
         
-        console.log('Mobile menu toggle:', mobileMenuToggle);
-        console.log('Main nav:', mainNav);
+        // Variables du menu mobile
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerLines = document.querySelectorAll('.hamburger-line');
+        const mobileSubmenuBtns = document.querySelectorAll('.mobile-submenu-btn');
         
-        if (mobileMenuToggle && mainNav) {
-            // Initialiser le menu comme caché sur mobile
-            function initMobileMenu() {
-                if (window.innerWidth <= 768) {
-                    mainNav.classList.add('mobile-hidden');
-                    mainNav.classList.remove('mobile-visible');
-                } else {
-                    mainNav.classList.remove('mobile-hidden', 'mobile-visible');
-                }
-            }
+        // Debug des éléments trouvés
+        console.log('Mobile menu button:', mobileMenuBtn);
+        console.log('Mobile menu:', mobileMenu);
+        console.log('Hamburger lines:', hamburgerLines.length);
+        console.log('Submenu buttons:', mobileSubmenuBtns.length);
+        
+        // Variables d'état
+        let isMobileMenuOpen = false;
+        
+        // Fonction pour basculer le menu mobile principal
+        function toggleMobileMenu() {
+            isMobileMenuOpen = !isMobileMenuOpen;
             
-            // Initialiser au chargement
-            initMobileMenu();
-            
-            mobileMenuToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Menu toggle clicked');
+            if (isMobileMenuOpen) {
+                // Ouvrir le menu
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+                mobileMenu.style.opacity = '1';
                 
-                if (mainNav.classList.contains('mobile-hidden')) {
-                    mainNav.classList.remove('mobile-hidden');
-                    mainNav.classList.add('mobile-visible');
-                    console.log('Menu ouvert');
-                } else {
-                    mainNav.classList.add('mobile-hidden');
-                    mainNav.classList.remove('mobile-visible');
-                    console.log('Menu fermé');
-                }
-            });
-            
-            // Gérer le redimensionnement de la fenêtre
-            window.addEventListener('resize', function() {
-                initMobileMenu();
-            });
-        } else {
-            console.error('Éléments du menu mobile non trouvés');
+                // Animation du hamburger vers X
+                hamburgerLines[0].style.transform = 'rotate(45deg) translateY(6px)';
+                hamburgerLines[1].style.opacity = '0';
+                hamburgerLines[2].style.transform = 'rotate(-45deg) translateY(-6px)';
+                
+                // Mettre à jour aria-expanded
+                mobileMenuBtn.setAttribute('aria-expanded', 'true');
+                mobileMenuBtn.setAttribute('aria-label', 'Fermer le menu');
+                
+                console.log('✅ Menu mobile ouvert');
+            } else {
+                // Fermer le menu
+                mobileMenu.style.maxHeight = '0';
+                mobileMenu.style.opacity = '0';
+                
+                // Animation du X vers hamburger
+                hamburgerLines[0].style.transform = 'rotate(0) translateY(0)';
+                hamburgerLines[1].style.opacity = '1';
+                hamburgerLines[2].style.transform = 'rotate(0) translateY(0)';
+                
+                // Mettre à jour aria-expanded
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.setAttribute('aria-label', 'Ouvrir le menu');
+                
+                // Fermer tous les sous-menus
+                mobileSubmenuBtns.forEach(btn => {
+                    const content = btn.nextElementSibling;
+                    const chevron = btn.querySelector('.mobile-chevron');
+                    if (content && content.classList.contains('mobile-submenu-content')) {
+                        content.classList.add('hidden');
+                        btn.setAttribute('aria-expanded', 'false');
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                // Masquer après l'animation
+                setTimeout(() => {
+                    if (!isMobileMenuOpen) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }, 300);
+                
+                console.log('❌ Menu mobile fermé');
+            }
         }
         
-        // Amélioration de la gestion des sous-menus
-        const dropdowns = document.querySelectorAll('nav[aria-label="Menu principal"] .relative.group');
+        // Event listener pour le bouton hamburger
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+        } else {
+            console.error('❌ Éléments du menu mobile manquants');
+        }
         
-        dropdowns.forEach(function(dropdown) {
-            const trigger = dropdown.querySelector('a');
-            const menu = dropdown.querySelector('ul');
-            
-            if (!menu) return;
-            
-            let timeoutId;
-            
-            // Afficher le menu au survol
-            dropdown.addEventListener('mouseenter', function() {
-                clearTimeout(timeoutId);
-                menu.style.display = 'block';
-            });
-            
-            // Masquer le menu avec délai au survol sortant
-            dropdown.addEventListener('mouseleave', function() {
-                timeoutId = setTimeout(function() {
-                    menu.style.display = 'none';
-                }, 300); // 300ms de délai
-            });
-            
-            // Maintenir le menu ouvert quand on survole le menu lui-même
-            menu.addEventListener('mouseenter', function() {
-                clearTimeout(timeoutId);
-            });
-            
-            menu.addEventListener('mouseleave', function() {
-                timeoutId = setTimeout(function() {
-                    menu.style.display = 'none';
-                }, 300);
-            });
-            
-            // Gestion mobile/tablette
-            if (window.innerWidth <= 1024) {
-                trigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const isOpen = menu.style.display === 'block';
-                    
-                    // Fermer tous les autres menus
-                    dropdowns.forEach(function(other) {
-                        if (other !== dropdown) {
-                            const otherMenu = other.querySelector('ul');
-                            if (otherMenu) otherMenu.style.display = 'none';
+        // Gestion des sous-menus mobiles
+        mobileSubmenuBtns.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const content = this.nextElementSibling;
+                const chevron = this.querySelector('.mobile-chevron');
+                const isOpen = !content.classList.contains('hidden');
+                
+                // Fermer tous les autres sous-menus
+                mobileSubmenuBtns.forEach(otherBtn => {
+                    if (otherBtn !== this) {
+                        const otherContent = otherBtn.nextElementSibling;
+                        const otherChevron = otherBtn.querySelector('.mobile-chevron');
+                        if (otherContent && otherContent.classList.contains('mobile-submenu-content')) {
+                            otherContent.classList.add('hidden');
+                            otherBtn.setAttribute('aria-expanded', 'false');
+                            if (otherChevron) {
+                                otherChevron.style.transform = 'rotate(0deg)';
+                            }
                         }
-                    });
-                    
-                    // Basculer ce menu
-                    menu.style.display = isOpen ? 'none' : 'block';
+                    }
+                });
+                
+                // Basculer le sous-menu actuel
+                if (isOpen) {
+                    content.classList.add('hidden');
+                    this.setAttribute('aria-expanded', 'false');
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    content.classList.remove('hidden');
+                    this.setAttribute('aria-expanded', 'true');
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(180deg)';
+                    }
+                }
+                
+                console.log(`🔄 Sous-menu ${isOpen ? 'fermé' : 'ouvert'}`);
+            });
+        });
+        
+        // Fermer le menu mobile lors du clic sur un lien
+        const mobileMenuLinks = document.querySelectorAll('#mobile-menu a:not(.mobile-submenu-btn)');
+        mobileMenuLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (isMobileMenuOpen) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+        
+        // Fermer le menu mobile si on clique en dehors
+        document.addEventListener('click', function(e) {
+            if (isMobileMenuOpen && !mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                toggleMobileMenu();
+            }
+        });
+        
+        // Gestion du redimensionnement de la fenêtre
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768 && isMobileMenuOpen) {
+                // Fermer le menu mobile si on passe en mode desktop
+                toggleMobileMenu();
+            }
+        });
+        
+        // Gestion du focus pour l'accessibilité
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleMobileMenu();
+                }
+            });
+        }
+        
+        // Amélioration des dropdowns desktop pour la fiabilité des clics
+        const desktopDropdowns = document.querySelectorAll('nav[aria-label="Menu principal"] .group');
+        desktopDropdowns.forEach(function(dropdown) {
+            const trigger = dropdown.querySelector('a[role="button"]');
+            const menu = dropdown.querySelector('ul[role="menu"]');
+            
+            if (trigger && menu) {
+                let timeout;
+                
+                // Améliorer la visibilité du menu au hover
+                dropdown.addEventListener('mouseenter', function() {
+                    if (window.innerWidth >= 768) {
+                        clearTimeout(timeout);
+                        menu.style.visibility = 'visible';
+                        menu.style.opacity = '1';
+                        menu.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                dropdown.addEventListener('mouseleave', function() {
+                    if (window.innerWidth >= 768) {
+                        timeout = setTimeout(() => {
+                            menu.style.visibility = 'hidden';
+                            menu.style.opacity = '0';
+                            menu.style.transform = 'translateY(8px)';
+                        }, 150);
+                    }
+                });
+                
+                // Gestion du focus pour l'accessibilité
+                trigger.addEventListener('focus', function() {
+                    if (window.innerWidth >= 768) {
+                        clearTimeout(timeout);
+                        menu.style.visibility = 'visible';
+                        menu.style.opacity = '1';
+                        menu.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                trigger.addEventListener('blur', function() {
+                    if (window.innerWidth >= 768) {
+                        timeout = setTimeout(() => {
+                            if (!menu.matches(':hover') && !menu.contains(document.activeElement)) {
+                                menu.style.visibility = 'hidden';
+                                menu.style.opacity = '0';
+                                menu.style.transform = 'translateY(8px)';
+                            }
+                        }, 150);
+                    }
                 });
             }
         });
         
-        // Fermer le menu mobile quand on clique sur un lien
-        const mobileNavLinks = document.querySelectorAll('#main-nav a');
-        mobileNavLinks.forEach(function(link) {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    mainNav.classList.add('mobile-hidden');
-                    mainNav.classList.remove('mobile-visible');
-                }
-            });
-        });
+        console.log('✅ Menu mobile initialisé avec succès');
     });
     </script>
     

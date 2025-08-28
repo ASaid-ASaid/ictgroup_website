@@ -11,86 +11,80 @@ from .telework_views import *
 from .admin_views import *
 from .stock_views import *
 from .calendar_views import *
+from .overtime_views import *
+from .document_views import *
 
-# Export explicite des vues principales
+# Export des noms de vues pour la compatibilité
 __all__ = [
-    # Vues d'authentification
+    # Auth
     'login_view',
-    'logout_view', 
-    'account_settings',
+    'logout_view',
+    'change_password',
     
-    # Vues du tableau de bord
-    'home',
+    # Dashboard
+    'dashboard',
     'dashboard_data',
+    'home',  # home et dashboard sont fusionnés
     
-    # Vues des congés
+    # Congés
     'leave_request',
     'leave_list',
+    'leave_edit',
+    'leave_delete',
     'validate_leave',
+    'monthly_leave_report',
+    'admin_leaves',
     
-    # Vues du télétravail
+    # Télétravail
     'telework_request',
     'telework_list',
+    'telework_edit',
+    'telework_delete',
     'validate_telework',
     'telework_validation',
-    
-    # Vues d'administration
-    'user_admin',
-    'admin_leaves',
     'admin_teleworks',
-    'admin_monthly_report',
-    'validation',
     
-    # Vues du stock
+    # Heures supplémentaires
+    'overtime_request',
+    'overtime_list',
+    'overtime_edit',
+    'overtime_delete',
+    'validate_overtime',
+    'overtime_create',
+    'overtime_create_admin',
+    'overtime_validate',
+    
+    # Documents
+    'document_list',
+    'document_upload',
+    'document_download',
+    'document_delete',
+    'document_edit',
+    'document_toggle_status',
+    'document_admin',
+    'documents_count_api',
+    
+    # Stock
+    'stock_list',
+    'stock_add',
+    'stock_movement',
+    'stock_export',
     'stock',
     'entry_exit',
     'movements_view',
     
-    # Vues du calendrier
+    # Administration
+    'user_admin',
+    'validation',
+    'user_profile_edit',
+    'user_toggle_active',
+    'user_delete',
+    'user_import',
+    'account_settings',
+    
+    # Calendrier
     'calendar_view',
     'presence_calendar',  # Alias pour compatibilité
     'calendar_api',
-]
-
-from .auth_views import *
-from .dashboard_views import *
-from .leave_views import *
-from .telework_views import *
-from .admin_views import *
-from .stock_views import *
-from .calendar_views import *
-
-__all__ = [
-    # Auth views
-    'login_view',
-    'logout_view',
-    'account_settings',
-    
-    # Dashboard views
-    'home',
-    'dashboard_data',
-    
-    # Leave views
-    'leave_request',
-    'leave_list',
-    'validate_leave',
-    
-    # Telework views
-    'telework_request',
-    'telework_list',
-    'validate_telework',
-    
-    # Admin views
-    'user_admin',
-    'admin_leaves',
-    'admin_teleworks',
-    'admin_monthly_report',
-    
-    # Stock views
-    'stock',
-    'entry_exit',
-    'movements_view',
-    
-    # Calendar views
-    'calendar_view',
+    'calendar_export_csv',
 ]

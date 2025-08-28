@@ -1,0 +1,375 @@
+/* ====== MOBILE MENU STYLES - ICTGROUP EXTRANET ====== */
+
+/* Base mobile visibility classes */
+.mobile-hidden {
+    display: none !important;
+}
+
+.mobile-visible {
+    display: block !important;
+}
+
+/* Mobile menu animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Hamburger menu styles */
+.hamburger-line {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+/* Mobile menu container */
+#mobile-menu {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Force hidden state initially */
+#mobile-menu.hidden {
+    display: none !important;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show state when visible */
+#mobile-menu.visible {
+    display: block !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile submenu styles */
+.mobile-submenu {
+    position: relative;
+}
+
+.mobile-submenu-btn {
+    cursor: pointer;
+    user-select: none;
+}
+
+.mobile-submenu-content {
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.mobile-submenu-content:not(.hidden) {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Mobile chevron rotation */
+.mobile-chevron {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Badge styles for notifications */
+.mobile-submenu-btn .bg-red-500,
+.mobile-submenu-btn .bg-orange-500 {
+    margin-left: auto;
+    margin-right: 0.5rem;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 767px) {
+    /* Hide desktop navigation */
+    .hidden\:md\:flex {
+        display: none !important;
+    }
+    
+    /* Show mobile hamburger button */
+    #mobile-menu-btn.md\:hidden {
+        display: flex !important;
+    }
+    
+    /* Mobile menu - respect hidden class */
+    #mobile-menu.hidden {
+        display: none !important;
+    }
+    
+    #mobile-menu:not(.hidden) {
+        display: block !important;
+    }
+    
+    /* Mobile menu backdrop blur */
+    #mobile-menu .bg-white\/10 {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    /* Mobile menu item spacing */
+    #mobile-menu a,
+    #mobile-menu button {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Mobile touch targets */
+    .mobile-submenu-btn,
+    #mobile-menu a {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+    
+    /* Smooth scrolling for mobile menu */
+    #mobile-menu {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Desktop styles (768px and up) */
+@media (min-width: 768px) {
+    /* Hide mobile menu on desktop */
+    #mobile-menu {
+        display: none !important;
+    }
+    
+    /* Show desktop navigation */
+    .hidden\:md\:flex {
+        display: flex !important;
+    }
+    
+    /* Hide mobile hamburger on desktop */
+    #mobile-menu-btn {
+        display: none !important;
+    }
+}
+
+/* ====== LEGACY STYLES (PRESERVED) ====== */
+
+/* Menu mobile principal */
+@media (max-width: 768px) {
+    /* Menu caché par défaut */
+    #main-nav.mobile-hidden {
+        display: none !important;
+    }
+    
+    /* Container du menu mobile */
+    #main-nav.mobile-visible {
+        display: block !important;
+        position: relative;
+        z-index: 1000;
+        background: rgba(30, 64, 175, 0.98) !important;
+        backdrop-filter: blur(15px) !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 1rem !important;
+        margin-top: 1rem !important;
+        padding: 1rem !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    /* Animation d'apparition du menu */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Liste principale du menu mobile */
+    #main-nav.mobile-visible > ul {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Liens principaux du menu mobile */
+    nav[aria-label="Menu principal"] > ul > li > a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important;
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 0.75rem !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Effet hover sur les liens principaux */
+    nav[aria-label="Menu principal"] > ul > li > a:hover,
+    nav[aria-label="Menu principal"] > ul > li > a:focus {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        transform: translateX(8px) scale(1.02) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Sous-menus mobiles */
+    .submenu-mobile {
+        display: none !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        margin-top: 0.75rem !important;
+        padding: 1rem !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 0.75rem !important;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    .submenu-mobile.show {
+        display: flex !important;
+    }
+    
+    /* Animation d'apparition des sous-menus */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Liens des sous-menus */
+    .submenu-mobile a {
+        display: block !important;
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 0.5rem !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Effet hover sur les liens des sous-menus */
+    .submenu-mobile a:hover,
+    .submenu-mobile a:focus {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+        transform: translateX(8px) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Animation des chevrons */
+    .chevron-icon {
+        transition: transform 0.3s ease !important;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) !important;
+    }
+    
+    /* Badges de notification en mobile */
+    .animate-pulse {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.75rem !important;
+        padding: 0.25rem 0.5rem !important;
+        border-radius: 9999px !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5) !important;
+        animation: pulse 2s infinite !important;
+    }
+    
+    /* Bouton hamburger amélioré */
+    #mobile-menu-toggle {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.3s ease !important;
+        padding: 0.75rem !important;
+    }
+    
+    #mobile-menu-toggle:hover,
+    #mobile-menu-toggle:focus {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Icône du bouton hamburger */
+    #mobile-menu-toggle svg {
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+    }
+}
+
+/* Très petits écrans (phones en portrait) */
+@media (max-width: 480px) {
+    #main-nav.mobile-visible {
+        margin: 0.5rem 0 !important;
+        padding: 0.75rem !important;
+    }
+    
+    nav[aria-label="Menu principal"] > ul > li > a {
+        padding: 0.875rem 1rem !important;
+        font-size: 1rem !important;
+    }
+    
+    .submenu-mobile {
+        padding: 0.75rem !important;
+    }
+    
+    .submenu-mobile a {
+        padding: 0.75rem 0.875rem !important;
+        font-size: 0.925rem !important;
+    }
+}
+
+/* Tablettes en portrait */
+@media (min-width: 481px) and (max-width: 768px) {
+    nav[aria-label="Menu principal"] > ul > li > a {
+        padding: 1.125rem 1.5rem !important;
+        font-size: 1.125rem !important;
+    }
+    
+    .submenu-mobile {
+        padding: 1.25rem !important;
+    }
+    
+    .submenu-mobile a {
+        padding: 1rem 1.25rem !important;
+        font-size: 1.05rem !important;
+    }
+}

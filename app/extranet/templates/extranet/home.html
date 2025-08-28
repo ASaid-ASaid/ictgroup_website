@@ -1,7 +1,7 @@
 {% extends 'extranet/base.html' %}
 {% load static %}
 
-{% block title %}Accueil - Extranet ICTGROUP{% endblock %}
+{% block title %}Dashboard - Extranet ICTGROUP{% endblock %}
 
 {% block content %}
 <main role="main" class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -10,9 +10,9 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 id="welcome-title" class="text-4xl font-bold text-primary mb-2">
-                    Bonjour {{ user.get_full_name|default:user.username }} !
+                    Dashboard - Bonjour {{ user.get_full_name|default:user.username }} !
                 </h1>
-                <p class="text-xl text-gray-600">Bienvenue sur votre espace personnel ICTGROUP</p>
+                <p class="text-gray-600 text-lg">Tableau de bord de votre espace extranet</p>
                 <div class="flex items-center mt-4 text-gray-500" role="group" aria-label="Informations utilisateur">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -199,6 +199,90 @@
                 </div>
             {% endif %}
         </div>
+    </div>
+
+    <!-- Documents récents -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Documents récents</h2>
+            <a href="{% url 'extranet:document_list' %}" class="text-primary hover:text-blue-700 font-medium">
+                Voir tous les documents →
+            </a>
+        </div>
+        
+        {% if recent_documents %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for document in recent_documents %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            {% if document.file_type == 'pdf' %}
+                                <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                                </svg>
+                            {% elif document.file_type == 'doc' %}
+                                <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                                </svg>
+                            {% elif document.file_type == 'excel' %}
+                                <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                                </svg>
+                            {% elif document.file_type == 'link' %}
+                                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                            {% else %}
+                                <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ document.title }}
+                            </p>
+                            <p class="text-sm text-gray-500 truncate">
+                                {{ document.category|default:"Document" }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ document.uploaded_at|date:"d/m/Y" }}
+                            </p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            {% if document.document_type == 'link' %}
+                                <a href="{{ document.link_url }}" target="_blank"
+                                   class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Ouvrir
+                                </a>
+                            {% else %}
+                                <a href="{% url 'extranet:document_download' document.id %}" 
+                                   class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Télécharger
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-500">Aucun document disponible</p>
+                <a href="{% url 'extranet:document_list' %}" class="text-primary hover:text-blue-700 font-medium mt-2 inline-block">
+                    Accéder aux documents →
+                </a>
+            </div>
+        {% endif %}
     </div>
 
     <!-- Informations supplémentaires -->

@@ -292,3 +292,24 @@ def overtime_validate(request, overtime_id):
         "extranet/overtime_validate.html",
         {"overtime_request": overtime_request}
     )
+
+
+@login_required
+def overtime_create(request):
+    """Création d'heures supplémentaires."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def overtime_create_admin(request):
+    """Création d'heures supplémentaires (admin)."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')
+
+
+@login_required
+def overtime_validate(request, overtime_id):
+    """Validation d'heures supplémentaires."""
+    messages.info(request, "Fonctionnalité en cours d'implémentation")
+    return redirect('extranet:calendar_view')

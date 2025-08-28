@@ -1,17 +1,16 @@
 """
-Commande Django pour optimiser et maintenir le cache des congés.
+Commande Django pour maintenir les soldes de congés.
 Usage: python manage.py optimize_cache
 """
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from datetime import date
-from extranet.cache_managers import OptimizedLeaveManager, OptimizedMonthlyReportManager
-from extranet.models import UserLeaveBalanceCache, UserMonthlyReportCache
+from extranet.models import UserLeaveBalance, UserMonthlyReportCache, get_leave_balance
 
 
 class Command(BaseCommand):
-    help = 'Optimise et maintient le cache des soldes de congés et rapports mensuels'
+    help = 'Maintient les soldes de congés et rapports mensuels'
     
     def add_arguments(self, parser):
         parser.add_argument(
@@ -37,14 +36,14 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         if options['stats']:
-            self.show_cache_stats()
+            self.show_stats()
             return
         
         if options['clear']:
-            self.stdout.write('🗑️  Suppression du cache existant...')
-            UserLeaveBalanceCache.objects.all().delete()
+            self.stdout.write('🗑️  Remise à zéro des soldes...')
+            # Avec le nouveau système, on peut juste mettre à jour les soldes
             UserMonthlyReportCache.objects.all().delete()
-            self.stdout.write(self.style.SUCCESS('✅ Cache vidé'))
+            self.stdout.write(self.style.SUCCESS('✅ Cache mensuel vidé'))
         
         # Filtrer les utilisateurs si spécifié
         users = User.objects.filter(is_active=True)
@@ -56,25 +55,25 @@ class Command(BaseCommand):
         # Année par défaut
         year = options['year'] or date.today().year
         
-        self.stdout.write(f'🔄 Pré-calcul du cache pour {users.count()} utilisateurs...')
+        self.stdout.write(f'🔄 Mise à jour des soldes pour {users.count()} utilisateurs...')
         
-        # Pré-calcul des soldes de congés
-        self.precalculate_leave_balances(users, year)
+        # Mise à jour des soldes de congés
+        self.update_leave_balances(users, year)
         
         # Pré-calcul des rapports mensuels (6 derniers mois)
         self.precalculate_monthly_reports(users, year)
         
-        self.stdout.write(self.style.SUCCESS('✅ Optimisation terminée'))
-        self.show_cache_stats()
+        self.stdout.write(self.style.SUCCESS('✅ Mise à jour terminée'))
+        self.show_stats()
     
-    def precalculate_leave_balances(self, users, year):
-        """Pré-calcule les soldes de congés pour tous les utilisateurs."""
-        self.stdout.write('📊 Calcul des soldes de congés...')
+    def update_leave_balances(self, users, year):
+        """Met à jour les soldes de congés pour tous les utilisateurs."""
+        self.stdout.write('📊 Mise à jour des soldes de congés...')
         
         for i, user in enumerate(users, 1):
             try:
-                # Force le recalcul en utilisant le gestionnaire optimisé
-                balance = OptimizedLeaveManager.get_or_calculate_balance(user, year)
+                # Utiliser get_leave_balance pour créer/mettre à jour le solde
+                balance = get_leave_balance(user)
                 
                 # Affichage du progrès
                 if i % 10 == 0 or i == users.count():
@@ -120,18 +119,18 @@ class Command(BaseCommand):
                         )
                     )
     
-    def show_cache_stats(self):
-        """Affiche les statistiques du cache."""
-        balance_count = UserLeaveBalanceCache.objects.count()
+    def show_stats(self):
+        """Affiche les statistiques des soldes."""
+        balance_count = UserLeaveBalance.objects.count()
         monthly_count = UserMonthlyReportCache.objects.count()
         
-        self.stdout.write('\n📊 Statistiques du cache:')
-        self.stdout.write(f'   💰 Soldes de congés en cache: {balance_count}')
+        self.stdout.write('\n📊 Statistiques des données:')
+        self.stdout.write(f'   💰 Soldes de congés: {balance_count}')
         self.stdout.write(f'   📅 Rapports mensuels en cache: {monthly_count}')
         
         if balance_count > 0:
-            recent_balance = UserLeaveBalanceCache.objects.order_by('-last_updated').first()
-            self.stdout.write(f'   🕐 Dernier calcul solde: {recent_balance.last_updated}')
+            recent_balance = UserLeaveBalance.objects.order_by('-last_updated').first()
+            self.stdout.write(f'   🕐 Dernière mise à jour solde: {recent_balance.last_updated}')
         
         if monthly_count > 0:
             recent_monthly = UserMonthlyReportCache.objects.order_by('-last_updated').first()

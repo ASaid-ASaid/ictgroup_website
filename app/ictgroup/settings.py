@@ -30,14 +30,20 @@ SECRET_KEY = os.getenv(
 
 
 # Mode de débogage.
-# À désactiver en production !
-DEBUG = os.getenv("DEBUG", "False") == "True"
+# En mode développement, définissez DEBUG=True dans vos variables d'environnement.
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # Hôtes autorisés.
-# En production, listez votre nom de domaine (ex: .ictgroup.fr) et le domaine Fly.io.
-ALLOWED_HOSTS = (
-    ["*"] if DEBUG else ["ictgroup-website.fly.dev", ".fly.dev", "localhost", "127.0.0.1"]
-)
+# Par défaut, autorise localhost et l'IP Docker.
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "172.17.0.1",
+    "testserver",  # Nécessaire pour les tests Django
+    ".fly.dev",
+    os.getenv("FLY_APP_NAME", "localhost") + ".fly.dev",
+]
 
 
 # Applications installées.
@@ -88,9 +94,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "ictgroup.wsgi.application"
 
 
-# Configuration de la base de données PostgreSQL via DATABASE_URL
+# Configuration de la base de données
+# Utilise l'URL de base de données depuis les variables d'environnement (Supabase PostgreSQL)
 DATABASES = {
-    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
+    "default": dj_database_url.parse(
+        os.getenv("DATABASE_URL", "sqlite:///db.sqlite3")
+    )
 }
 
 # Configuration du mot de passe

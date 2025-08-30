@@ -1,0 +1,350 @@
+/* Intranet ICTGROUP - Styles personnalisés */
+
+/* Variables CSS pour la cohérence */
+:root {
+    --intranet-primary: #1e40af;
+    --intranet-secondary: #3b82f6;
+    --intranet-accent: #6366f1;
+    --intranet-success: #10b981;
+    --intranet-warning: #f59e0b;
+    --intranet-danger: #ef4444;
+    --intranet-gray: #6b7280;
+    --intranet-light: #f8fafc;
+    --intranet-border: #e2e8f0;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Classes utilitaires */
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-pulse-custom {
+    animation: pulse 2s infinite;
+}
+
+/* Cartes de statistiques */
+.stat-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Boutons */
+.btn-intranet {
+    background: linear-gradient(135deg, var(--intranet-primary), var(--intranet-secondary));
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-intranet:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.btn-intranet:active {
+    transform: translateY(0);
+}
+
+/* Formulaires */
+.form-intranet {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-intranet .form-group {
+    margin-bottom: 20px;
+}
+
+.form-intranet label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.form-intranet input,
+.form-intranet select,
+.form-intranet textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--intranet-border);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-intranet input:focus,
+.form-intranet select:focus,
+.form-intranet textarea:focus {
+    border-color: var(--intranet-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    outline: none;
+}
+
+/* Tableaux */
+.table-intranet {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-intranet thead {
+    background: linear-gradient(135deg, var(--intranet-primary), var(--intranet-secondary));
+    color: white;
+}
+
+.table-intranet th {
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-intranet td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--intranet-border);
+    font-size: 14px;
+}
+
+.table-intranet tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-intranet tbody tr:hover {
+    background: var(--intranet-light);
+}
+
+/* Badges et indicateurs */
+.badge-intranet {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--intranet-primary), var(--intranet-secondary));
+    color: white;
+}
+
+/* Cartes d'information */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--intranet-primary);
+}
+
+/* Indicateurs de statut */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-draft { background: var(--intranet-gray); }
+.status-sent { background: var(--intranet-warning); }
+.status-approved { background: var(--intranet-accent); }
+.status-paid { background: var(--intranet-success); }
+.status-overdue { background: var(--intranet-danger); }
+.status-cancelled { background: #6b7280; }
+
+/* Navigation */
+.nav-intranet {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.nav-intranet a {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 4px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--intranet-primary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-intranet a:hover {
+    background: var(--intranet-light);
+    color: var(--intranet-secondary);
+}
+
+.nav-intranet a.active {
+    background: linear-gradient(135deg, var(--intranet-primary), var(--intranet-secondary));
+    color: white;
+}
+
+/* Filtres et recherche */
+.filters-intranet {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.filters-intranet .filter-group {
+    display: inline-block;
+    margin-right: 16px;
+    margin-bottom: 12px;
+}
+
+.filters-intranet label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Messages et alertes */
+.alert-intranet {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border-color: var(--intranet-success);
+    color: #166534;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    border-color: var(--intranet-warning);
+    color: #92400e;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    border-color: var(--intranet-danger);
+    color: #991b1b;
+}
+
+.alert-info {
+    background: #eff6ff;
+    border-color: var(--intranet-primary);
+    color: #1e40af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-intranet {
+        font-size: 12px;
+    }
+
+    .table-intranet th,
+    .table-intranet td {
+        padding: 12px 8px;
+    }
+
+    .form-intranet {
+        padding: 16px;
+    }
+
+    .btn-intranet {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support (optionnel) */
+@media (prefers-color-scheme: dark) {
+    .table-intranet thead {
+        background: #1f2937;
+    }
+
+    .form-intranet,
+    .info-card,
+    .filters-intranet {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+
+    .form-intranet input,
+    .form-intranet select,
+    .form-intranet textarea {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+}

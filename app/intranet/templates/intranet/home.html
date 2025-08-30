@@ -1,0 +1,229 @@
+{% extends 'intranet/base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord - Intranet ICTGROUP{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="intranet-header rounded-xl p-6 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">🏢 Intranet ICTGROUP</h1>
+                <p class="text-blue-100">Gestion administrative et financière</p>
+            </div>
+            <div class="text-right">
+                <p class="text-white text-sm">Bienvenue,</p>
+                <p class="text-white font-semibold">{{ user.get_full_name|default:user.username }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Factures -->
+        <div class="intranet-card p-6 stat-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium">Factures</p>
+                    <p class="text-2xl font-bold text-white">{{ total_invoices }}</p>
+                </div>
+                <div class="text-3xl">📄</div>
+            </div>
+            <div class="mt-4">
+                <p class="text-blue-100 text-xs">Payées: <span class="font-semibold">{{ total_invoices_amount|floatformat:0 }}€</span></p>
+            </div>
+        </div>
+
+        <!-- En attente -->
+        <div class="intranet-card p-6 stat-card expense">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium">En attente</p>
+                    <p class="text-2xl font-bold text-white">{{ pending_invoices }}</p>
+                </div>
+                <div class="text-3xl">⏳</div>
+            </div>
+            <div class="mt-4">
+                <p class="text-red-100 text-xs">Factures non payées</p>
+            </div>
+        </div>
+
+        <!-- Bons de commande -->
+        <div class="intranet-card p-6 stat-card neutral">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-100 text-sm font-medium">Commandes</p>
+                    <p class="text-2xl font-bold text-white">{{ total_purchase_orders }}</p>
+                </div>
+                <div class="text-3xl">📦</div>
+            </div>
+            <div class="mt-4">
+                <p class="text-gray-100 text-xs">En cours: <span class="font-semibold">{{ pending_orders }}</span></p>
+            </div>
+        </div>
+
+        <!-- Trésorerie -->
+        <div class="intranet-card p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium">Trésorerie</p>
+                    <p class="text-2xl font-bold text-white">💰</p>
+                </div>
+                <div class="text-3xl">💳</div>
+            </div>
+            <div class="mt-4">
+                <p class="text-purple-100 text-xs">Gestion des flux</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="intranet-card p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Actions rapides</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{% url 'intranet:invoice_create' %}" class="btn-intranet text-center block">
+                <span class="text-2xl block mb-2">➕</span>
+                Nouvelle facture
+            </a>
+            <a href="{% url 'intranet:treasury_create' %}" class="btn-intranet text-center block">
+                <span class="text-2xl block mb-2">💸</span>
+                Nouvelle transaction
+            </a>
+            <a href="{% url 'intranet:purchase_order_create' %}" class="btn-intranet text-center block">
+                <span class="text-2xl block mb-2">📋</span>
+                Bon de commande
+            </a>
+            <a href="{% url 'intranet:attachment_upload' %}" class="btn-intranet text-center block">
+                <span class="text-2xl block mb-2">📎</span>
+                Télécharger fichier
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation vers les modules -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Module Facturation -->
+        <div class="intranet-card p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-3xl mr-3">📄</div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Facturation</h3>
+                    <p class="text-gray-600 text-sm">Gestion des factures clients</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <a href="{% url 'intranet:invoice_list' %}" class="block text-blue-600 hover:text-blue-800 text-sm">📋 Liste des factures</a>
+                <a href="{% url 'intranet:invoice_create' %}" class="block text-blue-600 hover:text-blue-800 text-sm">➕ Créer une facture</a>
+                <a href="{% url 'intranet:attachment_list' %}?file_type=invoice" class="block text-blue-600 hover:text-blue-800 text-sm">📎 Pièces jointes factures</a>
+            </div>
+        </div>
+
+        <!-- Module Trésorerie -->
+        <div class="intranet-card p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-3xl mr-3">💰</div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Trésorerie</h3>
+                    <p class="text-gray-600 text-sm">Suivi des recettes et dépenses</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <a href="{% url 'intranet:treasury_list' %}" class="block text-blue-600 hover:text-blue-800 text-sm">📊 Transactions</a>
+                <a href="{% url 'intranet:treasury_create' %}" class="block text-blue-600 hover:text-blue-800 text-sm">➕ Nouvelle transaction</a>
+                <a href="{% url 'intranet:attachment_list' %}?file_type=receipt" class="block text-blue-600 hover:text-blue-800 text-sm">🧾 Reçus et justificatifs</a>
+            </div>
+        </div>
+
+        <!-- Module Achats -->
+        <div class="intranet-card p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-3xl mr-3">📦</div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Achats</h3>
+                    <p class="text-gray-600 text-sm">Gestion des bons de commande</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <a href="{% url 'intranet:purchase_order_list' %}" class="block text-blue-600 hover:text-blue-800 text-sm">📋 Bons de commande</a>
+                <a href="{% url 'intranet:purchase_order_create' %}" class="block text-blue-600 hover:text-blue-800 text-sm">➕ Nouveau bon de commande</a>
+                <a href="{% url 'intranet:attachment_list' %}?file_type=quote" class="block text-blue-600 hover:text-blue-800 text-sm">📄 Devis fournisseurs</a>
+            </div>
+        </div>
+
+        <!-- Module Documents -->
+        <div class="intranet-card p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-3xl mr-3">📚</div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Documents</h3>
+                    <p class="text-gray-600 text-sm">Gestion des pièces jointes</p>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <a href="{% url 'intranet:attachment_list' %}" class="block text-blue-600 hover:text-blue-800 text-sm">📎 Toutes les pièces jointes</a>
+                <a href="{% url 'intranet:attachment_upload' %}" class="block text-blue-600 hover:text-blue-800 text-sm">⬆️ Télécharger un fichier</a>
+                <a href="{% url 'intranet:attachment_list' %}?file_type=contract" class="block text-blue-600 hover:text-blue-800 text-sm">📋 Contrats</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activité récente -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Transactions récentes -->
+        <div class="intranet-card p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">💸 Transactions récentes</h3>
+            {% if recent_transactions %}
+                <div class="space-y-3">
+                    {% for transaction in recent_transactions %}
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div>
+                                <p class="font-medium text-gray-800">{{ transaction.description }}</p>
+                                <p class="text-sm text-gray-500">{{ transaction.date|date:"d/m/Y" }} - {{ transaction.get_category_display }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold {% if transaction.type == 'income' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if transaction.type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount }}€
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'intranet:treasury_list' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Voir toutes les transactions →</a>
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">Aucune transaction récente</p>
+            {% endif %}
+        </div>
+
+        <!-- Factures récentes -->
+        <div class="intranet-card p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">📄 Factures récentes</h3>
+            {% if recent_invoices %}
+                <div class="space-y-3">
+                    {% for invoice in recent_invoices %}
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div>
+                                <p class="font-medium text-gray-800">{{ invoice.invoice_number }}</p>
+                                <p class="text-sm text-gray-500">{{ invoice.client_name }} - {{ invoice.issue_date|date:"d/m/Y" }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="badge-intranet {% if invoice.status == 'paid' %}badge-success{% elif invoice.status == 'overdue' %}badge-danger{% else %}badge-warning{% endif %}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                                <p class="font-semibold text-gray-800 mt-1">{{ invoice.total_amount }}€</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'intranet:invoice_list' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Voir toutes les factures →</a>
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">Aucune facture récente</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

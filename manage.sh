@@ -52,6 +52,8 @@ log_header() {
 show_help() {
     cat << EOF
 ${CYAN}ICTGROUP Website - Script de Gestion${NC}
+${YELLOW}Version mise à jour - Août 2025${NC}
+${BLUE}✅ Nettoyé et optimisé après nettoyage du projet${NC}
 
 ${YELLOW}USAGE:${NC}
     ./manage.sh [COMMAND] [OPTIONS]
@@ -76,6 +78,7 @@ ${GREEN}Tests:${NC}
     test:unit           Exécuter les tests unitaires Django
     test:performance    Exécuter les tests de performance
     test:all            Exécuter tous les tests
+    test:coverage       Tests avec couverture de code
 
 ${GREEN}Déploiement:${NC}
     deploy:fly          Déployer sur Fly.io
@@ -89,7 +92,7 @@ ${GREEN}Outils:${NC}
 ${GREEN}Sauvegarde:${NC}
     backup:db           Sauvegarder la base de données
     backup:files        Sauvegarder les fichiers média
-    migrate:supabase    Migrer les données vers Supabase
+    migrate:supabase    Migration des données vers Supabase
 
 ${GREEN}Surveillance:${NC}
     monitor:logs        Surveiller les logs en temps réel
@@ -171,14 +174,10 @@ dev_superuser() {
 # Commandes de nettoyage
 clean_cache() {
     log_header "Nettoyage du cache"
-    if [ -f "$SCRIPTS_DIR/clean_cache.sh" ]; then
-        bash "$SCRIPTS_DIR/clean_cache.sh"
-    else
-        log_warn "Script de nettoyage non trouvé, nettoyage manuel..."
-        find . -name "*.pyc" -delete 2>/dev/null || true
-        find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
-        log_success "Cache nettoyé"
-    fi
+    log_info "Suppression des fichiers .pyc et dossiers __pycache__..."
+    find . -name "*.pyc" -delete 2>/dev/null || true
+    find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+    log_success "Cache nettoyé"
 }
 
 clean_docker() {
@@ -200,11 +199,6 @@ clean_all() {
 }
 
 # Commandes de tests
-test_unit() {
-    log_header "Tests unitaires Django"
-    docker-compose exec web python manage.py test
-}
-
 test_performance() {
     log_header "Tests de performance"
     if [ -f "$TESTS_DIR/performance_tests.py" ]; then
@@ -216,15 +210,10 @@ test_performance() {
 
 test_all() {
     log_header "Exécution de tous les tests"
-    
-    # Utiliser le script de tests complet
-    if [ -f "$TESTS_DIR/run_all_tests.py" ]; then
-        python "$TESTS_DIR/run_all_tests.py"
-    else
-        log_warn "Script de tests complet non trouvé, exécution des tests basiques..."
-        test_unit
-        test_performance
-    fi
+    log_info "Exécution des tests unitaires..."
+    test_unit
+    test_performance
+    log_success "Tous les tests exécutés"
 }
 
 test_unit() {
@@ -257,10 +246,11 @@ test_coverage() {
 # Commandes de déploiement
 deploy_fly() {
     log_header "Déploiement sur Fly.io"
-    if [ -f "$SCRIPTS_DIR/deploy_fly.sh" ]; then
-        bash "$SCRIPTS_DIR/deploy_fly.sh"
+    log_info "Vérification de flyctl..."
+    if command -v flyctl &> /dev/null; then
+        flyctl deploy
     else
-        log_error "Script de déploiement Fly.io non trouvé"
+        log_error "flyctl non installé. Installation: curl -L https://fly.io/install.sh | sh"
         exit 1
     fi
 }
@@ -283,21 +273,15 @@ deploy_check() {
 # Outils
 debug_static() {
     log_header "Diagnostic des fichiers statiques"
-    if [ -f "$SCRIPTS_DIR/debug_static.sh" ]; then
-        bash "$SCRIPTS_DIR/debug_static.sh"
-    else
-        log_warn "Script de diagnostic non trouvé"
-    fi
+    log_info "Vérification des fichiers statiques Django..."
+    docker-compose exec web python manage.py collectstatic --dry-run --verbosity=2
 }
 
 maintain_scripts() {
     log_header "Maintenance des scripts"
-    
-    if [ -f "$SCRIPTS_DIR/maintain_scripts.sh" ]; then
-        bash "$SCRIPTS_DIR/maintain_scripts.sh"
-    else
-        log_warn "⚠️ Script de maintenance non trouvé"
-    fi
+    log_info "Vérification des permissions des scripts..."
+    find scripts/ -name "*.sh" -exec chmod +x {} \;
+    log_success "Permissions des scripts mises à jour"
 }
 
 docs_validate() {
@@ -312,13 +296,8 @@ docs_validate() {
 
 migrate_supabase() {
     log_header "Migration des données vers Supabase"
-    
-    if [ -f "$SCRIPTS_DIR/migrate_to_supabase.sh" ]; then
-        bash "$SCRIPTS_DIR/migrate_to_supabase.sh"
-    else
-        log_error "❌ Script de migration non trouvé"
-        exit 1
-    fi
+    log_info "Cette fonctionnalité nécessite une configuration spécifique..."
+    log_warn "⚠️ Migration Supabase non automatisée - voir docs/MIGRATION_SUPABASE_SUCCESS.md"
 }
 
 # Nouvelles fonctions avancées

@@ -1,228 +1,203 @@
-/* Modern extranet theme: white, blue, sky blue, green, responsive, with fiber optic background */
+/* ICTGROUP Extranet - Main Styles */
+/* Custom styles to complement Tailwind CSS */
+
+:root {
+  --primary: #004080;
+  --secondary: #0090FF;
+  --success: #10B981;
+  --dark: #1F2937;
+}
+
+/* Body and general styles */
 body {
-    background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%) !important;
-    min-height: 100vh !important;
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
 }
 
+/* Logo styles */
 .logo-ictgroup {
-    height: 48px !important;
-    filter: drop-shadow(0 2px 8px #0ea5e9) !important;
-    transition: transform 0.2s !important;
+  height: 2.5rem;
+  width: auto;
+  filter: brightness(1.1) drop-shadow(0 2px 8px #0ea5e9);
+  transition: transform 0.2s ease;
 }
+
 .logo-ictgroup:hover {
-    transform: scale(1.05) rotate(-2deg) !important;
+  transform: scale(1.05);
 }
 
+/* Header gradient */
 header {
-    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%) !important;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.15) !important;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
 }
 
+/* Footer gradient */
 footer {
-    background: linear-gradient(90deg, #0a2540 0%, #2196f3 100%) !important;
+  background: linear-gradient(135deg, #004080 0%, #0090FF 100%);
 }
 
-.bg-fiber {
-    background: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
-    min-height: 220px;
-    border-radius: 1rem;
-    box-shadow: 0 4px 24px rgba(33,150,243,0.12);
-    margin-bottom: 2rem;
-}
-
-.bg-weekend {
-    background-color: #e5e7eb !important; /* gris clair */
-    color: #6b7280 !important; /* texte gris foncé */
-    opacity: 0.7;
-}
-
-/* Statuts */
+/* Status badges */
 .status-pending {
-    background: #fef08a !important;
-    color: #b45309 !important;
+  background-color: #fef3c7;
+  color: #92400e;
 }
+
 .status-approved {
-    background: #bbf7d0 !important;
-    color: #15803d !important;
+  background-color: #bbf7d0;
+  color: #166534;
 }
+
 .status-rejected {
-    background: #fecaca !important;
-    color: #b91c1c !important;
+  background-color: #fecaca;
+  color: #b91c1c;
 }
+
 .status-cancelled {
-    background: #e5e7eb !important;
-    color: #374151 !important;
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
-/* Boutons */
+/* Button enhancements */
 button, .btn {
-    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.10);
+  transition: all 0.2s ease;
 }
+
 button:focus, .btn:focus {
-    outline: 2px solid #0ea5e9;
-    outline-offset: 2px;
-    transform: scale(1.03);
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
+
 button:hover, .btn:hover {
-    filter: brightness(1.05);
-    box-shadow: 0 4px 16px rgba(33,150,243,0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Form inputs */
 input, textarea, select {
-    transition: border 0.2s, box-shadow 0.2s;
+  transition: all 0.2s ease;
 }
+
 input:focus, textarea:focus, select:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 2px #bae6fd;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
 }
 
-/* Tableaux */
+/* Table styles */
 table {
-    border-radius: 0.75rem;
-    overflow: hidden;
-}
-th, td {
-    transition: background 0.2s, color 0.2s;
-}
-tr:hover td {
-    background: #f1f5f9;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
-/* Modernisation supplémentaire pour la gestion utilisateurs */
-#user-search {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    transition: box-shadow 0.2s;
+th, td {
+  transition: background 0.2s ease;
 }
-#user-search:focus {
-    box-shadow: 0 0 0 2px #0ea5e9;
-    border-color: #0ea5e9;
+
+tr:hover td {
+  background-color: #f9fafb;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Badge utilisateur */
 .badge-user-count {
-    background: #e0e7ef;
-    color: #2563eb;
-    font-weight: bold;
-    border-radius: 9999px;
-    padding: 0.25em 0.75em;
-    font-size: 0.85em;
-    margin-left: 0.5em;
+  background: #e0e7ef;
+  color: #2563eb;
+  font-weight: bold;
+  border-radius: 9999px;
+  padding: 0.25em 0.75em;
+  font-size: 0.85em;
+  margin-left: 0.5em;
 }
 
 /* Toast notification */
 #toast-message {
-    min-width: 220px;
-    box-shadow: 0 4px 24px rgba(33,150,243,0.18);
-    opacity: 1;
-    transition: opacity 0.7s;
-    z-index: 9999;
+  min-width: 220px;
+  box-shadow: 0 4px 24px rgba(33,150,243,0.18);
+  opacity: 1;
+  transition: opacity 0.7s;
+  z-index: 9999;
 }
+
 #toast-message.opacity-0 {
-    opacity: 0;
-    pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Export bouton */
 button.export {
-    background: #0ea5e9;
-    color: #fff;
-    font-weight: 600;
-    border-radius: 0.5em;
-    padding: 0.5em 1.2em;
-    margin-left: 1em;
-    transition: background 0.2s;
+  background: #0ea5e9;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0.5em;
+  padding: 0.5em 1.2em;
+  margin-left: 1em;
+  transition: background 0.2s;
 }
+
 button.export:hover {
-    background: #0369a1;
+  background: #0369a1;
 }
 
+/* Mobile responsive */
 @media (max-width: 640px) {
-    .container, main, header, footer {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-    }
-    .logo-ictgroup {
-        height: 36px;
-    }
-    table, thead, tbody, th, td, tr {
-        display: block;
-    }
-    th, td {
-        padding: 0.5rem 0.75rem;
-        min-width: 120px;
-    }
-}
+  .container, main, header, footer {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
 
-/* Améliorations pour le menu mobile */
-@media (max-width: 768px) {
-    /* Menu mobile fond solide et visible */
-    #main-nav.mobile-visible {
-        background: rgba(30, 64, 175, 0.98) !important;
-        backdrop-filter: blur(15px) !important;
-        border: 2px solid rgba(255, 255, 255, 0.2) !important;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
-    }
-    
-    /* Liens principaux du menu mobile */
-    nav[aria-label="Menu principal"] > ul > li > a {
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        padding: 1rem !important;
-        margin-bottom: 0.5rem !important;
-        font-size: 1.1rem !important;
-    }
-    
-    /* Sous-menus mobiles */
-    .submenu-mobile {
-        background: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        margin-top: 0.5rem !important;
-        padding: 0.75rem !important;
-    }
-    
-    .submenu-mobile a {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: rgba(255, 255, 255, 0.95) !important;
-        padding: 0.75rem 1rem !important;
-        margin-bottom: 0.25rem !important;
-        font-size: 1rem !important;
-        border-radius: 0.5rem !important;
-    }
-    
-    .submenu-mobile a:hover,
-    .submenu-mobile a:focus {
-        background: rgba(255, 255, 255, 0.2) !important;
-        border-color: rgba(255, 255, 255, 0.3) !important;
-        color: #ffffff !important;
-        transform: translateX(5px) !important;
-    }
-    
-    /* Badges notification en mobile */
-    .animate-pulse {
-        background: #ef4444 !important;
-        color: #ffffff !important;
-        font-weight: bold !important;
-        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5) !important;
-    }
-    
-    /* Bouton hamburger amélioré */
-    #mobile-menu-toggle {
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 2px solid rgba(255, 255, 255, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    #mobile-menu-toggle:hover,
-    #mobile-menu-toggle:focus {
-        background: rgba(255, 255, 255, 0.25) !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
-        transform: scale(1.05) !important;
-    }
+  .logo-ictgroup {
+    height: 36px;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  th, td {
+    padding: 0.5rem 0.75rem;
+    min-width: 120px;
+  }
 }

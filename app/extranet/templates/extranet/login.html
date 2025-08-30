@@ -2,8 +2,76 @@
 
 {% block title %}Connexion Extranet - ICTGROUP{% endblock %}
 
+{% block extra_head %}
+<style>
+/* Masquer la navigation complète sur la page de login */
+header nav {
+    display: none !important;
+}
+
+/* Créer une barre de navigation simplifiée pour la page de login */
+.login-header-nav {
+    display: flex !important;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 8px 32px rgba(30, 64, 175, 0.2);
+}
+
+.login-header-nav ul {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.login-header-nav li {
+    list-style: none;
+}
+
+.login-header-nav a {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-header-nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .login-header-nav ul {
+        gap: 1rem;
+    }
+    
+    .login-header-nav a {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl animate-fade-in" role="main" aria-labelledby="login-title">
+<!-- Barre de navigation simplifiée pour la page de login -->
+<header class="login-header-nav">
+    <nav role="navigation" aria-label="Navigation principale">
+        <ul>
+            <!-- Navigation supprimée selon les demandes de l'utilisateur -->
+        </ul>
+    </nav>
+</header>
+
+<section class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl animate-fade-in mt-8" role="main" aria-labelledby="login-title">
     <h2 id="login-title" class="text-3xl font-extrabold text-primary mb-8 text-center tracking-tight">
         Connexion Extranet
     </h2>

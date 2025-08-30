@@ -16,7 +16,7 @@ app_name = "extranet"  # Espace de noms pour éviter les conflits d'URL
 urlpatterns = [
     # Page d'accueil de l'extranet
     path("", views.home, name="home"),
-    
+
     # Authentification
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),

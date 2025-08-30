@@ -56,6 +56,14 @@ open http://localhost:8000
 - **Rapports** : Génération PDF/Excel des statistiques
 - **Mobile-first** : Interface optimisée mobile et desktop
 
+### 🏢 Intranet Administratif
+- **Gestion des factures** : Création, suivi et paiement des factures clients
+- **Trésorerie** : Enregistrement des recettes/dépenses et virements
+- **Bons de commande** : Gestion des achats fournisseurs et livraisons
+- **Pièces jointes** : Documents sécurisés (contrats, devis, reçus)
+- **Tableaux de bord** : Métriques financières et statistiques
+- **Accès restreint** : Réservé aux administrateurs uniquement
+
 ### 📊 Analytics Avancés (Supabase)
 - **Logs d'activité** : Traçabilité complète des actions
 - **Métriques RH** : Statistiques d'utilisation et performance
@@ -64,11 +72,12 @@ open http://localhost:8000
 
 ## 🏗️ Architecture
 
-### Structure du Projet (Réorganisée)
+### Structure du Projet
 ```
 ictgroup_website/
 ├── 🐍 app/                     # Application Django principale
 │   ├── extranet/              # Module RH (congés, télétravail, users)
+│   ├── intranet/              # Module administratif (factures, trésorerie)
 │   ├── vitrine/               # Site vitrine public
 │   ├── ictgroup/              # Configuration Django
 │   └── static/                # Fichiers statiques
@@ -208,7 +217,8 @@ Le script `./manage.sh` centralise toutes les opérations :
 |---------|-----|-------------|
 | **Site vitrine** | http://localhost:8000/ | Page d'accueil publique |
 | **Extranet** | http://localhost:8000/extranet/ | Interface employés |
-| **Admin Django** | http://localhost:8000/admin/ | Administration |
+| **Intranet** | http://localhost:8000/intranet/ | Administration (réservé admins) |
+| **Admin Django** | http://localhost:8000/admin/ | Administration système |
 | **Production** | https://ictgroup-website.fly.dev/ | Site en production |
 
 ## 📊 Base de Données
@@ -229,6 +239,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 - **Django Standard** : Users, Groups, Permissions
 - **Extranet** : UserProfile, LeaveRequest, TeleworkRequest, StockItem
+- **Intranet** : Invoice, Treasury, PurchaseOrder, Attachment
 - **Analytics** : user_activity_logs, notifications, performance_metrics
 
 ### Migration
@@ -291,7 +302,7 @@ docker-compose logs -f
 
 ## 🧪 Tests
 
-### Structure des Tests Réorganisée
+### Structure des Tests
 
 ```bash
 tests/
@@ -388,60 +399,67 @@ docs/
 
 ## 📁 Structure du Projet
 
-### Avant vs Après Réorganisation
+### Architecture Organisée
 
-```diff
+```
 ictgroup_website/
-├── app/                           # ✅ Application Django (inchangé)
-- ├── test_*.sh                    # ❌ Supprimé (16 fichiers temporaires)
-- ├── mobile_menu_*.html/sh        # ❌ Supprimé (fichiers de debug)
-+ ├── archive/                     # ✅ Nouveau (fichiers archivés)
-+ │   ├── temp_files/             # 📁 Scripts temporaires archivés
-+ │   └── docs_deprecated/        # 📁 Documentation obsolète
-├── scripts/                       # ✅ Réorganisé par catégorie
-- │   ├── deploy_fly.sh           # ❌ Déplacé
-- │   ├── clean_cache.sh          # ❌ Déplacé
-+ │   ├── deployment/             # ✅ Scripts de déploiement
-+ │   ├── testing/                # ✅ Scripts de test
-+ │   ├── maintenance/            # ✅ Scripts de maintenance
-+ │   └── development/            # ✅ Scripts de développement
-├── tests/                         # ✅ Réorganisé par type
-- │   ├── test_models.py          # ❌ Déplacé
-+ │   ├── unit/                   # ✅ Tests unitaires
-+ │   ├── integration/            # ✅ Tests d'intégration
-+ │   ├── performance/            # ✅ Tests de performance
-+ │   └── functional/             # ✅ Tests fonctionnels
-├── docs/                          # ✅ Réorganisé par domaine
-- │   ├── CLEANUP_REPORT*.md      # ❌ Supprimé (10+ fichiers temporaires)
-+ │   ├── deployment/             # ✅ Guides déploiement
-+ │   ├── development/            # ✅ Guides développement
-+ │   ├── user-guide/             # ✅ Documentation utilisateur
-+ │   └── technical/              # ✅ Documentation technique
-+ └── cleanup_and_reorganize.sh   # ✅ Script de nettoyage (exécuté)
+├── 🐍 app/                     # Application Django principale
+│   ├── extranet/              # Module RH (congés, télétravail, users)
+│   ├── vitrine/               # Site vitrine public
+│   ├── ictgroup/              # Configuration Django
+│   └── static/                # Fichiers statiques
+├── 📜 scripts/                # Scripts organisés par catégorie
+│   ├── deployment/            # Scripts de déploiement (Fly.io, domaine)
+│   ├── testing/               # Scripts de test et CI
+│   ├── maintenance/           # Scripts de maintenance et monitoring
+│   └── development/           # Scripts de développement (hooks Git)
+├── 🧪 tests/                  # Tests organisés par type
+│   ├── unit/                  # Tests unitaires rapides
+│   ├── integration/           # Tests d'intégration
+│   ├── performance/           # Tests de performance
+│   └── functional/            # Tests fonctionnels end-to-end
+├── 📚 docs/                   # Documentation structurée
+│   ├── deployment/            # Guides de déploiement
+│   ├── development/           # Guides de développement
+│   ├── user-guide/            # Documentation utilisateur
+│   └── technical/             # Documentation technique
+├── 🗂️ archive/                # Fichiers archivés (nettoyage)
+│   ├── temp_files/            # Scripts temporaires archivés
+│   └── docs_deprecated/       # Documentation obsolète
+├── 🐳 docker/                 # Configuration Docker
+├── ⚙️ config/                 # Fichiers de configuration
+├── 📊 logs/                   # Logs d'application
+├── 🔄 migration_data/         # Données de migration
+└── 📋 manage.sh               # Script principal de gestion
 ```
 
-### Statistiques du Nettoyage
+### Organisation par Responsabilités
 
-| Catégorie | Avant | Après | Gain |
-|-----------|-------|--------|------|
-| **Fichiers temporaires** | 16 | 0 | -16 |
-| **Documentation obsolète** | 10 | 0 | -10 |
-| **Scripts non organisés** | 9 | 0 | Organisation |
-| **Tests dispersés** | 8 | 0 | Structure |
-| **Total fichiers nettoyés** | **34+** | **0** | **📁 Structure claire** |
+| Dossier | Responsabilité | Audience | Contenu |
+|---------|----------------|----------|---------|
+| **`scripts/deployment/`** | Déploiement | DevOps | Scripts Fly.io, Docker, domaine |
+| **`scripts/testing/`** | Tests & CI | Équipe dev | Tests automatisés, couverture |
+| **`scripts/maintenance/`** | Maintenance | Admin sys | Sauvegarde, monitoring, nettoyage |
+| **`scripts/development/`** | Développement | Développeurs | Hooks Git, setup dev |
+| **`docs/deployment/`** | Déploiement | DevOps | Guides production, configuration |
+| **`docs/development/`** | Développement | Développeurs | Setup local, bonnes pratiques |
+| **`docs/user-guide/`** | Utilisation | Utilisateurs | Guides fonctionnels, FAQ |
+| **`docs/technical/`** | Architecture | Tech leads | APIs, performance, sécurité |
+| **`tests/unit/`** | Tests rapides | CI/CD | Tests isolés, couverture élevée |
+| **`tests/integration/`** | Tests complets | QA | Tests composants, workflows |
+| **`tests/performance/`** | Performance | DevOps | Benchmarks, métriques |
+| **`tests/functional/`** | E2E | Product | Parcours utilisateur complets |
 
-### Nouvelle Organisation
-
-#### ✅ Avantages de la Nouvelle Structure
+### Avantages de l'Architecture
 
 1. **📁 Séparation claire** : Chaque type de fichier dans son dossier approprié
 2. **🔍 Navigation facile** : README dans chaque dossier pour guider
-3. **🧹 Maintenance réduite** : Fini les fichiers temporaires dans la racine
+3. **🧹 Maintenance réduite** : Structure organisée et propre
 4. **📚 Documentation structurée** : Par audience (dev, ops, utilisateur)
 5. **🧪 Tests organisés** : Par complexité et type
 6. **📜 Scripts classés** : Par usage (déploiement, maintenance, etc.)
 
-#### 🚀 Impact sur le Développement
+### Workflow de Développement
 
 - **Nouveau développeur** : Accès rapide via `docs/development/`
 - **Tests** : Exécution ciblée par type (`./manage.sh test:unit`)
@@ -590,7 +608,7 @@ docs(api): documenter endpoints REST
 - **📚 Documentation** : [Guides complets](docs/)
 
 ### Ressources Utiles
-- **� Formation Django** : [Documentation officielle](https://docs.djangoproject.com/)
+- **📚 Formation Django** : [Documentation officielle](https://docs.djangoproject.com/)
 - **🎨 Tailwind CSS** : [Composants et exemples](https://tailwindcss.com/)
 - **🗄️ Supabase** : [Documentation API](https://supabase.com/docs)
 - **🚀 Fly.io** : [Guides de déploiement](https://fly.io/docs/)

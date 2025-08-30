@@ -320,7 +320,10 @@
                     <li class="hidden md:block"><a href="#services" class="text-white hover:text-secondary transition-colors duration-300" aria-label="Services">Services</a></li>
                     <li class="hidden md:block"><a href="#valeurs" class="text-white hover:text-secondary transition-colors duration-300" aria-label="Nos Valeurs">Nos Valeurs</a></li>
                     <li class="hidden md:block"><a href="#contact" class="text-white hover:text-secondary transition-colors duration-300" aria-label="Contact">Contact</a></li>
-                    <li><a href="{% if user.is_authenticated %}/extranet/{% else %}/extranet/login/{% endif %}" class="bg-secondary hover:bg-blue-500 text-white px-4 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl" aria-label="Accès Extranet">Extranet</a></li>
+                    <li class="md:hidden"><a href="{% if user.is_authenticated %}/extranet/{% else %}/extranet/login/{% endif %}" class="bg-secondary hover:bg-blue-500 text-white px-3 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl text-sm" aria-label="Accès Extranet">Extranet</a></li>
+                    <li class="md:hidden"><a href="/intranet/" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-3 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl text-sm" aria-label="Accès Intranet">Intranet</a></li>
+                    <li class="hidden md:block"><a href="{% if user.is_authenticated %}/extranet/{% else %}/extranet/login/{% endif %}" class="bg-secondary hover:bg-blue-500 text-white px-4 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl" aria-label="Accès Extranet">Extranet</a></li>
+                    <li class="hidden md:block"><a href="/intranet/" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl" aria-label="Accès Intranet">Intranet</a></li>
                 </ul>
             </nav>
         </div>

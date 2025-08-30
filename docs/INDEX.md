@@ -9,10 +9,10 @@ Commencez par les guides de démarrage appropriés à votre rôle :
 
 | Rôle | Guide de Démarrage | Description |
 |------|-------------------|-------------|
-| **👨‍💻 Développeur** | [`development/README.md`](development/) | Setup environnement, outils, workflow |
-| **🚀 DevOps** | [`deployment/README.md`](deployment/) | Déploiement, infrastructure, monitoring |
-| **👤 Utilisateur** | [`user-guide/README.md`](user-guide/) | Guide d'utilisation de la plateforme |
-| **🔧 Admin Système** | [`technical/README.md`](technical/) | Architecture, APIs, optimisation |
+| **👨‍💻 Développeur** | [`development/README.md`](development/README.md) | Setup environnement, outils, workflow |
+| **🚀 DevOps** | [`deployment/README.md`](deployment/README.md) | Déploiement, infrastructure, monitoring |
+| **👤 Utilisateur** | [`user-guide/README.md`](user-guide/README.md) | Guide d'utilisation de la plateforme |
+| **🔧 Admin Système** | [`technical/README.md`](technical/README.md) | Architecture, APIs, optimisation |
 
 ## 📁 Structure Documentation
 
@@ -44,8 +44,9 @@ Documentation pour les utilisateurs finaux de la plateforme.
 - **[README.md](user-guide/README.md)** - Guide utilisateur complet
 - **[DOCUMENT_SYSTEM_GUIDE.md](user-guide/DOCUMENT_SYSTEM_GUIDE.md)** - Système de documents
 - **[SEO_COMPLETE_GUIDE.md](user-guide/SEO_COMPLETE_GUIDE.md)** - Optimisation SEO
+- **[INTRANET_USER_GUIDE.md](user-guide/INTRANET_USER_GUIDE.md)** - Guide intranet administratif
 
-**Pour qui :** Employés ICTGROUP, Managers, RH, Utilisateurs finaux
+**Pour qui :** Employés ICTGROUP, Managers, RH, Administrateurs
 
 ### ⚙️ Technique (`technical/`)
 Documentation technique avancée pour les développeurs et administrateurs.
@@ -54,6 +55,7 @@ Documentation technique avancée pour les développeurs et administrateurs.
 - **[README.md](technical/README.md)** - Architecture et APIs
 - **[PERFORMANCE_OPTIMIZATION.md](technical/PERFORMANCE_OPTIMIZATION.md)** - Optimisation
 - **[SUPABASE_CONFIG.md](technical/SUPABASE_CONFIG.md)** - Configuration Supabase
+- **[INTRANET_TECHNICAL.md](technical/INTRANET_TECHNICAL.md)** - Documentation technique intranet
 
 **Pour qui :** Développeurs senior, Architectes, Admin BDD
 
@@ -91,6 +93,13 @@ Documentation technique avancée pour les développeurs et administrateurs.
 - [Gestion congés](user-guide/README.md#gestion-des-congés)
 - [Télétravail](user-guide/README.md#télétravail)
 - [Système documents](user-guide/DOCUMENT_SYSTEM_GUIDE.md)
+- [Intranet administratif](user-guide/INTRANET_USER_GUIDE.md)
+
+### 🏢 Administration (Intranet)
+- [Gestion factures](user-guide/INTRANET_USER_GUIDE.md#gestion-des-factures)
+- [Trésorerie](user-guide/INTRANET_USER_GUIDE.md#gestion-de-la-trésorerie)
+- [Bons de commande](user-guide/INTRANET_USER_GUIDE.md#gestion-des-bons-de-commande)
+- [Pièces jointes](user-guide/INTRANET_USER_GUIDE.md#gestion-des-pièces-jointes)
 
 ### ⚡ Performance et Optimisation
 - [Optimisation Django](technical/PERFORMANCE_OPTIMIZATION.md)

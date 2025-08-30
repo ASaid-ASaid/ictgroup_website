@@ -117,9 +117,9 @@ Le nouveau script `./manage.sh` centralise toutes les opérations :
 - `README.md` : Nouveau guide complet du projet
 
 ### Accès Rapide
-- **Installation** : [README.md#installation](../README.md#️-installation)
-- **Déploiement** : [docs/FLY_DEPLOYMENT.md](FLY_DEPLOYMENT.md)
-- **Configuration** : [docs/SUPABASE_CONFIG.md](SUPABASE_CONFIG.md)
+- **Installation** : [README.md#installation-automatique](../README.md#installation-automatique)
+- **Déploiement** : [docs/deployment/FLY_DEPLOYMENT.md](deployment/FLY_DEPLOYMENT.md)
+- **Configuration** : [docs/technical/SUPABASE_CONFIG.md](technical/SUPABASE_CONFIG.md)
 
 ## 🧪 Tests Améliorés
 
@@ -240,7 +240,7 @@ En cas de problème avec la migration :
 
 <div align="center">
 
-**[🏠 Retour au README](../README.md) • [🚀 Démarrage Rapide](../README.md#-démarrage-rapide) • [📚 Documentation](INDEX.md)**
+**[🏠 Retour au README](../README.md) • [🚀 Démarrage Rapide](../README.md#démarrage-rapide) • [📚 Documentation](INDEX.md)**
 
 *Migration effectuée avec succès - ICTGROUP Team*
 

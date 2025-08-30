@@ -1,6 +1,6 @@
 # 📚 Documentation ICTGROUP Website
 
-> **Dossier de documentation technique centralisée**
+> **Dossier de documentation technique centralisée** - Version mise à jour Août 2025
 
 ## 📋 Vue d'Ensemble
 
@@ -13,14 +13,22 @@ Ce dossier contient toute la documentation technique du projet ICTGROUP Website,
 - **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - Guide de migration vers la nouvelle structure
 
 ### 🔧 **Configuration & Déploiement**
-- **[FLY_DEPLOYMENT.md](FLY_DEPLOYMENT.md)** - Déploiement sur Fly.io
-- **[DEPLOYMENT_DOCKER.md](DEPLOYMENT_DOCKER.md)** - Configuration Docker
-- **[SUPABASE_CONFIG.md](SUPABASE_CONFIG.md)** - Configuration Supabase
-- **[GANDI_DOMAIN_CONFIG.md](GANDI_DOMAIN_CONFIG.md)** - Configuration DNS
+- **[FLY_DEPLOYMENT.md](deployment/FLY_DEPLOYMENT.md)** - Déploiement sur Fly.io
+- **[DEPLOYMENT_DOCKER.md](deployment/DEPLOYMENT_DOCKER.md)** - Configuration Docker
+- **[SUPABASE_CONFIG.md](technical/SUPABASE_CONFIG.md)** - Configuration Supabase
+- **[GANDI_DOMAIN_CONFIG.md](deployment/GANDI_DOMAIN_CONFIG.md)** - Configuration DNS
 
 ### 📊 **Rapports & Optimisation**
 - **[MIGRATION_SUPABASE_SUCCESS.md](MIGRATION_SUPABASE_SUCCESS.md)** - Rapport migration Supabase
-- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Guide optimisation
+- **[PERFORMANCE_OPTIMIZATION.md](technical/PERFORMANCE_OPTIMIZATION.md)** - Guide optimisation
+- **[OVERTIME_MANAGEMENT.md](OVERTIME_MANAGEMENT.md)** - Gestion des heures supplémentaires
+
+### 👥 **Guides Utilisateur**
+- **[DOCUMENT_SYSTEM_GUIDE.md](user-guide/DOCUMENT_SYSTEM_GUIDE.md)** - Guide système documentaire
+- **[SEO_COMPLETE_GUIDE.md](user-guide/SEO_COMPLETE_GUIDE.md)** - Guide SEO complet
+
+### 🧪 **Tests & Validation**
+- **[VALIDATION_RULES_CLARIFICATION.md](VALIDATION_RULES_CLARIFICATION.md)** - Règles de validation
 
 ## 🎯 Navigation Rapide
 
@@ -30,7 +38,7 @@ Ce dossier contient toute la documentation technique du projet ICTGROUP Website,
 cat docs/INDEX.md
 
 # Installation rapide
-./manage.sh start
+./manage.sh dev:start
 
 # Documentation complète
 ./manage.sh docs:serve
@@ -42,10 +50,19 @@ cat docs/INDEX.md
 ./manage.sh deploy:fly
 
 # Configuration Supabase
-cat docs/SUPABASE_CONFIG.md
+cat docs/technical/SUPABASE_CONFIG.md
 
 # Configuration domaine
-cat docs/GANDI_DOMAIN_CONFIG.md
+cat docs/deployment/GANDI_DOMAIN_CONFIG.md
+```
+
+### Pour les Utilisateurs
+```bash
+# Guide d'utilisation
+cat docs/user-guide/README.md
+
+# Système documentaire
+cat docs/user-guide/DOCUMENT_SYSTEM_GUIDE.md
 ```
 
 ### Pour la Maintenance

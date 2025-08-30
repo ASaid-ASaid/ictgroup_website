@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "vitrine",  # Application pour la partie publique
     "extranet",  # Application pour l'extranet employés
+    "intranet",  # Application pour l'intranet administrateurs
 ]
 
 MIDDLEWARE = [

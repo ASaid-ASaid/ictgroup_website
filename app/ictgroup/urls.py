@@ -84,6 +84,9 @@ urlpatterns = [
     path(
         "extranet/", include("extranet.urls")
     ),  # Inclut les URLs de l'application 'extranet'
+    path(
+        "intranet/", include("intranet.urls")
+    ),  # Inclut les URLs de l'application 'intranet'
     path("health/", health_check, name="health_check"),  # Health check pour Fly.io
     path("robots.txt", robots_txt, name="robots_txt"),  # Robots.txt pour SEO
     path("sitemap.xml", sitemap_xml, name="sitemap_xml"),  # Sitemap pour SEO
